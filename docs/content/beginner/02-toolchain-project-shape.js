@@ -64,13 +64,10 @@ jobs:
                 ["C++ include directories often leak internals; Rust private-by-default modules and `pub use` make it easier to narrow APIs."]
               ],
               examples: [
-                sharedExample("Workspace + 多文件模块边界", "Workspace + multi-file module boundary", "rust", `// root Cargo.toml
-// [workspace]
-// members = ["crates/course-core", "crates/course-cli"]
-// resolver = "2"
-
-// crates/course-core/src/lib.rs
-mod model;    // 内部文件：src/model.rs
+                sharedExample("root Cargo.toml: workspace 只负责组织成员", "root Cargo.toml: workspace organizes members", "toml", `[workspace]
+members = ["crates/course-core", "crates/course-cli"]
+resolver = "2"`),
+                sharedExample("crates/course-core/src/lib.rs: 对外入口", "crates/course-core/src/lib.rs: public entry point", "rust", `mod model;    // 内部文件：src/model.rs
 mod parser;   // 内部文件：src/parser.rs
 mod validate; // 内部文件：src/validate.rs
 
@@ -83,10 +80,8 @@ pub fn load_course(input: &str) -> Result<Course, ParseError> {
     let course = parser::parse(input)?;
     validate::course(&course)?;
     Ok(course)
-}
-
-// crates/course-core/src/model.rs
-#[derive(Debug, Clone)]
+}`),
+                sharedExample("crates/course-core/src/model.rs: 公开数据类型", "crates/course-core/src/model.rs: public data types", "rust", `#[derive(Debug, Clone)]
 pub struct Course {
     pub title: String,
     pub lessons: Vec<Lesson>,
@@ -96,10 +91,8 @@ pub struct Course {
 pub struct Lesson {
     pub slug: String,
     pub title: String,
-}
-
-// crates/course-core/src/parser.rs
-use crate::model::{Course, Lesson};
+}`),
+                sharedExample("crates/course-core/src/parser.rs: crate 内部解析实现", "crates/course-core/src/parser.rs: crate-internal parser", "rust", `use crate::model::{Course, Lesson};
 
 #[derive(Debug)]
 pub enum ParseError {
@@ -121,10 +114,8 @@ pub(crate) fn parse(input: &str) -> Result<Course, ParseError> {
         .collect();
 
     Ok(Course { title: "Rust Course".to_owned(), lessons })
-}
-
-// crates/course-core/src/validate.rs
-use crate::model::Course;
+}`),
+                sharedExample("crates/course-core/src/validate.rs: crate 内部校验", "crates/course-core/src/validate.rs: crate-internal validation", "rust", `use crate::model::Course;
 use crate::parser::ParseError;
 
 pub(crate) fn course(course: &Course) -> Result<(), ParseError> {
