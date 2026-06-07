@@ -20,7 +20,6 @@
       previous: "上一节",
       next: "下一节",
       part: "阶段",
-      wrongExample: "错误写法",
       compilerError: "会触发的错误",
       whyWrong: "为什么不对",
       languageButton: "English",
@@ -35,7 +34,6 @@
       previous: "Previous",
       next: "Next",
       part: "Level",
-      wrongExample: "Incorrect usage",
       compilerError: "Compiler error",
       whyWrong: "Why this is wrong",
       languageButton: "中文",
@@ -188,7 +186,7 @@
       <div class="mistake-list">
         ${mistakes.map((mistake) => `
           <section class="mistake-card">
-            <div class="mistake-title">${labels[state.language].wrongExample}: ${escapeHtml(pick(mistake.title))}</div>
+            <div class="mistake-title">${escapeHtml(pick(mistake.title))}</div>
             <pre class="mistake-code"><code class="language-${escapeHtml(mistake.language || example.language)}">${escapeHtml(pick(mistake.code))}</code></pre>
             <div class="mistake-detail mistake-error">
               <strong>${labels[state.language].compilerError}</strong>
