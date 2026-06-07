@@ -125,6 +125,21 @@ pub(crate) fn course(course: &Course) -> Result<(), ParseError> {
         }
     }
     Ok(())
+}`),
+                sharedExample("crates/course-cli/Cargo.toml: 依赖 core crate", "crates/course-cli/Cargo.toml: depend on the core crate", "toml", `[dependencies]
+course-core = { path = "../course-core" }`),
+                sharedExample("crates/course-cli/src/main.rs: 只调用公开 API", "crates/course-cli/src/main.rs: call only the public API", "rust", `use course_core::load_course;
+
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let input = std::fs::read_to_string("course.txt")?;
+    let course = load_course(&input)?;
+
+    println!("course: {}", course.title);
+    for lesson in course.lessons {
+        println!("- {} ({})", lesson.title, lesson.slug);
+    }
+
+    Ok(())
 }`)
               ],
               references: ["rust-lang/cargo", "rust-lang/rust-analyzer"]
