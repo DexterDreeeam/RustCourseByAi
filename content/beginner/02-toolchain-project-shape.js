@@ -100,16 +100,44 @@ workspace
                   "package 和 crate 的区别",
                   "Difference between package and crate",
                   [
-                    "package 是 Cargo 看到的项目：它有 `Cargo.toml`，里面写 package 名字、版本、依赖、feature、构建配置。",
-                    "crate 是 Rust 编译器看到的编译单元：library crate 通常来自 `src/lib.rs`，binary crate 通常来自 `src/main.rs` 或 `src/bin/*.rs`。",
-                    "一个 package 可以产生一个 library crate，也可以产生多个 binary crate。例子里 package 名是 `course-core`，而代码里引用的 library crate 名通常写成 `course_core`，因为 Rust 代码路径不能写连字符。"
+                    "`package` 看 `Cargo.toml`：下面的 `crates/course-tools/Cargo.toml` 就定义了一个 package，名字叫 `course-tools`。",
+                    "`crate` 看编译入口：同一个 package 里的 `src/lib.rs` 会编译成一个 library crate，`src/bin/check.rs` 会编译成另一个 binary crate。",
+                    "所以一个 package 里面可以有多个 crate。package 名可以是 `course-tools`，但 Rust 代码里引用 library crate 时通常写 `course_tools`，因为代码路径不能写连字符。"
                   ],
                   [
                     "A package is the project Cargo sees: it has Cargo.toml with package name, version, dependencies, features, and build configuration.",
                     "A crate is the compilation unit rustc sees: a library crate usually comes from src/lib.rs, and binary crates usually come from src/main.rs or src/bin/*.rs.",
                     "One package can produce one library crate and multiple binary crates. In this example the package is named course-core, while Rust code usually refers to the library crate as course_core because Rust paths cannot contain hyphens."
-                  ]
+                  ],
+                  `workspace
+└── package: course-tools
+    ├── Cargo.toml           # [package] name = "course-tools"
+    └── src
+        ├── lib.rs           # crate 1: library crate，代码里叫 course_tools
+        └── bin
+            └── check.rs     # crate 2: binary crate，命令名通常叫 check
+
+这就是“一个 package 产生两个 crate”的例子：
+- package：course-tools
+- crate 1：course_tools 这个库
+- crate 2：check 这个可执行程序`
                 ),
+                sharedExample("course-tools/Cargo.toml: 一个 package", "course-tools/Cargo.toml: one package", "toml", `[package]
+name = "course-tools"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+course-core = { path = "../course-core" }`),
+                sharedExample("course-tools/src/lib.rs: library crate", "course-tools/src/lib.rs: library crate", "rust", `pub fn normalize_slug(raw: &str) -> String {
+    raw.trim().to_ascii_lowercase().replace(' ', "-")
+}`),
+                sharedExample("course-tools/src/bin/check.rs: binary crate", "course-tools/src/bin/check.rs: binary crate", "rust", `use course_tools::normalize_slug;
+
+fn main() {
+    let slug = normalize_slug(" Ownership Basics ");
+    println!("{slug}");
+}`),
                 textExample(
                   "module 和文件不是一回事",
                   "Modules and files are not the same thing",
