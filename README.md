@@ -24,6 +24,7 @@ https://dexterdreeeam.github.io/RustCourseByAi/
 docs\index.html           GitHub Pages entry point
 docs\assets\styles.css    Dark theme and responsive layout
 docs\assets\app.js        Navigation, language switching, and rendering
+docs\assets\rust-logo.svg Official Rust logo used as the site icon
 docs\content\course-data.js
                            Structured course content
 docs\.nojekyll            Disables Jekyll processing on GitHub Pages
@@ -39,3 +40,7 @@ The deployed `gh-pages` branch contains the same site files at its root, plus th
 - Required lesson parts: syntax explanation and engineering usage.
 - Comparisons: explain Rust concepts through C++ analogies when useful.
 - Engineering references: see `.copilot\instruction.md` for the Rust repositories used as long-term examples.
+
+## Logo attribution
+
+The Rust logo asset is from `rust-lang/rust-artwork` and is distributed under the Creative Commons Attribution license (CC-BY 4.0). Rust and Cargo names/logos are Rust trademarks and should follow the Rust trademark policy.

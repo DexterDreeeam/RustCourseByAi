@@ -17,6 +17,7 @@
   --shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
   --page-gutter: clamp(1rem, 3vw, 2.5rem);
   --sidebar-width: clamp(17rem, 24vw, 20rem);
+  --sidebar-rail-width: calc(var(--sidebar-width) + var(--page-gutter));
   --header-height: 4.6rem;
 }
 
@@ -86,15 +87,14 @@ a {
 }
 
 .brand-mark {
-  display: grid;
+  display: block;
   width: 2.4rem;
   height: 2.4rem;
-  place-items: center;
   border: 1px solid rgba(125, 211, 252, 0.55);
   border-radius: 0.8rem;
-  background: linear-gradient(135deg, rgba(56, 189, 248, 0.24), rgba(134, 239, 172, 0.1));
-  color: var(--accent);
-  font-weight: 800;
+  background: #f5f1e8;
+  object-fit: contain;
+  padding: 0.32rem;
 }
 
 .brand strong,
@@ -137,30 +137,33 @@ a {
 
 .layout {
   display: grid;
-  grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+  grid-template-columns: var(--sidebar-rail-width) minmax(0, 1fr);
   gap: clamp(1rem, 3vw, 2rem);
   padding: var(--page-gutter);
 }
 
 .sidebar {
   position: fixed;
-  top: calc(var(--header-height) + var(--page-gutter));
-  left: var(--page-gutter);
+  top: var(--header-height);
+  bottom: 0;
+  left: 0;
   z-index: 10;
-  width: var(--sidebar-width);
-  max-height: calc(100vh - var(--header-height) - (2 * var(--page-gutter)));
+  width: var(--sidebar-rail-width);
+  max-height: none;
   overflow: auto;
   border: 1px solid rgba(148, 163, 184, 0.16);
-  border-radius: 1.25rem;
+  border-top: 0;
+  border-bottom: 0;
+  border-left: 0;
+  border-radius: 0;
   background: rgba(13, 17, 25, 0.76);
   box-shadow: var(--shadow);
-  padding: 1rem;
-  transition: top 220ms ease, max-height 220ms ease;
+  padding: var(--page-gutter) 1rem var(--page-gutter) var(--page-gutter);
+  transition: top 220ms ease;
 }
 
 .header-hidden .sidebar {
-  top: var(--page-gutter);
-  max-height: calc(100vh - (2 * var(--page-gutter)));
+  top: 0;
 }
 
 .part-tabs {

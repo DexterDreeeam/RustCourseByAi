@@ -19,7 +19,7 @@
       references: "参考项目",
       previous: "上一节",
       next: "下一节",
-      part: "篇",
+      part: "阶段",
       languageButton: "English",
       brandSubtitle: "面向 C++ 程序员的 Rust 教程"
     },
@@ -31,7 +31,7 @@
       references: "Reference projects",
       previous: "Previous",
       next: "Next",
-      part: "Part",
+      part: "Level",
       languageButton: "中文",
       brandSubtitle: "Rust for C++ Engineers"
     }

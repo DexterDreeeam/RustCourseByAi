@@ -52,7 +52,7 @@ window.RUST_COURSE_DATA = {
   parts: [
     {
       id: "beginner",
-      title: t("入门篇", "Beginner track"),
+      title: t("入门", "Beginner"),
       chapters: [
         {
           id: "cpp-to-rust-map",
@@ -813,7 +813,7 @@ mod tests {
               id: "course-index-cli",
               title: ["综合项目：课程索引 CLI", "Capstone: course index CLI"],
               goals: [
-                ["把入门篇知识连成一个小工程。", "练习模块拆分、所有权、错误、迭代器和测试。"],
+                ["把入门阶段知识连成一个小工程。", "练习模块拆分、所有权、错误、迭代器和测试。"],
                 ["Connect beginner topics into a small project.", "Practice modules, ownership, errors, iterators, and tests."]
               ],
               syntax: [
@@ -821,7 +821,7 @@ mod tests {
                 ["The project contains `model`, `parser`, `validate`, and `cli` modules.", "The entry point handles IO, while the library handles pure logic and structured errors."]
               ],
               engineering: [
-                ["这个项目应该能从配置加载课程，校验 slug，按标签输出索引，并提供测试。", "这是入门篇结束时判断是否真正理解 Rust 基础的标准。"],
+                ["这个项目应该能从配置加载课程，校验 slug，按标签输出索引，并提供测试。", "这是入门阶段结束时判断是否真正理解 Rust 基础的标准。"],
                 ["The project should load a course config, validate slugs, output an index by tag, and include tests.", "This is the beginner-track checkpoint for real Rust understanding."]
               ],
               cppComparison: [
@@ -857,7 +857,7 @@ pub fn build_index(input: &str) -> Result<BTreeMap<String, Vec<String>>, parser:
     },
     {
       id: "advanced",
-      title: t("进阶篇", "Advanced track"),
+      title: t("进阶", "Advanced"),
       chapters: [
         {
           id: "workspace-architecture",
@@ -1310,7 +1310,7 @@ steps:
               id: "async-service-workspace",
               title: ["综合项目：async service + library workspace", "Capstone: async service + library workspace"],
               goals: [
-                ["把进阶篇工程主题整合成一个小型服务。", "练习 workspace、trait、async、tracing、错误和测试。"],
+                ["把进阶阶段工程主题整合成一个小型服务。", "练习 workspace、trait、async、tracing、错误和测试。"],
                 ["Integrate advanced engineering topics into a small service.", "Practice workspaces, traits, async, tracing, errors, and tests."]
               ],
               syntax: [
