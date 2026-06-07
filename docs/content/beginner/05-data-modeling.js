@@ -8,7 +8,7 @@
               id: "struct-impl-newtype",
               title: ["struct、impl 与 newtype", "Structs, impl blocks, and newtypes"],
               goals: [
-                ["用类型表达领域约束，而不是到处传裸 `String` / `u64`。", "理解方法接收者如何表达只读、可变和消费。"],
+                ["用类型表达业务规则，而不是到处传裸 `String` / `u64`。", "理解方法接收者如何表达只读、可变和消耗这个值。"],
                 ["Use types to express domain constraints instead of passing raw `String` / `u64` everywhere.", "Understand how method receivers express read-only, mutable, and consuming operations."]
               ],
               syntax: [
@@ -20,7 +20,7 @@
                 ["Types such as `UserId`, `Port`, and `CourseSlug` prevent argument order bugs and invalid values from spreading.", "Constructors should centralize validation so other modules receive valid domain objects."]
               ],
               cppComparison: [
-                ["C++ 也能用强类型 typedef/class 做 newtype，但 Rust 的私有字段和模块可见性让这种封装更自然。"],
+                ["C++ 也能用强类型 typedef 或小 class 做类似封装；Rust 的私有字段和模块规则让这种做法更自然。"],
                 ["C++ can build strong typedefs/classes, but Rust private fields and module visibility make this encapsulation natural."]
               ],
               examples: [

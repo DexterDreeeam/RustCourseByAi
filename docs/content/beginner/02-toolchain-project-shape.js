@@ -12,11 +12,11 @@
                 ["Understand Cargo as more than a build tool.", "Establish the build/test/fmt/clippy/doc quality loop."]
               ],
               syntax: [
-                ["`Cargo.toml` 描述 package、dependencies、features、profiles；命令行统一由 `cargo` 驱动。", "`edition` 让语言演进和老代码兼容可以共存。"],
+                ["`Cargo.toml` 描述包信息、依赖、可选功能和构建配置；命令行统一由 `cargo` 驱动。", "`edition` 让 Rust 语言可以继续演进，同时不破坏老项目。"],
                 ["`Cargo.toml` describes packages, dependencies, features, and profiles; `cargo` drives the workflow.", "`edition` lets language evolution coexist with older code."]
               ],
               engineering: [
-                ["团队项目应把 `cargo fmt --check`、`cargo clippy`、`cargo test` 放进 CI。", "文档和 examples 也应该被看作 public API 的一部分。"],
+                ["团队项目应把 `cargo fmt --check`、`cargo clippy`、`cargo test` 放进 CI。", "文档和 examples 也会影响用户怎么使用你的库，所以也要当成对外承诺来维护。"],
                 ["Team projects should put `cargo fmt --check`, `cargo clippy`, and `cargo test` in CI.", "Docs and examples should be treated as part of the public API."]
               ],
               cppComparison: [
@@ -52,15 +52,15 @@ jobs:
                 ["Distinguish Rust's four organization levels.", "Know when to evolve from one crate into a workspace."]
               ],
               syntax: [
-                ["package 是发布单位，crate 是编译单位，module 是代码可见性边界，workspace 是多 package 协作边界。", "`src/lib.rs` 暴露库 API，`src/main.rs` 是二进制入口。"],
+                ["package 是发布单位，crate 是编译单位，module 决定哪些代码能被外部看到，workspace 用来管理多个 package。", "`src/lib.rs` 放库的对外入口，`src/main.rs` 放可执行程序入口。"],
                 ["A package is a publishing unit, a crate is a compilation unit, a module is a visibility boundary, and a workspace coordinates packages.", "`src/lib.rs` exposes library APIs, while `src/main.rs` is a binary entry point."]
               ],
               engineering: [
-                ["中小项目先保持单 crate；当 domain、CLI、server、adapter 生命周期明显分离时再拆 workspace。", "模块边界不是目录美化，而是长期 API 稳定性的起点。"],
+                ["中小项目先保持单 crate；当核心逻辑、CLI、服务端、外部适配层需要分开演进时，再拆 workspace。", "模块不是为了把文件夹摆整齐，而是为了决定哪些代码可以被外部依赖，哪些只是内部实现。"],
                 ["Keep small projects in one crate; split into a workspace when domain, CLI, server, and adapters have separate lifecycles.", "Module boundaries are not folder decoration; they are the start of stable API design."]
               ],
               cppComparison: [
-                ["C++ include 目录很容易泄漏内部细节；Rust 私有默认和 `pub use` 更适合先收窄 API 表面。"],
+                ["C++ 的 include 目录很容易把内部实现也暴露给使用者；Rust 默认私有，只有你写 `pub` 或 `pub use` 的内容才会公开，所以更容易先只开放真正需要给别人用的接口。"],
                 ["C++ include directories often leak internals; Rust private-by-default modules and `pub use` make it easier to narrow APIs."]
               ],
               examples: [
@@ -88,4 +88,3 @@ pub fn load_course(input: &str) -> Result<Course, ParseError> {
           ]
         });
 })();
-

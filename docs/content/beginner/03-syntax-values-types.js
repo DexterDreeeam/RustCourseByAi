@@ -12,7 +12,7 @@
                 ["Understand `let` bindings as more than C++ variable declarations.", "Use shadowing to express step-by-step normalization."]
               ],
               syntax: [
-                ["Rust 默认不可变，`mut` 标出状态变化；shadowing 创建新绑定，可以改变类型。", "`const` 是编译期常量，`static` 是具有固定地址的全局值。"],
+                ["Rust 默认不可变，`mut` 明确标出哪里会改值；shadowing 会创建一个新的同名绑定，也可以改变类型。", "`const` 是编译时就确定的常量，`static` 是有固定地址的全局值。"],
                 ["Rust is immutable by default; `mut` marks state changes; shadowing creates a new binding and may change type.", "`const` is a compile-time constant, while `static` is a global value with a fixed address."]
               ],
               engineering: [
@@ -110,7 +110,7 @@ fn parse_config(raw_host: &str, raw_port: &str, raw_workers: &str) -> ServerConf
                 ["Public APIs should prefer `&str` or slices and allocate owned values only when storing.", "Choose collections from access patterns: order, lookup, sorting, or queueing."]
               ],
               cppComparison: [
-                ["`&str` 接近 `std::string_view`，`&[T]` 接近 span；Rust 会检查视图不能超过源数据生命周期。"],
+                ["`&str` 接近 `std::string_view`，`&[T]` 接近 span；不同的是，Rust 会检查这些视图不会比原始数据活得更久。"],
                 ["`&str` resembles `std::string_view`, and `&[T]` resembles span; Rust checks that views cannot outlive sources."]
               ],
               examples: [
@@ -153,7 +153,7 @@ fn count_tags(lessons: &[Lesson]) -> HashMap<&str, usize> {
                         ["error[E0515]: cannot return value referencing local variable `tags`", "`tags` is dropped at function exit, so the returned `&str` would dangle."]
                       ),
                       explanation: t(
-                        ["如果调用方需要长期保存结果，返回 `String`；如果只是临时查看，让调用方传入数据并返回与输入同生命周期的借用。"],
+                        ["如果调用方需要长期保存结果，就返回 `String`；如果只是临时查看，就让调用方传入数据，并返回和输入绑定在一起的借用。"],
                         ["Return `String` if the caller needs to keep the result; return a borrow only when it is tied to caller-provided input."]
                       )
                     }

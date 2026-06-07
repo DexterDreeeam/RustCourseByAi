@@ -41,7 +41,7 @@ pub fn checksum_bytes(bytes: &[u8]) -> u32 {
 }`),
                   [
                     {
-                      title: t("错误：把裸指针 API 暴露给业务层", "Wrong: expose raw pointer API to business code"),
+                      title: t("错误：把裸指针接口直接给业务层用", "Wrong: expose raw pointer API to business code"),
                       language: "rust",
                       code: t(
                         `pub unsafe fn checksum_raw(ptr: *const u8, len: usize) -> u32 {

@@ -6,21 +6,21 @@
           sections: [
             lesson({
               id: "associated-types-object-safety",
-              title: ["associated type、object safety 与分发成本", "Associated types, object safety, and dispatch cost"],
+              title: ["关联类型、trait object 与调用成本", "Associated types, object safety, and dispatch cost"],
               goals: [
-                ["理解 associated type 适合把输出类型绑定到实现。", "知道为什么一些 trait 不能变成 `dyn Trait`。"],
+                ["理解关联类型适合把输出类型绑定到具体实现上。", "知道为什么有些 trait 不能直接写成 `dyn Trait`。"],
                 ["Understand associated types as output types tied to implementations.", "Know why some traits cannot become `dyn Trait`."]
               ],
               syntax: [
-                ["associated type 写在 trait 内部，调用方通过实现选择具体类型。", "object safety 限制 trait object 能安全调用的方法集合。"],
+                ["关联类型写在 trait 内部，由每个实现决定具体类型。", "trait object 只能调用一部分满足规则的方法，否则编译器无法保证运行时调用是安全的。"],
                 ["Associated types live inside traits, and implementations choose concrete types.", "Object safety limits the method set that can be safely called through trait objects."]
               ],
               engineering: [
-                ["parser、storage、service 抽象常用 associated type 表达错误或输出。", "如果 API 暴露过度泛型，会增加编译时间和使用复杂度。"],
+                ["parser、storage、service 这类抽象常用关联类型表达错误或输出。", "如果对外 API 设计得过度泛型，用户会更难理解，编译时间也可能变长。"],
                 ["Parser, storage, and service abstractions often use associated types for errors or outputs.", "Overly generic APIs increase compile time and usage complexity."]
               ],
               cppComparison: [
-                ["这类似 C++ traits/type aliases 与虚接口之间的取舍；Rust 让静态和动态分发边界更显式。"],
+                ["这有点像 C++ 里 traits/type aliases 和虚接口之间的取舍；Rust 会更明确地区分两种情况：一种是在编译时就知道要调用哪个具体类型，另一种是在运行时通过 trait object 再决定。"],
                 ["This resembles trade-offs between C++ traits/type aliases and virtual interfaces; Rust makes static and dynamic dispatch boundaries explicit."]
               ],
               examples: [
@@ -44,7 +44,7 @@ impl Parser for CourseParser {
 }`),
                   [
                     {
-                      title: t("错误：dyn Trait 忘记指定 associated type", "Wrong: dyn Trait without associated types"),
+                      title: t("错误：dyn Trait 忘记指定关联类型", "Wrong: dyn Trait without associated types"),
                       language: "rust",
                       code: t(
                         `fn run_parser(parser: Box<dyn Parser>, input: &str) {
@@ -55,11 +55,11 @@ impl Parser for CourseParser {
 }`
                       ),
                       error: t(
-                        ["error[E0191]: the value of the associated types `Output` and `Error` in `Parser` must be specified", "`dyn Parser` 需要知道 `Output` 和 `Error` 的具体类型，否则调用方不知道返回什么。"],
+                        ["error[E0191]: the value of the associated types `Output` and `Error` in `Parser` must be specified", "`dyn Parser` 必须写清楚 `Output` 和 `Error` 的具体类型，否则调用方不知道 `parse` 会返回什么。"],
                         ["error[E0191]: the value of the associated types `Output` and `Error` in `Parser` must be specified", "`dyn Parser` needs concrete `Output` and `Error` types; otherwise callers do not know what is returned."]
                       ),
                       explanation: t(
-                        ["写成 `Box<dyn Parser<Output = Course, Error = ParseError>>`，或者在这里继续使用泛型静态分发。"],
+                        ["可以写成 `Box<dyn Parser<Output = Course, Error = ParseError>>`；如果不需要运行时替换实现，也可以继续使用泛型。"],
                         ["Write `Box<dyn Parser<Output = Course, Error = ParseError>>`, or keep static dispatch with generics here."]
                       )
                     }

@@ -12,15 +12,15 @@
                 ["Integrate advanced engineering topics into a small service.", "Practice workspaces, traits, async, tracing, errors, and tests."]
               ],
               syntax: [
-                ["core crate 定义领域和 trait，server crate 负责 runtime 和 HTTP，adapter crate 负责存储。", "使用 bounded channel 做后台任务，tracing 串联请求上下文。"],
+                ["core crate 定义领域模型和 trait，server crate 负责运行时和 HTTP，adapter crate 负责存储。", "使用有容量上限的 channel 做后台任务，用 tracing 串联请求上下文。"],
                 ["The core crate defines domain and traits, the server crate owns runtime and HTTP, and adapter crates own storage.", "Use bounded channels for background work and tracing for request context."]
               ],
               engineering: [
-                ["综合项目应该展示如何避免 runtime 泄漏进核心库、如何让错误有上下文、如何测试 trait 边界。", "最后再做性能和 API 演进讨论。"],
+                ["综合项目应该展示如何避免运行时细节进入核心库、如何让错误带上下文、如何测试 trait 抽象。", "最后再讨论性能瓶颈和 API 以后怎么演进。"],
                 ["The capstone should show how to keep runtime out of core libraries, attach error context, and test trait boundaries.", "Finish with performance and API evolution discussion."]
               ],
               cppComparison: [
-                ["这对应 C++ 中 library + service binary + adapter target 的工程结构，但 Rust 的 trait 和 Cargo feature 让边界更显式。"],
+                ["这对应 C++ 中 library + service binary + adapter target 的工程结构；Rust 的 trait 和 Cargo 可选功能会让这些层次更明确。"],
                 ["This maps to C++ library + service binary + adapter targets, but Rust traits and Cargo features make boundaries more explicit."]
               ],
               examples: [
@@ -51,4 +51,3 @@ where
           ]
         });
 })();
-

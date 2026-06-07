@@ -8,15 +8,15 @@
               id: "rust-safety-goals",
               title: ["Rust 解决的问题", "Problems Rust is designed to solve"],
               goals: [
-                ["理解 Rust 为什么强调编译期约束。", "把内存安全、并发安全和零成本抽象放在同一个目标里看。"],
+                ["理解 Rust 为什么尽量在编译时发现问题。", "把内存安全、并发安全和不牺牲性能的抽象放在同一个目标里看。"],
                 ["Understand why Rust emphasizes compile-time constraints.", "Connect memory safety, concurrency safety, and zero-cost abstraction as one goal."]
               ],
               syntax: [
-                ["Rust 没有 GC，却要求值有唯一 owner；引用必须满足借用规则；`Drop` 在作用域结束时释放资源。", "`Send`、`Sync`、`Result`、`Option` 这些常见类型和 trait 都是在把运行期事故前移到类型系统中。"],
+                ["Rust 没有 GC，却要求每个值都有明确的拥有者；引用必须满足借用规则；`Drop` 在作用域结束时释放资源。", "`Send`、`Sync`、`Result`、`Option` 这些常见类型和 trait，都是为了把很多本来运行时才会暴露的问题提前到编译时发现。"],
                 ["Rust has no GC, but each value has an owner; references must satisfy borrowing rules; `Drop` releases resources at scope end.", "`Send`, `Sync`, `Result`, and `Option` push many runtime accidents into the type system."]
               ],
               engineering: [
-                ["真实工程中，Rust 的价值不是少写代码，而是让资源生命周期、错误传播和并发边界在 API 上可见。", "当你设计函数签名时，就已经在设计资源归属、线程边界和失败策略。"],
+                ["真实工程中，Rust 的价值不是少写几行代码，而是让“谁拥有资源、错误怎么传出去、能不能跨线程”这些事情直接体现在函数签名里。", "当你设计函数签名时，其实已经在决定资源归谁、能不能跨线程、失败时交给谁处理。"],
                 ["In real projects, Rust's value is not fewer lines; it is making resource lifetime, error flow, and concurrency boundaries visible in APIs.", "When you design a function signature, you are already designing ownership, thread boundaries, and failure strategy."]
               ],
               cppComparison: [
@@ -91,7 +91,7 @@ fn handle_request(request: Request) {
 }`
                       ),
                       error: t(
-                        ["error[E0382]: borrow of moved value: `request`", "`enqueue(request)` 把 `Request` 移入队列，后面的 `request.body` 已经没有有效 owner。"],
+                        ["error[E0382]: borrow of moved value: `request`", "`enqueue(request)` 已经把 `Request` 交给队列，后面的 `request.body` 不再属于当前函数。"],
                         ["error[E0382]: borrow of moved value: `request`", "`enqueue(request)` moved the `Request` into the queue, so `request.body` no longer has a valid owner here."]
                       ),
                       explanation: t(
@@ -121,7 +121,7 @@ fn handle_request(request: Request) {
                         ["error[E0308]: mismatched types", "expected `Request`, found `&Request`."]
                       ),
                       explanation: t(
-                        ["`&Request` 只是临时观察权；`enqueue` 的设计语义是队列接管请求并负责之后的生命周期。"],
+                        ["`&Request` 只能临时看一眼请求；而 `enqueue` 的设计意思是：队列要接手这个请求，并负责它后面的生命周期。"],
                         ["`&Request` is only temporary observation; `enqueue` is designed so the queue takes over the request lifetime."]
                       )
                     }
@@ -209,4 +209,3 @@ fn main() {
           ]
         });
 })();
-
