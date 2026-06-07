@@ -29,8 +29,16 @@ docs\assets\rust-logo-favicon.svg
                            Theme-adaptive Rust logo used as the browser tab icon
 docs\assets\rust-logo-white.svg
                            White transparent Rust logo used in the site UI
+docs\content\course-helpers.js
+                           Shared content authoring helpers
+docs\content\references.js
+                           Shared Rust engineering reference repositories
+docs\content\beginner\*.js
+                           Beginner chapters, one chapter per file
+docs\content\advanced\*.js
+                           Advanced chapters, one chapter per file
 docs\content\course-data.js
-                           Structured course content
+                           Final data assembler for the page
 docs\.nojekyll            Disables Jekyll processing on GitHub Pages
 ```
 

@@ -23,6 +23,16 @@ This repository hosts a GitHub Pages tutorial site that teaches Rust to programm
 
 Course content is stored as structured JavaScript data under `docs\content\`.
 
+File organization:
+
+- `docs\content\course-helpers.js` defines shared authoring helpers on `window.Course`.
+- `docs\content\references.js` defines shared reference repositories.
+- `docs\content\beginner\NN-topic.js` contains one beginner chapter per file.
+- `docs\content\advanced\NN-topic.js` contains one advanced chapter per file.
+- `docs\content\course-data.js` only assembles the final `window.RUST_COURSE_DATA`; do not put chapter content back into this file.
+- Chapter files must consume helpers inside an IIFE from `window.Course` to avoid classic script global `const` redeclaration issues.
+- Section IDs must remain globally unique across all chapter files.
+
 Every section should have:
 
 - A stable `id`.
