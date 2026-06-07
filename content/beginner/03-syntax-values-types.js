@@ -138,29 +138,38 @@ fn count_tags(lessons: &[Lesson]) -> HashMap<&str, usize> {
 }`),
                   [
                     {
-                      title: t("错误：返回指向局部 String 的 &str", "Wrong: return &str pointing into a local String"),
+                      title: t("错误：返回指向局部 Vec 的 slice", "Wrong: return a slice into a local Vec"),
                       language: "rust",
                       code: t(
-                        `fn first_tag() -> &str {
-    let tags = vec![String::from("rust")];
-    tags[0].as_str()
+                        `fn default_ports() -> &[u16] {
+    let ports = vec![80, 443, 8080];
+    &ports[0..2]
 }`,
-                        `fn first_tag() -> &str {
-    let tags = vec![String::from("rust")];
-    tags[0].as_str()
+                        `fn default_ports() -> &[u16] {
+    let ports = vec![80, 443, 8080];
+    &ports[0..2]
 }`
                       ),
                       error: t(
-                        ["error[E0515]: cannot return value referencing local variable `tags`", "`tags` 在函数结束时被释放，返回的 `&str` 会悬垂。"],
-                        ["error[E0515]: cannot return value referencing local variable `tags`", "`tags` is dropped at function exit, so the returned `&str` would dangle."]
+                        ["error[E0515]: cannot return value referencing local variable `ports`", "`&ports[0..2]` 是一个 slice，它借用 `ports` 里的连续元素；`ports` 在函数结束时释放，所以这个 slice 不能返回。"],
+                        ["error[E0515]: cannot return value referencing local variable `ports`", "`&ports[0..2]` is a slice borrowing consecutive elements from `ports`; `ports` is dropped at function exit, so the slice cannot be returned."]
                       ),
                       explanation: t(
-                        ["如果调用方需要长期保存结果，就返回 `String`；如果只是临时查看，就让调用方传入数据，并返回和输入绑定在一起的借用。"],
-                        ["Return `String` if the caller needs to keep the result; return a borrow only when it is tied to caller-provided input."]
+                        ["slice 是 borrowed view，必须依附在仍然活着的数据上。要么返回 `Vec<u16>` 让调用方拥有数据，要么让调用方传入 `&[u16]`，再返回和输入同生命周期的 slice。"],
+                        ["A slice is a borrowed view and must refer to data that is still alive. Return `Vec<u16>` if the caller should own the data, or accept `&[u16]` from the caller and return a slice tied to that input."]
                       )
                     }
                   ]
-                )
+                ),
+                sharedExample("Rust: slice 借用调用方仍然拥有的数据", "Rust: slice borrows data still owned by the caller", "rust", `fn first_two_ports(ports: &[u16]) -> &[u16] {
+    &ports[0..2]
+}
+
+fn main() {
+    let ports = vec![80, 443, 8080];
+    let common = first_two_ports(&ports);
+    println!("{common:?}");
+}`)
               ],
               references: ["BurntSushi/ripgrep"]
             })
