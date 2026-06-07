@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="zh">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>RustCourseByAi - Rust for C++ Engineers</title>
+    <meta name="description" content="A bilingual Rust course for C++ programmers, from syntax to engineering practice.">
+    <link rel="stylesheet" href="assets/styles.css">
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="site-header">
+        <a class="brand" href="#rust-vs-cpp-model" aria-label="RustCourseByAi home">
+          <span class="brand-mark">R</span>
+          <span>
+            <strong>RustCourseByAi</strong>
+            <small id="brandSubtitle">Rust for C++ Engineers</small>
+          </span>
+        </a>
+        <div class="header-actions">
+          <button id="languageToggle" class="language-toggle" type="button">中文 / English</button>
+          <a class="repo-link" href="https://github.com/DexterDreeeam/RustCourseByAi" target="_blank" rel="noreferrer">GitHub</a>
+        </div>
+      </header>
+
+      <div class="layout">
+        <aside class="sidebar" aria-label="Course navigation">
+          <div class="sidebar-title" id="tocTitle">目录</div>
+          <nav id="sidebarNav"></nav>
+        </aside>
+
+        <main class="main-content">
+          <section class="hero" id="hero"></section>
+          <article id="courseRoot" class="lesson" aria-live="polite"></article>
+        </main>
+      </div>
+    </div>
+
+    <noscript>
+      <div class="noscript">This tutorial needs JavaScript to render the bilingual course navigation.</div>
+    </noscript>
+
+    <script src="content/course-data.js"></script>
+    <script src="assets/app.js"></script>
+  </body>
+</html>
+

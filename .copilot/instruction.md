@@ -1,0 +1,82 @@
+# RustCourseByAi project instructions
+
+## Project purpose
+
+This repository hosts a GitHub Pages tutorial site that teaches Rust to programmers who already know C++. The course must move from beginner syntax to advanced engineering practice, and it must constantly explain how Rust concepts relate to familiar C++ concepts.
+
+## Required site principles
+
+- The website is a no-build static site under `docs\` and is intended to be viewed through GitHub Pages.
+- The UI uses a black/dark theme by default.
+- The site is bilingual: Chinese (`zh`) and English (`en`) must be switchable at any time.
+- Chinese and English content must stay conceptually aligned. Do not add a section in one language without the matching section in the other language.
+- Each lesson teaches one concrete knowledge point.
+- Each lesson must include two required explanations:
+  1. Syntax-level explanation.
+  2. Concrete engineering/project usage.
+- Lessons should assume the reader understands C++ basics, RAII, templates, references, pointers, build systems, and common project organization.
+- Prefer Rust-vs-C++ comparisons over generic Rust explanations when a comparison clarifies the idea.
+- Examples should be original or short adapted snippets. Do not copy large blocks from other repositories.
+
+## Content data contract
+
+Course content is stored as structured JavaScript data under `docs\content\`.
+
+Every section should have:
+
+- A stable `id`.
+- `title.zh` and `title.en`.
+- `goals.zh` and `goals.en`.
+- `syntax.zh` and `syntax.en`.
+- `engineering.zh` and `engineering.en`.
+- `cppComparison.zh` and `cppComparison.en`.
+- `examples`, each with a language label such as `rust`, `cpp`, or `toml`.
+- Optional `references` containing repository names from the reference table below.
+
+When adding or changing content:
+
+- Keep section order identical for both languages by storing both languages in the same section object.
+- Keep code examples small and focused on the section's single knowledge point.
+- If a concept differs sharply between Rust and C++, explicitly describe the trade-off.
+- Engineering explanations should answer: "How would this appear in a real project?"
+
+## Engineering topics to cover
+
+Future content should gradually cover:
+
+- Module and crate organization.
+- Workspace layout and API boundaries.
+- Formatting, linting, naming, documentation, and examples.
+- Error handling and diagnostics.
+- Communication mechanisms: channels, shared state, ownership transfer, and message passing.
+- Async Rust, cancellation, runtime boundaries, and performance implications.
+- Performance: allocation, zero-copy, iterators, profiling, and benchmarking concepts.
+- Debugging, tracing, testing, reproducible examples, and encapsulation.
+- Unsafe isolation and C/C++ FFI boundaries.
+- Packaging, feature flags, semantic versioning, and CI/release workflows.
+
+## Rust engineering reference repositories
+
+Use these repositories as long-term references for examples, comparisons, and engineering lessons:
+
+| Repository | URL | Lessons to extract |
+| --- | --- | --- |
+| `rust-lang/rust` | https://github.com/rust-lang/rust | Large-scale Rust organization, compiler diagnostics, safety boundaries, contribution discipline. |
+| `rust-lang/cargo` | https://github.com/rust-lang/cargo | Cargo workflows, package metadata, feature flags, CLI architecture, integration testing. |
+| `rust-lang/rust-analyzer` | https://github.com/rust-lang/rust-analyzer | Modular architecture, incremental computation, LSP-style project structure, performance-aware design. |
+| `tokio-rs/tokio` | https://github.com/tokio-rs/tokio | Async runtime design, tasks, channels, cancellation, synchronization primitives. |
+| `serde-rs/serde` | https://github.com/serde-rs/serde | Trait-driven APIs, derive macros, generic design, zero-copy serialization patterns. |
+| `BurntSushi/ripgrep` | https://github.com/BurntSushi/ripgrep | CLI ergonomics, performance-focused IO, crate decomposition, practical error handling. |
+| `hyperium/hyper` | https://github.com/hyperium/hyper | Async networking, service abstractions, HTTP protocol layering. |
+| `rustls/rustls` | https://github.com/rustls/rustls | Security-sensitive API boundaries, encapsulation, testing discipline, safe defaults. |
+| `clap-rs/clap` | https://github.com/clap-rs/clap | Builder/derive API design, command-line UX, macro ergonomics. |
+| `tauri-apps/tauri` | https://github.com/tauri-apps/tauri | Large workspace layout, cross-platform application boundaries, command/plugin architecture. |
+
+## Page behavior expectations
+
+- Language switching must keep the reader on the same lesson.
+- Section URLs should be hash-based and shareable.
+- Navigation should show part, chapter, and section hierarchy.
+- Code blocks should show the source language.
+- Reference repositories used by a lesson should be visible in the rendered page.
+
