@@ -56,7 +56,7 @@ jobs:
                 ["A package is a publishing unit, a crate is a compilation unit, a module is a visibility boundary, and a workspace coordinates packages.", "`src/lib.rs` exposes library APIs, while `src/main.rs` is a binary entry point."]
               ],
               engineering: [
-                ["中小项目先保持单 crate；当核心逻辑、CLI、服务端、外部适配层需要分开演进时，再拆 workspace。", "模块不是为了把文件夹摆整齐，而是为了决定哪些代码可以被外部依赖，哪些只是内部实现。"],
+                ["中小项目先保持单 crate；当核心逻辑、CLI、服务端、外部适配层需要分开演进时，再拆 workspace。", "`pub` 表示 crate 外部也能访问；`pub(crate)` 表示只有当前 crate 内部能访问；不写 `pub` 时，通常只有当前模块能访问。", "模块不是为了把文件夹摆整齐，而是为了决定哪些代码可以被外部依赖，哪些只是内部实现。"],
                 ["Keep small projects in one crate; split into a workspace when domain, CLI, server, and adapters have separate lifecycles.", "Module boundaries are not folder decoration; they are the start of stable API design."]
               ],
               cppComparison: [
@@ -106,6 +106,7 @@ struct RawLesson<'a> {
     title: &'a str,
 }
 
+// pub(crate)：整个 course-core crate 内都能调用，但外部 crate 不能调用。
 pub(crate) fn parse(input: &str) -> Result<Course, ParseError> {
     if input.trim().is_empty() {
         return Err(ParseError::Empty);
@@ -139,6 +140,7 @@ struct SlugRule {
     allow_dash: bool,
 }
 
+// pub(crate)：lib.rs 能调用，但 course-cli 不能直接调用。
 pub(crate) fn course(course: &Course) -> Result<(), ParseError> {
     let rule = SlugRule { allow_dash: true };
 

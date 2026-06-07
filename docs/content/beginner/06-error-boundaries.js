@@ -1,31 +1,31 @@
 (function () {
-  const { t, sharedExample, localizedExample, withMistakes, lesson } = window.Course;
+  const { t, sharedExample, withMistakes, lesson } = window.Course;
   window.RUST_COURSE_CHAPTERS.beginner.push({
-          id: "error-boundaries",
-          title: t("错误处理与失败边界", "Error handling and failure boundaries"),
-          sections: [
-            lesson({
-              id: "option-result-panic",
-              title: ["Option、Result 与 panic 边界", "Option, Result, and panic boundaries"],
-              goals: [
-                ["区分缺失、可恢复失败和程序 bug。", "知道什么时候返回 `Result`，什么时候允许 `panic!`。"],
-                ["Distinguish absence, recoverable failure, and program bugs.", "Know when to return `Result` and when `panic!` is acceptable."]
-              ],
-              syntax: [
-                ["`Option<T>` 表示没有值，`Result<T,E>` 表示可恢复失败，`panic!` 表示不可恢复 bug。", "`?` 在错误时提前返回，并通过 `From` 转换错误类型。"],
-                ["`Option<T>` means no value, `Result<T,E>` means recoverable failure, and `panic!` means unrecoverable bug.", "`?` returns early and converts errors through `From`."]
-              ],
-              engineering: [
-                ["库代码应该把失败放进返回类型，应用入口再决定日志、提示和退出码。", "错误类型应该帮助调用者决策：重试、提示用户、跳过还是终止。"],
-                ["Library code should put failures in return types; app entry points decide logs, messages, and exit codes.", "Error types should help callers decide: retry, inform the user, skip, or stop."]
-              ],
-              cppComparison: [
-                ["C++ 项目常混用异常、错误码和 optional；Rust 让可恢复错误显式出现在函数签名中。"],
-                ["C++ projects often mix exceptions, error codes, and optional values; Rust makes recoverable errors explicit in signatures."]
-              ],
-              examples: [
-                withMistakes(
-                  sharedExample("Rust: 配置解析错误带上下文", "Rust: config parse errors with context", "rust", `#[derive(Debug)]
+    id: "error-boundaries",
+    title: t("错误处理与失败边界", "Error handling and failure boundaries"),
+    sections: [
+      lesson({
+        id: "option-result-panic",
+        title: ["Option、Result 与 panic 边界", "Option, Result, and panic boundaries"],
+        goals: [
+          ["区分缺失、可恢复失败和程序 bug。", "知道什么时候返回 `Result`，什么时候允许 `panic!`。"],
+          ["Distinguish absence, recoverable failure, and program bugs.", "Know when to return `Result` and when `panic!` is acceptable."]
+        ],
+        syntax: [
+          ["`Option<T>` 表示没有值，`Result<T,E>` 表示可恢复失败，`panic!` 表示不可恢复 bug。", "`?` 是错误传播运算符：遇到 `Ok` 就取出里面的值继续执行，遇到 `Err` 就从当前函数提前返回这个错误。"],
+          ["`Option<T>` means no value, `Result<T,E>` means recoverable failure, and `panic!` means unrecoverable bug.", "`?` returns early and converts errors through `From`."]
+        ],
+        engineering: [
+          ["库代码应该把失败放进返回类型，应用入口再决定日志、提示和退出码。", "错误类型应该帮助调用者决策：重试、提示用户、跳过还是终止。"],
+          ["Library code should put failures in return types; app entry points decide logs, messages, and exit codes.", "Error types should help callers decide: retry, inform the user, skip, or stop."]
+        ],
+        cppComparison: [
+          ["C++ 项目常混用异常、错误码和 optional；Rust 让可恢复错误显式出现在函数签名中。"],
+          ["C++ projects often mix exceptions, error codes, and optionals; Rust makes recoverable errors explicit in signatures."]
+        ],
+        examples: [
+          withMistakes(
+            sharedExample("Rust: 配置解析错误带上下文", "Rust: config parse errors with context", "rust", `#[derive(Debug)]
 enum ConfigError {
     MissingField(&'static str),
     InvalidPort { raw: String },
@@ -45,32 +45,52 @@ fn parse_config(host: Option<&str>, port: Option<&str>) -> Result<Config, Config
 
     Ok(Config { host: host.to_owned(), port })
 }`),
-                  [
-                    {
-                      title: t("错误：库函数里直接 unwrap 用户输入", "Wrong: unwrap user input inside library code"),
-                      language: "rust",
-                      code: t(
-                        `fn parse_port(raw: &str) -> u16 {
+            [
+              {
+                title: t("错误：库函数里直接 unwrap 用户输入", "Wrong: unwrap user input inside library code"),
+                language: "rust",
+                code: t(
+                  `fn parse_port(raw: &str) -> u16 {
     raw.parse::<u16>().unwrap()
 }`,
-                        `fn parse_port(raw: &str) -> u16 {
+                  `fn parse_port(raw: &str) -> u16 {
     raw.parse::<u16>().unwrap()
 }`
-                      ),
-                      error: t(
-                        ["runtime panic: called `Result::unwrap()` on an `Err` value", "用户输入 `abc` 时，库函数直接 panic，调用方无法决定重试、提示还是使用默认值。"],
-                        ["runtime panic: called `Result::unwrap()` on an `Err` value", "For input `abc`, the library panics and the caller cannot choose retry, user feedback, or a default."]
-                      ),
-                      explanation: t(
-                        ["解析用户输入属于可恢复失败，应返回 `Result`，让应用入口决定如何展示错误。"],
-                        ["Parsing user input is a recoverable failure; return `Result` and let the application boundary format the error."]
-                      )
-                    }
-                  ]
+                ),
+                error: t(
+                  ["runtime panic: called `Result::unwrap()` on an `Err` value", "用户输入 `abc` 时，库函数直接 panic，调用方无法决定重试、提示还是使用默认值。"],
+                  ["runtime panic: called `Result::unwrap()` on an `Err` value", "For input `abc`, the library panics and the caller cannot choose retry, user feedback, or a default."]
+                ),
+                explanation: t(
+                  ["解析用户输入属于可恢复失败，应返回 `Result`，让应用入口决定如何展示错误。"],
+                  ["Parsing user input is a recoverable failure; return `Result` and let the application boundary format the error."]
                 )
-              ],
-              references: ["BurntSushi/ripgrep"]
-            })
-          ]
-        });
+              }
+            ]
+          ),
+          sharedExample("Rust: `?` 等价的 match 展开", "Rust: `?` expanded as match", "rust", `fn parse_port_without_question_mark(raw: &str) -> Result<u16, ConfigError> {
+    let port = match raw.parse::<u16>() {
+        Ok(port) => port,
+        Err(_) => {
+            return Err(ConfigError::InvalidPort {
+                raw: raw.to_owned(),
+            });
+        }
+    };
+
+    Ok(port)
+}
+
+fn parse_port_with_question_mark(raw: &str) -> Result<u16, ConfigError> {
+    let port = raw
+        .parse::<u16>()
+        .map_err(|_| ConfigError::InvalidPort { raw: raw.to_owned() })?;
+
+    Ok(port)
+}`)
+        ],
+        references: ["BurntSushi/ripgrep"]
+      })
+    ]
+  });
 })();
