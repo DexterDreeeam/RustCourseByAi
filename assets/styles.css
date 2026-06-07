@@ -88,9 +88,21 @@ a {
 
 .brand-mark {
   display: block;
-  width: 2.4rem;
-  height: 2.4rem;
+  width: 2.64rem;
+  height: 2.64rem;
+  animation: rust-logo-spin 12s linear infinite;
   object-fit: contain;
+  transform-origin: center;
+}
+
+@keyframes rust-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .brand strong,
