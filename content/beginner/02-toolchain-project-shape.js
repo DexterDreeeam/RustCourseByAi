@@ -52,7 +52,7 @@ jobs:
                 ["Distinguish Rust's four organization levels.", "Know when to evolve from one crate into a workspace."]
               ],
               syntax: [
-                ["从大到小看：workspace 管多个 package；package 是一个可发布/可构建的项目；package 里会产生一个或多个 crate；crate 里面再用 module 组织代码。", "module 不等于文件。module 是 Rust 里的命名空间和可见性边界；文件只是承载 module 代码的常见方式。", "`src/lib.rs` 通常生成 library crate，`src/main.rs` 通常生成 binary crate；`mod xxx;` 可以把 `xxx.rs`、`xxx/mod.rs` 或当前文件里的内联模块接进当前 crate 的模块树。"],
+                ["从大到小看：workspace 管多个 package；package 是一个可发布/可构建的项目；Cargo 会根据 package 里的配置和默认规则，挑出哪些文件是 crate root，然后每个 crate root 编译成一个 crate。", "不是随便一个 `.rs` 文件都是 crate。只有被 Cargo 当成编译入口交给 rustc 的文件，才是 crate root，比如 `src/lib.rs`、`src/main.rs`、`src/bin/*.rs`。", "module 不等于文件。module 是 Rust 里的命名空间和可见性边界；普通模块文件只有被 crate root 里的 `mod xxx;` 接进来，才会成为这个 crate 的一部分。"],
                 ["A package is a publishing unit, a crate is a compilation unit, a module is a visibility boundary, and a workspace coordinates packages.", "`src/lib.rs` exposes library APIs, while `src/main.rs` is a binary entry point."]
               ],
               engineering: [
@@ -69,9 +69,9 @@ jobs:
                   "From outside to inside: workspace, package, crate, module",
                   [
                     "workspace 是最外层的工作区，它自己通常不编译代码，而是列出要一起管理的 package。",
-                    "package 是一个有 `Cargo.toml` 的项目单元。Cargo 先看到 package，再根据里面的入口文件决定要编译出哪些 crate。",
-                    "crate 不是“任意一个 .rs 文件”。crate 是一次编译的入口和结果。默认情况下，`src/lib.rs`、`src/main.rs`、`src/bin/*.rs` 这类 crate root 才会形成 crate。",
-                    "module 是 crate 里面的名字空间。`src/parser.rs`、`src/parser/token.rs` 这类文件通常只是 module 的代码，不是单独的 crate。"
+                    "package 是有 `Cargo.toml` 的项目单元。Cargo 先看到 package，再决定这个 package 里面有哪些编译目标。",
+                    "crate 是 rustc 的一次编译单位。Cargo 会把 crate root 文件交给 rustc；rustc 从这个 root 开始编译出一个库或一个可执行程序。",
+                    "module 是 crate 里面的名字空间。`src/parser.rs`、`src/parser/token.rs` 这类文件通常只是被 root 通过 `mod` 拉进来的模块文件，不会单独编译成 crate。"
                   ],
                   [
                     "A workspace is the outer working area. It usually does not compile code by itself; it lists packages managed together.",
@@ -99,10 +99,10 @@ jobs:
                   "什么文件算 crate？什么文件只是 module？",
                   "Which files are crates and which are modules?",
                   [
-                    "`src/lib.rs` 是 library crate 的根文件，所以它算一个 crate root。",
-                    "`src/main.rs` 或 `src/bin/inspect.rs` 是 binary crate 的根文件，所以它们也算 crate root。",
-                    "`src/parser.rs` 不是 crate root。它是被 `mod parser;` 接进 `course_core` 这个 crate 里的 module 文件。",
-                    "所以判断一个 `.rs` 文件是不是 crate，关键不是看扩展名，而是看它是不是 Cargo/rustc 的编译入口。"
+                    "根本区别是：谁把这个文件交给 rustc 当“起点”。Cargo 会把 `src/lib.rs`、`src/main.rs`、`src/bin/*.rs` 这类文件当作起点，所以它们是 crate root。",
+                    "rustc 从 crate root 开始构建模块树。root 里写 `mod parser;`，rustc 才会去找 `src/parser.rs`，把它作为 `parser` 模块接进当前 crate。",
+                    "`src/parser.rs` 没有被 Cargo 单独交给 rustc，它只是被 `src/lib.rs` 拉进来的模块文件，所以它不是一个 crate。",
+                    "所以判断一个 `.rs` 文件是不是 crate，不是看扩展名，也不是看它能不能写 Rust 代码，而是看它是不是 Cargo/rustc 的编译起点。"
                   ],
                   [
                     "`src/lib.rs` is the root of a library crate.",
@@ -110,6 +110,29 @@ jobs:
                     "`src/parser.rs` is not a crate root. It is a module file included into the `course_core` crate by `mod parser;`.",
                     "So a `.rs` file is a crate only when it is a Cargo/rustc compilation entry point."
                   ]
+                ),
+                textExample(
+                  "Cargo 和 rustc 实际怎么找到这些文件",
+                  "How Cargo and rustc find these files",
+                  [
+                    "第一步：Cargo 读 `Cargo.toml`，发现 `src/lib.rs` 是 library crate root，`src/bin/inspect.rs` 是 binary crate root。",
+                    "第二步：Cargo 分别调用 rustc 编译这些 root。编译 `src/lib.rs` 会得到 `course_core` 这个 library crate；编译 `src/bin/inspect.rs` 会得到 `inspect` 这个 binary crate。",
+                    "第三步：rustc 编译 `src/lib.rs` 时看到 `mod parser;`，才会加载 `src/parser.rs`。这说明 `parser.rs` 是 `course_core` crate 的一个 module 文件，不是新的 crate。"
+                  ],
+                  [
+                    "Step 1: Cargo reads Cargo.toml and discovers src/lib.rs as the library crate root and src/bin/inspect.rs as a binary crate root.",
+                    "Step 2: Cargo invokes rustc separately for those roots. Compiling src/lib.rs produces the course_core library crate; compiling src/bin/inspect.rs produces the inspect binary crate.",
+                    "Step 3: When rustc compiles src/lib.rs and sees mod parser;, it loads src/parser.rs. That makes parser.rs a module file inside course_core, not a new crate."
+                  ],
+                  `Cargo.toml
+├── [lib] path = "src/lib.rs"          -> rustc src/lib.rs          -> crate: course_core
+└── [[bin]] path = "src/bin/inspect.rs" -> rustc src/bin/inspect.rs -> crate: inspect
+
+src/lib.rs
+└── mod parser;                         -> loads src/parser.rs as module parser
+
+src/parser.rs
+└── not passed to rustc as a root        -> not a crate by itself`
                 ),
                 sharedExample("root Cargo.toml: workspace 只负责组织成员", "root Cargo.toml: workspace organizes members", "toml", `[workspace]
 members = ["crates/course-core", "crates/course-cli"]
