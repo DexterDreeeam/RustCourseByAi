@@ -4,7 +4,6 @@
   const nav = document.getElementById("sidebarNav");
   const hero = document.getElementById("hero");
   const languageToggle = document.getElementById("languageToggle");
-  const tocTitle = document.getElementById("tocTitle");
   const brandSubtitle = document.getElementById("brandSubtitle");
   const header = document.querySelector(".site-header");
 
@@ -14,7 +13,6 @@
 
   const labels = {
     zh: {
-      toc: "目录",
       syntax: "语法层面",
       engineering: "工程用法",
       comparison: "Rust 与 C++ 对照",
@@ -28,7 +26,6 @@
       brandSubtitle: "面向 C++ 程序员的 Rust 教程"
     },
     en: {
-      toc: "Contents",
       syntax: "Syntax view",
       engineering: "Engineering usage",
       comparison: "Rust vs C++",
@@ -125,7 +122,6 @@
     const activePartId = getCurrentItem().part.id;
     const activePart = data.parts.find((part) => part.id === activePartId) || data.parts[0];
 
-    tocTitle.textContent = labels[state.language].toc;
     brandSubtitle.textContent = labels[state.language].brandSubtitle;
     languageToggle.textContent = labels[state.language].languageButton;
     nav.innerHTML = `
