@@ -307,6 +307,30 @@ a {
   gap: 1rem;
 }
 
+.explanation-card {
+  border: 1px solid rgba(125, 211, 252, 0.18);
+  border-radius: 0.9rem;
+  background: rgba(18, 24, 38, 0.64);
+  padding: 1rem;
+}
+
+.explanation-card h3 {
+  color: var(--accent);
+  margin: 0 0 0.7rem;
+}
+
+.explanation-card p {
+  margin: 0.45rem 0;
+}
+
+.example-diagram {
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 0.75rem;
+  background: var(--code);
+  color: var(--text);
+  margin-top: 0.9rem;
+}
+
 .code-card {
   overflow: hidden;
   border: 1px solid rgba(148, 163, 184, 0.16);

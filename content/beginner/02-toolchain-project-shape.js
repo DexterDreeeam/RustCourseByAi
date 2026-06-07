@@ -1,5 +1,5 @@
 (function () {
-  const { t, sharedExample, localizedExample, withMistakes, lesson } = window.Course;
+  const { t, sharedExample, localizedExample, textExample, withMistakes, lesson } = window.Course;
   window.RUST_COURSE_CHAPTERS.beginner.push({
           id: "toolchain-project-shape",
           title: t("工具链与项目基本形态", "Toolchain and project shape"),
@@ -64,7 +64,18 @@ jobs:
                 ["C++ include directories often leak internals; Rust private-by-default modules and `pub use` make it easier to narrow APIs."]
               ],
               examples: [
-                sharedExample("包含关系图：workspace、package、crate、module", "Containment: workspace, package, crate, module", "text", `workspace
+                textExample(
+                  "包含关系图：workspace、package、crate、module",
+                  "Containment: workspace, package, crate, module",
+                  [
+                    "从大到小看：workspace 管多个 package；package 是 Cargo 管理的项目单元；package 里会产生一个或多个 crate；crate 里面再用 module 组织代码。",
+                    "注意：package 和 crate 的名字经常很像，但它们不是同一个概念。package 是 Cargo.toml 这一层，crate 是 rustc 真正编译出来的库或可执行程序。"
+                  ],
+                  [
+                    "From large to small: a workspace contains packages; a package is the Cargo-managed project unit; a package produces one or more crates; crates organize code with modules.",
+                    "Package names and crate names often look similar, but they are not the same concept. A package is the Cargo.toml level; a crate is what rustc actually compiles."
+                  ],
+                  `workspace
 └── package: course-core
     ├── Cargo.toml
     └── crate: course_core
@@ -83,26 +94,63 @@ workspace
 - workspace：一组 package 的工作区
 - package：有 Cargo.toml 的项目单元
 - crate：一次编译出来的库或可执行程序
-- module：crate 内部的代码组织和可见性边界`),
-                sharedExample("module 与文件：不是严格一一对应", "Modules and files are not strictly one-to-one", "rust", `// 1. 内联 module：模块直接写在当前文件里，不需要单独文件。
+- module：crate 内部的代码组织和可见性边界`
+                ),
+                textExample(
+                  "package 和 crate 的区别",
+                  "Difference between package and crate",
+                  [
+                    "package 是 Cargo 看到的项目：它有 `Cargo.toml`，里面写 package 名字、版本、依赖、feature、构建配置。",
+                    "crate 是 Rust 编译器看到的编译单元：library crate 通常来自 `src/lib.rs`，binary crate 通常来自 `src/main.rs` 或 `src/bin/*.rs`。",
+                    "一个 package 可以产生一个 library crate，也可以产生多个 binary crate。例子里 package 名是 `course-core`，而代码里引用的 library crate 名通常写成 `course_core`，因为 Rust 代码路径不能写连字符。"
+                  ],
+                  [
+                    "A package is the project Cargo sees: it has Cargo.toml with package name, version, dependencies, features, and build configuration.",
+                    "A crate is the compilation unit rustc sees: a library crate usually comes from src/lib.rs, and binary crates usually come from src/main.rs or src/bin/*.rs.",
+                    "One package can produce one library crate and multiple binary crates. In this example the package is named course-core, while Rust code usually refers to the library crate as course_core because Rust paths cannot contain hyphens."
+                  ]
+                ),
+                textExample(
+                  "module 和文件不是一回事",
+                  "Modules and files are not the same thing",
+                  [
+                    "module 是 Rust 语言里的名字空间和可见性边界；文件只是保存 module 代码的一种常见方式。",
+                    "小模块可以直接写在当前文件里；大模块通常拆成 `parser.rs` 这样的文件；更大的模块还可以继续拆成 `parser/token.rs`、`parser/ast.rs` 这样的子模块文件。"
+                  ],
+                  [
+                    "A module is a Rust namespace and visibility boundary; a file is just a common place to store module code.",
+                    "Small modules can be inline; larger modules usually move into files such as parser.rs; even larger modules can have submodules such as parser/token.rs and parser/ast.rs."
+                  ],
+                  `module inline_parser
+└── 写在当前文件里，不需要单独文件
+
+module parser
+└── 通常对应 src/parser.rs
+
+module parser::token
+└── 通常对应 src/parser/token.rs`
+                ),
+                sharedExample("内联 module: 写在当前文件里", "Inline module: written in the current file", "rust", `// src/lib.rs
 mod inline_parser {
     pub(crate) fn parse_line(line: &str) -> &str {
         line.trim()
     }
-}
+}`),
+                sharedExample("文件 module: src/lib.rs 声明 parser", "File module: src/lib.rs declares parser", "rust", `// src/lib.rs
+mod parser;`),
+                sharedExample("文件 module: src/parser.rs 承载 parser 模块", "File module: src/parser.rs stores parser module", "rust", `// src/parser.rs
+pub(crate) fn parse_line(line: &str) -> &str {
+    line.trim()
+}`),
+                sharedExample("子模块文件: parser 继续拆 token/ast", "Submodule files: parser splits token/ast", "rust", `// src/parser.rs
+mod token;
+mod ast;
 
-// 2. 文件 module：下面这句通常对应 src/parser.rs。
-mod parser;
+// src/parser/token.rs
+pub(crate) struct Token;
 
-// 3. 目录 module：parser.rs 里面还可以继续声明子模块：
-// src/parser.rs
-// mod token; // 对应 src/parser/token.rs
-// mod ast;   // 对应 src/parser/ast.rs
-
-// 结论：
-// - module 是代码名字空间/可见性边界
-// - 文件只是放 module 代码的一种方式
-// - 小模块可以内联，大模块通常拆到文件或目录里`),
+// src/parser/ast.rs
+pub(crate) struct Ast;`),
                 sharedExample("root Cargo.toml: workspace 只负责组织成员", "root Cargo.toml: workspace organizes members", "toml", `[workspace]
 members = ["crates/course-core", "crates/course-cli"]
 resolver = "2"`),

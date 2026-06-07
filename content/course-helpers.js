@@ -17,6 +17,13 @@
     }
   });
 
+  const textExample = (zhTitle, enTitle, zhParagraphs, enParagraphs, diagram = null) => ({
+    kind: "text",
+    title: t(zhTitle, enTitle),
+    paragraphs: t(zhParagraphs, enParagraphs),
+    diagram: diagram ? block(diagram) : null
+  });
+
   const withMistakes = (example, mistakes) => ({
     ...example,
     mistakes
@@ -42,6 +49,6 @@
     references
   });
 
-  window.Course = { t, block, sharedExample, localizedExample, withMistakes, lesson };
+  window.Course = { t, block, sharedExample, localizedExample, textExample, withMistakes, lesson };
   window.RUST_COURSE_CHAPTERS = window.RUST_COURSE_CHAPTERS || { beginner: [], advanced: [] };
 })();
