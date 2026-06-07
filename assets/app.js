@@ -147,7 +147,7 @@
                 <span>${escapeHtml(pick(example.title))}</span>
                 <span>${escapeHtml(example.language)}</span>
               </div>
-              <pre><code class="language-${escapeHtml(example.language)}">${escapeHtml(example.code)}</code></pre>
+              <pre><code class="language-${escapeHtml(example.language)}">${escapeHtml(pick(example.code))}</code></pre>
             </div>
           `).join("")}
         </div>
