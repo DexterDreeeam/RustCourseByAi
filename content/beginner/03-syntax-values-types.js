@@ -100,19 +100,19 @@ fn parse_config(raw_host: &str, raw_port: &str, raw_workers: &str) -> ServerConf
               id: "strings-slices-collections",
               title: ["String、slice 与常用集合", "String, slices, and common collections"],
               goals: [
-                ["理解拥有类型和借用视图。", "知道 `String`、`&str`、`Vec<T>`、`HashMap<K,V>` 如何配合。"],
+                ["理解 owned type 和 borrowed view 的区别。", "先搞清楚 slice：它是指向一段连续数据的 borrowed view。"],
                 ["Understand owned types and borrowed views.", "Know how `String`, `&str`, `Vec<T>`, and `HashMap<K,V>` work together."]
               ],
               syntax: [
-                ["`String` 拥有堆内存，`&str` 是字符串视图；`Vec<T>` 拥有连续数组，`&[T]` 是切片视图。", "集合 API 经常通过借用避免不必要分配。"],
+                ["slice 表示“一段连续数据”的 borrowed view：它不拥有数据，只记录从哪里开始、长度是多少。`&str` 是字符串 slice，`&[T]` 是任意元素类型的 slice。", "`String` 拥有堆上的字符串数据，`&str` 只是看这段字符串；`Vec<T>` 拥有连续数组，`&[T]` 只是看这段数组。集合 API 经常通过 borrowed view 避免不必要分配。"],
                 ["`String` owns heap memory, `&str` is a string view; `Vec<T>` owns a contiguous array, and `&[T]` is a slice view.", "Collection APIs often use borrowing to avoid unnecessary allocation."]
               ],
               engineering: [
-                ["公共 API 优先接收 `&str` 或 slice，只有需要保存数据时才转成 owned。", "集合选择应该来自访问模式：顺序、查找、排序、队列。"],
+                ["公共 API 优先接收 `&str` 或 `&[T]` 这样的 borrowed view；只有函数需要长期保存数据时，才转成 `String` 或 `Vec<T>` 这种 owned type。", "集合选择应该来自访问模式：顺序、查找、排序、队列。"],
                 ["Public APIs should prefer `&str` or slices and allocate owned values only when storing.", "Choose collections from access patterns: order, lookup, sorting, or queueing."]
               ],
               cppComparison: [
-                ["`&str` 接近 `std::string_view`，`&[T]` 接近 span；不同的是，Rust 会检查这些视图不会比原始数据活得更久。"],
+                ["`&str` 接近 `std::string_view`，`&[T]` 接近 span；不同的是，Rust 会检查这些 view 不会比原始数据活得更久。"],
                 ["`&str` resembles `std::string_view`, and `&[T]` resembles span; Rust checks that views cannot outlive sources."]
               ],
               examples: [
