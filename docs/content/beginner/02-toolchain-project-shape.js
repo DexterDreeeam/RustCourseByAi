@@ -100,6 +100,12 @@ pub enum ParseError {
     InvalidLine(String),
 }
 
+// 非 pub：只在 parser.rs 内部使用，外部和兄弟模块都看不到。
+struct RawLesson<'a> {
+    slug: &'a str,
+    title: &'a str,
+}
+
 pub(crate) fn parse(input: &str) -> Result<Course, ParseError> {
     if input.trim().is_empty() {
         return Err(ParseError::Empty);
@@ -107,24 +113,50 @@ pub(crate) fn parse(input: &str) -> Result<Course, ParseError> {
 
     let lessons = input
         .lines()
-        .map(|line| Lesson {
-            slug: line.trim().to_owned(),
-            title: line.trim().replace('-', " "),
+        .map(parse_line)
+        .map(|raw| Lesson {
+            slug: raw.slug.to_owned(),
+            title: raw.title.to_owned(),
         })
         .collect();
 
     Ok(Course { title: "Rust Course".to_owned(), lessons })
+}
+
+// 非 pub：文件内 helper，调用方不应该知道解析细节。
+fn parse_line(line: &str) -> RawLesson<'_> {
+    let slug = line.trim();
+    RawLesson {
+        slug,
+        title: slug,
+    }
 }`),
                 sharedExample("crates/course-core/src/validate.rs: crate 内部校验", "crates/course-core/src/validate.rs: crate-internal validation", "rust", `use crate::model::Course;
 use crate::parser::ParseError;
 
+// 非 pub：只服务于本文件的校验规则。
+struct SlugRule {
+    allow_dash: bool,
+}
+
 pub(crate) fn course(course: &Course) -> Result<(), ParseError> {
+    let rule = SlugRule { allow_dash: true };
+
     for lesson in &course.lessons {
-        if lesson.slug.contains(' ') {
+        if !is_valid_slug(&lesson.slug, &rule) {
             return Err(ParseError::InvalidLine(lesson.slug.clone()));
         }
     }
     Ok(())
+}
+
+// 非 pub：内部 helper，外部只关心 validate::course 是否通过。
+fn is_valid_slug(slug: &str, rule: &SlugRule) -> bool {
+    slug.chars().all(|ch| {
+        ch.is_ascii_lowercase()
+            || ch.is_ascii_digit()
+            || (rule.allow_dash && ch == '-')
+    })
 }`),
                 sharedExample("crates/course-cli/Cargo.toml: 依赖 core crate", "crates/course-cli/Cargo.toml: depend on the core crate", "toml", `[dependencies]
 course-core = { path = "../course-core" }`),
