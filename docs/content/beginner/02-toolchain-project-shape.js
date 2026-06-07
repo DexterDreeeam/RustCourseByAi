@@ -52,11 +52,11 @@ jobs:
                 ["Distinguish Rust's four organization levels.", "Know when to evolve from one crate into a workspace."]
               ],
               syntax: [
-                ["package 是发布单位，crate 是编译单位，module 决定哪些代码能被外部看到，workspace 用来管理多个 package。", "`src/lib.rs` 放库的对外入口，`src/main.rs` 放可执行程序入口。"],
+                ["从大到小看：workspace 管多个 package；package 是一个可发布/可构建的项目；package 里会产生一个或多个 crate；crate 里面再用 module 组织代码。", "`src/lib.rs` 通常生成 library crate，`src/main.rs` 通常生成 binary crate；`mod xxx;` 会把 `xxx.rs` 或 `xxx/mod.rs` 接进当前 crate 的模块树。"],
                 ["A package is a publishing unit, a crate is a compilation unit, a module is a visibility boundary, and a workspace coordinates packages.", "`src/lib.rs` exposes library APIs, while `src/main.rs` is a binary entry point."]
               ],
               engineering: [
-                ["中小项目先保持单 crate；当核心逻辑、CLI、服务端、外部适配层需要分开演进时，再拆 workspace。", "`pub` 表示 crate 外部也能访问；`pub(crate)` 表示只有当前 crate 内部能访问；不写 `pub` 时，通常只有当前模块能访问。", "模块不是为了把文件夹摆整齐，而是为了决定哪些代码可以被外部依赖，哪些只是内部实现。"],
+                ["中小项目先保持一个 package、一个主要 crate；当核心逻辑、CLI、服务端、外部适配层需要分开演进时，再把它们拆成 workspace 里的多个 package。", "`pub` 表示 crate 外部也能访问；`pub(crate)` 表示只有当前 crate 内部能访问；不写 `pub` 时，通常只有当前模块能访问。", "模块不是为了把文件夹摆整齐，而是为了决定哪些代码可以被外部依赖，哪些只是内部实现。"],
                 ["Keep small projects in one crate; split into a workspace when domain, CLI, server, and adapters have separate lifecycles.", "Module boundaries are not folder decoration; they are the start of stable API design."]
               ],
               cppComparison: [
@@ -64,6 +64,26 @@ jobs:
                 ["C++ include directories often leak internals; Rust private-by-default modules and `pub use` make it easier to narrow APIs."]
               ],
               examples: [
+                sharedExample("包含关系图：workspace、package、crate、module", "Containment: workspace, package, crate, module", "text", `workspace
+└── package: course-core
+    ├── Cargo.toml
+    └── crate: course_core
+        ├── crate root: src/lib.rs
+        ├── module: model    -> src/model.rs
+        ├── module: parser   -> src/parser.rs
+        └── module: validate -> src/validate.rs
+
+workspace
+└── package: course-cli
+    ├── Cargo.toml
+    └── crate: course_cli
+        └── crate root: src/main.rs
+
+记法：
+- workspace：一组 package 的工作区
+- package：有 Cargo.toml 的项目单元
+- crate：一次编译出来的库或可执行程序
+- module：crate 内部的代码组织和可见性边界`),
                 sharedExample("root Cargo.toml: workspace 只负责组织成员", "root Cargo.toml: workspace organizes members", "toml", `[workspace]
 members = ["crates/course-core", "crates/course-cli"]
 resolver = "2"`),
