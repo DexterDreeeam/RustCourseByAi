@@ -52,12 +52,12 @@ jobs:
                 ["Distinguish Rust's four organization levels.", "Know when to evolve from one crate into a workspace."]
               ],
               syntax: [
-                ["从大到小看：workspace 管多个 package；package 是一个可发布/可构建的项目；Cargo 会根据 package 里的配置和默认规则，挑出哪些文件是 crate root，然后每个 crate root 编译成一个 crate。", "不是随便一个 `.rs` 文件都是 crate。只有被 Cargo 当成编译入口交给 rustc 的文件，才是 crate root，比如 `src/lib.rs`、`src/main.rs`、`src/bin/*.rs`。", "module 不等于文件。module 是 Rust 里的命名空间和可见性边界；普通模块文件只有被 crate root 里的 `mod xxx;` 接进来，才会成为这个 crate 的一部分。"],
+                ["从大到小看：workspace 管多个 package；package 是一个可发布/可构建的项目；Cargo 会根据 package 里的配置和默认规则，挑出哪些文件是 crate root，然后每个 crate root 编译成一个 crate。", "crate root 文件包括 `src/lib.rs`、`src/main.rs`、`src/bin/*.rs` 这类 Cargo 会交给 rustc 的编译入口。", "module 是 Rust 里的命名空间和可见性边界；普通模块文件通过 crate root 里的 `mod xxx;` 接进当前 crate 的模块树。"],
                 ["A package is a publishing unit, a crate is a compilation unit, a module is a visibility boundary, and a workspace coordinates packages.", "`src/lib.rs` exposes library APIs, while `src/main.rs` is a binary entry point."]
               ],
               engineering: [
-                ["中小项目先保持一个 package、一个主要 crate；当核心逻辑、CLI、服务端、外部适配层需要分开演进时，再把它们拆成 workspace 里的多个 package。", "`pub` 表示 crate 外部也能访问；`pub(crate)` 表示只有当前 crate 内部能访问；不写 `pub` 时，通常只有当前模块能访问。", "模块不是为了把文件夹摆整齐，而是为了决定哪些代码可以被外部依赖，哪些只是内部实现。"],
-                ["Keep small projects in one crate; split into a workspace when domain, CLI, server, and adapters have separate lifecycles.", "Module boundaries are not folder decoration; they are the start of stable API design."]
+                ["中小项目先保持一个 package、一个主要 crate；当核心逻辑、CLI、服务端、外部适配层需要分开演进时，再把它们拆成 workspace 里的多个 package。", "`pub` 表示 crate 外部也能访问；`pub(crate)` 表示当前 crate 内部能访问；默认私有时，通常只有当前模块能访问。", "模块用来决定哪些代码可以被外部依赖，哪些代码属于内部实现。"],
+                ["Keep small projects in one crate; split into a workspace when domain, CLI, server, and adapters have separate lifecycles.", "Module boundaries define what external users can rely on and what remains internal implementation."]
               ],
               cppComparison: [
                 ["C++ 的 include 目录很容易把内部实现也暴露给使用者；Rust 默认私有，只有你写 `pub` 或 `pub use` 的内容才会公开，所以更容易先只开放真正需要给别人用的接口。"],
@@ -68,13 +68,13 @@ jobs:
                   "第一步：先把四个概念分清楚",
                   "Step 1: separate the four concepts first",
                   [
-                    "workspace：最外层的工作区。它由根目录的 `Cargo.toml` 里的 `[workspace]` 定义，只负责列出一组 package。workspace 自己通常不直接编译成库或程序。",
+                    "workspace：最外层的工作区。它由根目录的 `Cargo.toml` 里的 `[workspace]` 定义，主要职责是列出一组 package。",
                     "package：Cargo 管理的项目单元。一个 package 一定有自己的 `Cargo.toml`，里面写 `[package]` 名字、版本、依赖等信息。",
                     "crate：rustc 的一次编译单位。Cargo 会把某个 crate root 文件交给 rustc，rustc 从这个 root 开始编译出一个库或一个可执行程序。",
-                    "module：crate 内部的命名空间和可见性边界。普通 `.rs` 文件通常只是 module 文件，只有被 crate root 里的 `mod xxx;` 接进来，才属于这个 crate。"
+                    "module：crate 内部的命名空间和可见性边界。普通 `.rs` 文件通常作为 module 文件，通过 crate root 里的 `mod xxx;` 接入当前 crate。"
                   ],
                   [
-                    "A workspace is the outer working area defined by a root Cargo.toml [workspace]. It lists packages; it usually does not compile into a library or executable itself.",
+                    "A workspace is the outer working area defined by a root Cargo.toml [workspace]. Its main job is to list related packages.",
                     "A package is the project unit Cargo manages. A package has its own Cargo.toml with [package] name, version, dependencies, and related metadata.",
                     "A crate is one rustc compilation unit. Cargo passes a crate root file to rustc, and rustc compiles a library or executable from that root.",
                     "A module is a namespace and visibility boundary inside a crate. Ordinary .rs files usually hold module code and become part of a crate only when pulled in by mod declarations."
@@ -86,12 +86,12 @@ jobs:
                   [
                     "下面这个例子有一个 workspace，里面有两个 package：`course-core` 和 `course-cli`。",
                     "`course-core` 这个 package 里面会产生两个 crate：一个 library crate `course_core`，一个 binary crate `inspect`。",
-                    "`parser.rs`、`model.rs`、`validate.rs` 只是 `course_core` 这个 crate 里的 module 文件，不是独立 crate。"
+                    "`parser.rs`、`model.rs`、`validate.rs` 是 `course_core` 这个 crate 里的 module 文件。"
                   ],
                   [
                     "This example has one workspace with two packages: `course-core` and `course-cli`.",
                     "The `course-core` package produces two crates: a library crate `course_core` and a binary crate `inspect`.",
-                    "`parser.rs`, `model.rs`, and `validate.rs` are module files inside the `course_core` crate, not independent crates."
+                    "`parser.rs`, `model.rs`, and `validate.rs` are module files inside the `course_core` crate."
                   ],
                   `rust-course/                         # workspace 目录
 ├── Cargo.toml                       # [workspace]，列出成员 package
@@ -100,9 +100,9 @@ jobs:
     │   ├── Cargo.toml               # [package] name = "course-core"
     │   └── src/
     │       ├── lib.rs               # crate root -> library crate: course_core
-    │       ├── parser.rs            # module: parser，不是 crate
-    │       ├── model.rs             # module: model，不是 crate
-    │       ├── validate.rs          # module: validate，不是 crate
+    │       ├── parser.rs            # module file -> parser
+    │       ├── model.rs             # module file -> model
+    │       ├── validate.rs          # module file -> validate
     │       └── bin/
     │           └── inspect.rs       # crate root -> binary crate: inspect
     └── course-cli/                  # package: course-cli
@@ -113,12 +113,12 @@ jobs:
                   "第三步：Cargo 和 rustc 的读取链路",
                   "Step 3: how Cargo and rustc read this project",
                   [
-                    "1. 你运行 `cargo build --workspace` 时，Cargo 先读 `rust-course/Cargo.toml`。这个文件是 workspace 的 `Cargo.toml`，不是某个 crate 的源码入口。",
-                    "2. Cargo 从 `[workspace] members` 找到两个 package：`crates/course-core/Cargo.toml` 和 `crates/course-cli/Cargo.toml`。注意：这一步是 Cargo 在找 package，不是 rustc 在找 package。",
+                    "1. 你运行 `cargo build --workspace` 时，Cargo 先读 `rust-course/Cargo.toml`。这个文件是 workspace 的清单文件，Cargo 用它找到成员 package。",
+                    "2. Cargo 从 `[workspace] members` 找到两个 package：`crates/course-core/Cargo.toml` 和 `crates/course-cli/Cargo.toml`。这一步由 Cargo 负责。",
                     "3. Cargo 读取 `crates/course-core/Cargo.toml`，发现 `[lib] path = \"src/lib.rs\"`，于是调用 rustc 编译 `crates/course-core/src/lib.rs`，得到 library crate `course_core`。",
                     "4. Cargo 在同一个 package 里又发现 `[[bin]] path = \"src/bin/inspect.rs\"`，于是再调用一次 rustc 编译 `crates/course-core/src/bin/inspect.rs`，得到 binary crate `inspect`。",
-                    "5. rustc 编译 `crates/course-core/src/lib.rs` 时，看到 `mod parser;`，才会按规则读取 `crates/course-core/src/parser.rs`。这一步是在当前 crate 里加载 module，不是在创建新 crate。",
-                    "6. rustc 不会从 `parser.rs` 推测出“下一个 package”或“下一个 crate”。package 和 crate root 是 Cargo 根据 `Cargo.toml` 决定的；module 文件是 rustc 根据 `mod` 声明加载的。"
+                    "5. rustc 编译 `crates/course-core/src/lib.rs` 时，看到 `mod parser;`，于是按规则读取 `crates/course-core/src/parser.rs`，把它作为当前 crate 里的 `parser` module。",
+                    "6. package 和 crate root 由 Cargo 根据 `Cargo.toml` 决定；module 文件由 rustc 根据 `mod` 声明加载。"
                   ],
                   [
                     "1. Running `cargo build --workspace` makes Cargo read `rust-course/Cargo.toml`, the workspace manifest.",
@@ -126,7 +126,7 @@ jobs:
                     "3. Cargo reads `crates/course-core/Cargo.toml`, finds `[lib] path = \"src/lib.rs\"`, and invokes rustc on `crates/course-core/src/lib.rs` to produce the `course_core` library crate.",
                     "4. Cargo also finds `[[bin]] path = \"src/bin/inspect.rs\"`, and invokes rustc again on `crates/course-core/src/bin/inspect.rs` to produce the `inspect` binary crate.",
                     "5. While compiling `src/lib.rs`, rustc sees `mod parser;` and loads `crates/course-core/src/parser.rs` as a module inside the current crate.",
-                    "6. rustc does not discover the next package or crate from `parser.rs`; Cargo decides packages and crate roots, while rustc follows `mod` declarations inside one crate."
+                    "6. Cargo decides packages and crate roots from `Cargo.toml`; rustc follows `mod` declarations to load module files inside one crate."
                   ],
                   `Cargo.toml
 ├── [lib] path = "src/lib.rs"          -> rustc src/lib.rs          -> crate: course_core
@@ -136,7 +136,7 @@ src/lib.rs
 └── mod parser;                         -> loads src/parser.rs as module parser
 
 src/parser.rs
-└── not passed to rustc as a root        -> not a crate by itself`
+└── loaded by mod parser as a module file inside course_core`
                 ),
                 textExample(
                   "第四步：下面开始看每个文件的内容",
@@ -204,7 +204,7 @@ struct RawLesson<'a> {
     title: &'a str,
 }
 
-// pub(crate)：整个 course-core crate 内都能调用，但外部 crate 不能调用。
+// pub(crate)：调用范围是整个 course-core crate。
 pub(crate) fn parse(input: &str) -> Result<Course, ParseError> {
     if input.trim().is_empty() {
         return Err(ParseError::Empty);
@@ -222,7 +222,7 @@ pub(crate) fn parse(input: &str) -> Result<Course, ParseError> {
     Ok(Course { title: "Rust Course".to_owned(), lessons })
 }
 
-// 非 pub：文件内 helper，调用方不应该知道解析细节。
+// 非 pub：文件内 helper，解析细节保留在 parser.rs 里。
 fn parse_line(line: &str) -> RawLesson<'_> {
     let slug = line.trim();
     RawLesson {
@@ -238,7 +238,7 @@ struct SlugRule {
     allow_dash: bool,
 }
 
-// pub(crate)：lib.rs 能调用，但 course-cli 不能直接调用。
+// pub(crate)：调用范围是整个 course-core crate，比如 lib.rs。
 pub(crate) fn course(course: &Course) -> Result<(), ParseError> {
     let rule = SlugRule { allow_dash: true };
 
