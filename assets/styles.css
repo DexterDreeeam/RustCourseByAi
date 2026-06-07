@@ -224,7 +224,6 @@ a {
   min-width: 0;
 }
 
-.hero,
 .lesson {
   border: 1px solid rgba(148, 163, 184, 0.16);
   border-radius: 1.5rem;
@@ -232,39 +231,16 @@ a {
   box-shadow: var(--shadow);
 }
 
-.hero {
-  margin-bottom: 1rem;
-  padding: clamp(1.5rem, 4vw, 3rem);
-}
-
-.eyebrow {
-  color: var(--accent);
-  font-size: 0.8rem;
-  font-weight: 800;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-}
-
-.hero h1,
 .lesson h1 {
   font-size: clamp(2rem, 5vw, 4rem);
   line-height: 1.05;
   margin: 0.6rem 0 1rem;
 }
 
-.hero p,
 .lesson p {
   color: var(--muted);
 }
 
-.hero-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.75rem;
-  margin-top: 1.5rem;
-}
-
-.hero-card,
 .content-card,
 .comparison-card,
 .examples,
@@ -272,16 +248,6 @@ a {
   border: 1px solid rgba(148, 163, 184, 0.15);
   border-radius: 1rem;
   background: rgba(18, 24, 38, 0.76);
-}
-
-.hero-card {
-  padding: 1rem;
-}
-
-.hero-card strong {
-  display: block;
-  color: var(--text);
-  margin-bottom: 0.3rem;
 }
 
 .lesson {
@@ -414,7 +380,6 @@ li code {
     grid-column: auto;
   }
 
-  .hero-grid,
   .lesson-grid {
     grid-template-columns: 1fr;
   }
