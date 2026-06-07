@@ -20,6 +20,9 @@
       previous: "上一节",
       next: "下一节",
       part: "阶段",
+      wrongExample: "错误写法",
+      compilerError: "会触发的错误",
+      whyWrong: "为什么不对",
       languageButton: "English",
       brandSubtitle: "面向 C++ 程序员的 Rust 教程"
     },
@@ -32,6 +35,9 @@
       previous: "Previous",
       next: "Next",
       part: "Level",
+      wrongExample: "Incorrect usage",
+      compilerError: "Compiler error",
+      whyWrong: "Why this is wrong",
       languageButton: "中文",
       brandSubtitle: "Rust for C++ Engineers"
     }
@@ -94,6 +100,13 @@
     return (items || []).map((item) => `<p>${formatInline(item)}</p>`).join("");
   }
 
+  function asArray(value) {
+    if (!value) {
+      return [];
+    }
+    return Array.isArray(value) ? value : [value];
+  }
+
   function renderList(items) {
     return `<ul>${(items || []).map((item) => `<li>${formatInline(item)}</li>`).join("")}</ul>`;
   }
@@ -151,16 +164,43 @@
         <h2>${labels[state.language].examples}</h2>
         <div class="examples-grid">
           ${(examples || []).map((example) => `
-            <div class="code-card">
+            <div class="code-card ${example.mistakes ? "has-mistakes" : ""}">
               <div class="code-header">
                 <span>${escapeHtml(pick(example.title))}</span>
                 <span>${escapeHtml(example.language)}</span>
               </div>
               <pre><code class="language-${escapeHtml(example.language)}">${escapeHtml(pick(example.code))}</code></pre>
+              ${renderMistakes(example)}
             </div>
           `).join("")}
         </div>
       </section>
+    `;
+  }
+
+  function renderMistakes(example) {
+    const mistakes = example.mistakes || [];
+    if (mistakes.length === 0) {
+      return "";
+    }
+
+    return `
+      <div class="mistake-list">
+        ${mistakes.map((mistake) => `
+          <section class="mistake-card">
+            <div class="mistake-title">${labels[state.language].wrongExample}: ${escapeHtml(pick(mistake.title))}</div>
+            <pre class="mistake-code"><code class="language-${escapeHtml(mistake.language || example.language)}">${escapeHtml(pick(mistake.code))}</code></pre>
+            <div class="mistake-detail mistake-error">
+              <strong>${labels[state.language].compilerError}</strong>
+              ${renderParagraphs(asArray(pick(mistake.error)))}
+            </div>
+            <div class="mistake-detail">
+              <strong>${labels[state.language].whyWrong}</strong>
+              ${renderParagraphs(asArray(pick(mistake.explanation)))}
+            </div>
+          </section>
+        `).join("")}
+      </div>
     `;
   }
 

@@ -16,6 +16,11 @@ const localizedExample = (zhTitle, enTitle, language, zhCode, enCode) => ({
   }
 });
 
+const withMistakes = (example, mistakes) => ({
+  ...example,
+  mistakes
+});
+
 const lesson = ({
   id,
   title,
@@ -78,11 +83,12 @@ window.RUST_COURSE_DATA = {
                 ["C++ can be safe with RAII, smart pointers, const discipline, tools, and conventions; Rust makes many of those conventions default rules."]
               ],
               examples: [
-                localizedExample(
-                  "Rust: 请求生命周期从入口到队列",
-                  "Rust: request lifetime from entry to queue",
-                  "rust",
-                  `struct Request {
+                withMistakes(
+                  localizedExample(
+                    "Rust: 请求生命周期从入口到队列",
+                    "Rust: request lifetime from entry to queue",
+                    "rust",
+                    `struct Request {
     id: u64,
     body: String,
 }
@@ -102,7 +108,7 @@ fn handle_request(request: Request) {
     enqueue(request);
     // request 已经移动，不能再读 id 或 body。
 }`,
-                  `struct Request {
+                    `struct Request {
     id: u64,
     body: String,
 }
@@ -122,6 +128,63 @@ fn handle_request(request: Request) {
     enqueue(request);
     // request moved and can no longer be read.
 }`
+                  ),
+                  [
+                    {
+                      title: t("错误：move 后继续使用 request", "Wrong: use request after move"),
+                      language: "rust",
+                      code: t(
+                        `fn handle_request(request: Request) {
+    audit(&request);
+    enqueue(request);
+
+    // 错误：enqueue 已经拿走 request 的所有权。
+    println!("body bytes={}", request.body.len());
+}`,
+                        `fn handle_request(request: Request) {
+    audit(&request);
+    enqueue(request);
+
+    // Wrong: enqueue already took ownership of request.
+    println!("body bytes={}", request.body.len());
+}`
+                      ),
+                      error: t(
+                        ["error[E0382]: borrow of moved value: `request`", "`enqueue(request)` 把 `Request` 移入队列，后面的 `request.body` 已经没有有效 owner。"],
+                        ["error[E0382]: borrow of moved value: `request`", "`enqueue(request)` moved the `Request` into the queue, so `request.body` no longer has a valid owner here."]
+                      ),
+                      explanation: t(
+                        ["如果后面还要读请求，就应该在 move 之前读完，或者把 `enqueue` 的签名改成借用；但改成借用意味着队列不能拥有请求。"],
+                        ["If later code still needs to read the request, read it before the move or change `enqueue` to borrow; but borrowing means the queue cannot own the request."]
+                      )
+                    },
+                    {
+                      title: t("错误：把借用传给需要所有权的函数", "Wrong: pass a borrow to a function that needs ownership"),
+                      language: "rust",
+                      code: t(
+                        `fn handle_request(request: Request) {
+    audit(&request);
+
+    // 错误：enqueue 的参数类型是 Request，不是 &Request。
+    enqueue(&request);
+}`,
+                        `fn handle_request(request: Request) {
+    audit(&request);
+
+    // Wrong: enqueue expects Request, not &Request.
+    enqueue(&request);
+}`
+                      ),
+                      error: t(
+                        ["error[E0308]: mismatched types", "expected `Request`, found `&Request`。"],
+                        ["error[E0308]: mismatched types", "expected `Request`, found `&Request`."]
+                      ),
+                      explanation: t(
+                        ["`&Request` 只是临时观察权；`enqueue` 的设计语义是队列接管请求并负责之后的生命周期。"],
+                        ["`&Request` is only temporary observation; `enqueue` is designed so the queue takes over the request lifetime."]
+                      )
+                    }
+                  ]
                 )
               ],
               references: ["rust-lang/rust"]
