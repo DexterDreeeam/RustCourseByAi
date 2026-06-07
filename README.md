@@ -1,6 +1,6 @@
 # RustCourseByAi
 
-A bilingual GitHub Pages course for C++ programmers who want to learn Rust syntax and real-world Rust engineering practices.
+A GitHub Pages course for C++ programmers who want to learn Rust syntax, mental models, and real-world Rust engineering practices.
 
 ## View the site
 
@@ -25,7 +25,7 @@ docs\index.html           GitHub Pages entry point
 docs\assets\styles.css    Dark theme and responsive layout
 docs\assets\app.js        Navigation, language switching, and rendering
 docs\content\course-data.js
-                           Structured bilingual course content
+                           Structured course content
 docs\.nojekyll            Disables Jekyll processing on GitHub Pages
 ```
 
@@ -34,7 +34,7 @@ The deployed `gh-pages` branch contains the same site files at its root, plus th
 ## Content principles
 
 - Audience: programmers with C++ experience.
-- Languages: Chinese and English must stay aligned.
+- Chinese and English versions share the same structure, but the site should emphasize the C++-to-Rust learning path rather than language support.
 - Lesson format: one knowledge point per section.
 - Required lesson parts: syntax explanation and engineering usage.
 - Comparisons: explain Rust concepts through C++ analogies when useful.

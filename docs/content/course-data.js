@@ -3,9 +3,9 @@ window.RUST_COURSE_DATA = {
     zh: {
       eyebrow: "Rust for C++ Engineers",
       title: "从 C++ 视角深入 Rust",
-      description: "这是一套面向 C++ 程序员的双语 Rust 教程：前半部分建立语法和心智模型，后半部分进入真实项目工程经验。",
+      description: "这是一套面向 C++ 程序员的 Rust 教程：前半部分建立语法和心智模型，后半部分进入真实项目工程经验。",
       cards: [
-        { title: "双语一致", text: "中文和英文共享同一份结构化课程数据，随时切换语言。" },
+        { title: "由浅入深", text: "先建立语法和心智模型，再进入真实项目工程经验。" },
         { title: "C++ 对照", text: "用 RAII、模板、引用、构建系统等熟悉概念解释 Rust。" },
         { title: "工程导向", text: "每节同时讲语法和项目中的具体用法。" }
       ]
@@ -13,9 +13,9 @@ window.RUST_COURSE_DATA = {
     en: {
       eyebrow: "Rust for C++ Engineers",
       title: "Learn Rust deeply from a C++ perspective",
-      description: "A bilingual Rust course for C++ programmers: the first half builds syntax and mental models, while the second half moves into real project engineering.",
+      description: "A Rust course for C++ programmers: the first half builds syntax and mental models, while the second half moves into real project engineering.",
       cards: [
-        { title: "Bilingual parity", text: "Chinese and English share the same structured course data and can be switched anytime." },
+        { title: "Progressive path", text: "Start with syntax and mental models, then move into real project engineering." },
         { title: "C++ comparisons", text: "Rust is explained through familiar ideas such as RAII, templates, references, and build systems." },
         { title: "Engineering focused", text: "Every lesson covers both syntax and concrete project usage." }
       ]

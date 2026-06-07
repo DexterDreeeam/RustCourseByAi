@@ -2,14 +2,14 @@
 
 ## Project purpose
 
-This repository hosts a GitHub Pages tutorial site that teaches Rust to programmers who already know C++. The course must move from beginner syntax to advanced engineering practice, and it must constantly explain how Rust concepts relate to familiar C++ concepts.
+This repository hosts a GitHub Pages tutorial site that teaches Rust to programmers who already know C++. The first half of the course builds Rust syntax and mental models; the second half moves into real project engineering experience. The site should constantly explain how Rust concepts relate to familiar C++ concepts.
 
 ## Required site principles
 
 - The website is a no-build static site under `docs\` and is intended to be viewed through GitHub Pages.
 - The UI uses a black/dark theme by default.
-- The site is bilingual: Chinese (`zh`) and English (`en`) must be switchable at any time.
-- Chinese and English content must stay conceptually aligned. Do not add a section in one language without the matching section in the other language.
+- The course has Chinese (`zh`) and English (`en`) versions, but product copy should foreground the C++-to-Rust learning path rather than bilingual support.
+- Chinese and English content must stay conceptually aligned as an implementation requirement. Do not add a section in one language without the matching section in the other language.
 - Each lesson teaches one concrete knowledge point.
 - Each lesson must include two required explanations:
   1. Syntax-level explanation.
@@ -17,6 +17,7 @@ This repository hosts a GitHub Pages tutorial site that teaches Rust to programm
 - Lessons should assume the reader understands C++ basics, RAII, templates, references, pointers, build systems, and common project organization.
 - Prefer Rust-vs-C++ comparisons over generic Rust explanations when a comparison clarifies the idea.
 - Examples should be original or short adapted snippets. Do not copy large blocks from other repositories.
+- Avoid using "bilingual" as a primary marketing point in visible site text. Mention language switching only where it helps navigation or contribution rules.
 
 ## Content data contract
 
@@ -35,7 +36,7 @@ Every section should have:
 
 When adding or changing content:
 
-- Keep section order identical for both languages by storing both languages in the same section object.
+- Keep section order identical for both language versions by storing both versions in the same section object.
 - Keep code examples small and focused on the section's single knowledge point.
 - If a concept differs sharply between Rust and C++, explicitly describe the trade-off.
 - Engineering explanations should answer: "How would this appear in a real project?"
@@ -79,4 +80,3 @@ Use these repositories as long-term references for examples, comparisons, and en
 - Navigation should show part, chapter, and section hierarchy.
 - Code blocks should show the source language.
 - Reference repositories used by a lesson should be visible in the rendered page.
-
