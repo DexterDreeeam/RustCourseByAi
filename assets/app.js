@@ -6,6 +6,7 @@
   const languageToggle = document.getElementById("languageToggle");
   const tocTitle = document.getElementById("tocTitle");
   const brandSubtitle = document.getElementById("brandSubtitle");
+  const header = document.querySelector(".site-header");
 
   if (!data || !root || !nav || !hero || !languageToggle) {
     return;
@@ -216,7 +217,7 @@
     const next = flatSections[index + 1];
 
     document.documentElement.lang = state.language;
-    document.title = `${pick(section.title)} - RustCourseByAi`;
+    document.title = `${pick(section.title)} - Rust Course By AI`;
 
     root.innerHTML = `
       <div class="breadcrumb">
@@ -294,9 +295,37 @@
     }
   });
 
+  function updateHeaderVisibility() {
+    if (!header) {
+      return;
+    }
+
+    const scrollTop = window.scrollY || document.documentElement.scrollTop;
+    const scrollBottom = scrollTop + window.innerHeight;
+    const documentHeight = document.documentElement.scrollHeight;
+    const shouldShow = scrollTop <= 12 || documentHeight - scrollBottom <= 12;
+    document.body.classList.toggle("header-hidden", !shouldShow);
+  }
+
+  let headerTicking = false;
+  window.addEventListener("scroll", () => {
+    if (headerTicking) {
+      return;
+    }
+
+    headerTicking = true;
+    window.requestAnimationFrame(() => {
+      updateHeaderVisibility();
+      headerTicking = false;
+    });
+  }, { passive: true });
+
+  window.addEventListener("resize", updateHeaderVisibility);
+
   if (!window.location.hash) {
     history.replaceState(null, "", `#${encodeURIComponent(state.sectionId)}`);
   }
 
   render();
+  updateHeaderVisibility();
 })();
