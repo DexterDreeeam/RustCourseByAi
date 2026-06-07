@@ -24,8 +24,7 @@
                 ["C++ headers often expose details; Rust module boundaries make hiding implementation easier, and doc tests compile documentation snippets."]
               ],
               examples: [
-                sharedExample("Rust: 对外稳定，对内可重构", "Rust: stable outside, refactorable inside", "rust", `// src/lib.rs
-mod parse;    // 私有模块：外部不能 course_core::parse::toml(...)
+                sharedExample("src/lib.rs: 稳定公开入口", "src/lib.rs: stable public entry point", "rust", `mod parse;    // 私有模块：外部不能 course_core::parse::toml(...)
 mod model;    // 私有模块：外部不能依赖文件结构
 mod validate; // 私有模块：校验细节可以以后重构
 
@@ -36,10 +35,8 @@ pub fn from_toml(input: &str) -> Result<Course, CourseParseError> {
     let course = parse::toml(input)?;
     validate::course(&course)?;
     Ok(course)
-}
-
-// src/parse.rs
-use crate::model::{Course, Lesson};
+}`),
+                sharedExample("src/parse.rs: 内部解析模块", "src/parse.rs: internal parser module", "rust", `use crate::model::{Course, Lesson};
 
 #[derive(Debug)]
 pub enum CourseParseError {
@@ -54,10 +51,8 @@ pub(crate) fn toml(input: &str) -> Result<Course, CourseParseError> {
         title: "Rust Course".to_owned(),
         lessons: vec![Lesson { title: "Ownership".to_owned() }],
     })
-}
-
-// src/model.rs
-#[derive(Debug)]
+}`),
+                sharedExample("src/model.rs: 对外复用的数据类型", "src/model.rs: reusable public data types", "rust", `#[derive(Debug)]
 pub struct Course {
     pub title: String,
     pub lessons: Vec<Lesson>,
@@ -66,10 +61,8 @@ pub struct Course {
 #[derive(Debug)]
 pub struct Lesson {
     pub title: String,
-}
-
-// tests/load_course.rs
-use course_core::from_toml;
+}`),
+                sharedExample("tests/load_course.rs: 只通过公开入口测试", "tests/load_course.rs: test through public entry point", "rust", `use course_core::from_toml;
 
 #[test]
 fn rejects_empty_course() {
