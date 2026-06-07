@@ -88,7 +88,7 @@ Use these repositories as long-term references for examples, comparisons, and en
 - Do not show lesson-level breadcrumb or part/chapter pills above or below the lesson title.
 - Do not show a repeated global course intro/hero banner above every lesson. If an overview is important, make it a normal lesson instead.
 - Display the project name as `Rust Course By AI` in visible UI text.
-- Use the official Rust logo from `rust-lang/rust-artwork` as the site icon and brand mark, with attribution preserved in README.
+- Use the official Rust logo from `rust-lang/rust-artwork` as the site icon and brand mark, with attribution preserved in README. The in-site brand mark should be a white transparent logo; the browser favicon should be a theme-adaptive SVG that switches black/white with `prefers-color-scheme`.
 - The top title banner should show only near the top of the page and slide out while the reader scrolls through content; do not show it again at the bottom.
 - Code blocks should show the source language.
 - Reference repositories used by a lesson should be visible in the rendered page.

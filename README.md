@@ -24,7 +24,11 @@ https://dexterdreeeam.github.io/RustCourseByAi/
 docs\index.html           GitHub Pages entry point
 docs\assets\styles.css    Dark theme and responsive layout
 docs\assets\app.js        Navigation, language switching, and rendering
-docs\assets\rust-logo.svg Official Rust logo used as the site icon
+docs\assets\rust-logo.svg Official Rust logo source asset
+docs\assets\rust-logo-favicon.svg
+                           Theme-adaptive Rust logo used as the browser tab icon
+docs\assets\rust-logo-white.svg
+                           White transparent Rust logo used in the site UI
 docs\content\course-data.js
                            Structured course content
 docs\.nojekyll            Disables Jekyll processing on GitHub Pages
