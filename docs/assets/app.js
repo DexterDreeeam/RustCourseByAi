@@ -21,7 +21,6 @@
       previous: "上一节",
       next: "下一节",
       part: "篇",
-      chapter: "章",
       languageButton: "English",
       brandSubtitle: "面向 C++ 程序员的 Rust 教程"
     },
@@ -34,7 +33,6 @@
       previous: "Previous",
       next: "Next",
       part: "Part",
-      chapter: "Chapter",
       languageButton: "中文",
       brandSubtitle: "Rust for C++ Engineers"
     }
@@ -208,7 +206,7 @@
   function renderLesson() {
     const index = flatSections.findIndex((item) => item.section.id === state.sectionId);
     const current = getCurrentItem();
-    const { part, chapter, section } = current;
+    const { section } = current;
     const previous = flatSections[index - 1];
     const next = flatSections[index + 1];
 
@@ -216,16 +214,7 @@
     document.title = `${pick(section.title)} - Rust Course By AI`;
 
     root.innerHTML = `
-      <div class="breadcrumb">
-        <span>${escapeHtml(pick(part.title))}</span>
-        <span>/</span>
-        <span>${escapeHtml(pick(chapter.title))}</span>
-      </div>
       <h1>${escapeHtml(pick(section.title))}</h1>
-      <div class="lesson-meta">
-        <span class="pill">${labels[state.language].part}: ${escapeHtml(pick(part.title))}</span>
-        <span class="pill">${labels[state.language].chapter}: ${escapeHtml(pick(chapter.title))}</span>
-      </div>
       ${renderList(pick(section.goals))}
       <div class="lesson-grid">
         <section class="content-card syntax">
@@ -297,9 +286,7 @@
     }
 
     const scrollTop = window.scrollY || document.documentElement.scrollTop;
-    const scrollBottom = scrollTop + window.innerHeight;
-    const documentHeight = document.documentElement.scrollHeight;
-    const shouldShow = scrollTop <= 12 || documentHeight - scrollBottom <= 12;
+    const shouldShow = scrollTop <= 12;
     document.body.classList.toggle("header-hidden", !shouldShow);
   }
 

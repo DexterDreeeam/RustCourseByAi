@@ -82,7 +82,8 @@ Use these repositories as long-term references for examples, comparisons, and en
 - Beginner and advanced parts should be switched with top tabs; do not show both parts' full navigation at the same time.
 - Navigation should show chapter and section hierarchy for the active part.
 - Do not show a redundant sidebar title such as `目录` or `Contents` above the navigation tabs.
+- Do not show lesson-level breadcrumb or part/chapter pills above or below the lesson title.
 - Display the project name as `Rust Course By AI` in visible UI text.
-- The top title banner should slide out while the reader is scrolling through the middle of the page, and show again near the top or bottom.
+- The top title banner should show only near the top of the page and slide out while the reader scrolls through content; do not show it again at the bottom.
 - Code blocks should show the source language.
 - Reference repositories used by a lesson should be visible in the rendered page.
