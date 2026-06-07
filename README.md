@@ -1,4 +1,4 @@
-# RustCourseByAi
+# Rust Course By AI
 
 A GitHub Pages course for C++ programmers who want to learn Rust syntax, mental models, and real-world Rust engineering practices.
 

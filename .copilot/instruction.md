@@ -1,4 +1,4 @@
-# RustCourseByAi project instructions
+# Rust Course By AI project instructions
 
 ## Project purpose
 
@@ -81,5 +81,7 @@ Use these repositories as long-term references for examples, comparisons, and en
 - On desktop, the left navigation should stay fixed in place while the main content scrolls.
 - Beginner and advanced parts should be switched with top tabs; do not show both parts' full navigation at the same time.
 - Navigation should show chapter and section hierarchy for the active part.
+- Display the project name as `Rust Course By AI` in visible UI text.
+- The top title banner should slide out while the reader is scrolling through the middle of the page, and show again near the top or bottom.
 - Code blocks should show the source language.
 - Reference repositories used by a lesson should be visible in the rendered page.
