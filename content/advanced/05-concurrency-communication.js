@@ -63,7 +63,7 @@ async fn flush(queue: Arc<Mutex<Vec<Job>>>) {
 }`
                       ),
                       error: t(
-                        ["future cannot be sent between threads safely", "`std::sync::MutexGuard` 可能跨 `await` 保留；在多线程 runtime 中这个 future 通常不是 `Send`，也容易造成锁持有时间过长。"],
+                        ["future cannot be sent between threads safely", "`std::sync::MutexGuard` 可能一直被拿到 `.await` 之后；在多线程运行时里，这样的 future 通常不能安全跨线程，也会让锁被占用太久。"],
                         ["future cannot be sent between threads safely", "`std::sync::MutexGuard` may be held across `await`; on a multi-thread runtime this future is usually not `Send` and can hold the lock too long."]
                       ),
                       explanation: t(

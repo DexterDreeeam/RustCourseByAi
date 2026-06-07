@@ -12,7 +12,7 @@
                 ["Understand that traits are not class inheritance.", "Use traits to cut module boundaries and create test doubles."]
               ],
               syntax: [
-                ["`trait` 定义行为，`impl Trait for Type` 为类型实现行为。", "泛型参数可以用 `T: Trait` 或 `where` 约束。"],
+                ["`trait` 定义一种能力，`impl Trait for Type` 表示某个类型具备这种能力。", "泛型参数可以用 `T: Trait` 或 `where` 写清楚需要哪些能力。"],
                 ["A `trait` defines behavior, and `impl Trait for Type` implements it.", "Generic parameters can be constrained with `T: Trait` or `where` clauses."]
               ],
               engineering: [
@@ -20,7 +20,7 @@
                 ["Traits fit storage, clocks, networking, randomness, and other external dependencies.", "Do not abstract early just to look architectural; introduce traits when there is a real substitution point."]
               ],
               cppComparison: [
-                ["trait 既像 C++ concept 的能力约束，也能像虚接口一样动态分发；Rust 要你显式选择。"],
+                ["trait 有时像 C++ concept，用来说明类型必须具备什么能力；也可以像虚接口一样做运行时调用。Rust 会要求你明确选择哪一种用法。"],
                 ["Traits can act like C++ concepts for capability bounds and like virtual interfaces for dynamic dispatch; Rust makes the choice explicit."]
               ],
               examples: [
@@ -56,7 +56,7 @@ impl Clock for FakeClock {
 }`
                       ),
                       error: t(
-                        ["error[E0599]: no method named `now_ms` found for reference `&C`", "泛型 `C` 没有被约束为实现 `Clock`，编译器不能假设它有 `now_ms`。"],
+                        ["error[E0599]: no method named `now_ms` found for reference `&C`", "泛型 `C` 没有写明必须实现 `Clock`，所以编译器不能假设它有 `now_ms` 方法。"],
                         ["error[E0599]: no method named `now_ms` found for reference `&C`", "Generic `C` is not constrained to implement `Clock`, so the compiler cannot assume `now_ms` exists."]
                       ),
                       explanation: t(

@@ -12,7 +12,7 @@
                 ["Know when to split into a workspace.", "Use core/adapters/cli/server layers to control dependency direction."]
               ],
               syntax: [
-                ["workspace 根 `Cargo.toml` 管理 members、resolver 和 workspace dependencies。", "每个 crate 有自己的 public API 和 feature。"],
+                ["workspace 根目录的 `Cargo.toml` 管理成员 crate、依赖解析方式和共享依赖版本。", "每个 crate 都有自己的对外 API 和可选功能。"],
                 ["The workspace root `Cargo.toml` manages members, resolver, and workspace dependencies.", "Each crate has its own public API and features."]
               ],
               engineering: [
@@ -43,4 +43,3 @@ tokio = { version = "1", features = ["rt-multi-thread", "macros"] }`)
           ]
         });
 })();
-

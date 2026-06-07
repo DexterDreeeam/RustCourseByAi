@@ -2,25 +2,25 @@
   const { t, sharedExample, localizedExample, withMistakes, lesson } = window.Course;
   window.RUST_COURSE_CHAPTERS.advanced.push({
           id: "async-runtime-boundaries",
-          title: t("异步 Rust 与 runtime 边界", "Async Rust and runtime boundaries"),
+          title: t("异步 Rust 与运行时边界", "Async Rust and runtime boundaries"),
           sections: [
             lesson({
               id: "future-task-cancellation",
               title: ["future、task 与取消", "Futures, tasks, and cancellation"],
               goals: [
-                ["理解 async Rust 是状态机。", "知道 runtime 边界应该出现在应用入口。"],
+                ["理解 async Rust 本质上是状态机。", "知道异步运行时应该由应用入口负责创建。"],
                 ["Understand async Rust as state machines.", "Know that runtime boundaries belong at app entry points."]
               ],
               syntax: [
-                ["`async fn` 返回 future，只有被 runtime poll 才推进。", "`tokio::spawn` 常要求 future 是 `Send + 'static`。"],
+                ["`async fn` 返回 future，只有被运行时不断 poll 才会往下执行。", "`tokio::spawn` 常要求 future 是 `Send + 'static`。"],
                 ["`async fn` returns a future that progresses only when polled by a runtime.", "`tokio::spawn` often requires futures to be `Send + 'static`."]
               ],
               engineering: [
-                ["库应暴露 async API，而不是偷偷创建全局 runtime。", "取消通常通过 drop future 发生，因此清理逻辑要放在明确 owner 中。"],
+                ["库应该暴露 async API，而不是偷偷创建全局运行时。", "取消通常就是 future 被 drop，所以清理逻辑要放在明确拥有资源的对象里。"],
                 ["Libraries should expose async APIs instead of secretly creating a global runtime.", "Cancellation usually happens by dropping futures, so cleanup needs explicit owners."]
               ],
               cppComparison: [
-                ["C++ coroutine 也会生成状态机，但 Rust async 还受到所有权和 `Send` 边界约束。"],
+                ["C++ coroutine 也会生成状态机；Rust async 额外要求你把所有权和能否跨线程这些事情说清楚。"],
                 ["C++ coroutines also become state machines, but Rust async is additionally constrained by ownership and `Send` boundaries."]
               ],
               examples: [
@@ -60,7 +60,7 @@ async fn start() -> mpsc::Sender<Job> {
 }`
                       ),
                       error: t(
-                        ["error[E0373]: async block may outlive the current function", "`tokio::spawn` 的任务可能在当前函数返回后继续运行，不能持有 `payload: &str` 这种短生命周期借用。"],
+                        ["error[E0373]: async block may outlive the current function", "`tokio::spawn` 启动的任务可能在当前函数返回后还继续跑，所以不能拿着 `payload: &str` 这种临时借用。"],
                         ["error[E0373]: async block may outlive the current function", "A `tokio::spawn` task may continue after the function returns, so it cannot hold the short-lived `payload: &str` borrow."]
                       ),
                       explanation: t(

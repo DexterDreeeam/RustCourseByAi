@@ -70,21 +70,21 @@ fn create_user(input: &str) -> Result<User, &'static str> {
             }),
             lesson({
               id: "lifetimes-in-practice",
-              title: ["生命周期的实际阅读方式", "Reading lifetimes in practice"],
+              title: ["生命周期该怎么读", "Reading lifetimes in practice"],
               goals: [
-                ["把生命周期理解为引用关系说明。", "能读懂返回引用和结构体保存引用。"],
+                ["把生命周期理解为“这个引用依赖哪份数据”。", "能读懂返回引用和结构体里保存引用的代码。"],
                 ["Understand lifetimes as descriptions of reference relationships.", "Read functions returning references and structs storing references."]
               ],
               syntax: [
-                ["生命周期参数不改变运行时行为，只描述引用之间谁至少活得一样久。", "生命周期省略规则让常见函数不必显式写 `<'a>`。"],
+                ["生命周期参数不会改变程序运行方式，只是在说明引用之间的有效关系：谁必须至少和谁一样久。", "常见函数里编译器会自动推断，所以不一定都要手写 `<'a>`。"],
                 ["Lifetime parameters do not change runtime behavior; they describe which references must live at least as long as others.", "Lifetime elision removes `<'a>` from common cases."]
               ],
               engineering: [
-                ["缓存、解析器、HTTP header、零拷贝视图经常出现生命周期。", "如果生命周期扩散到所有层，可以考虑在模块边界拥有数据。"],
+                ["缓存、解析器、HTTP header、少拷贝的数据视图里经常会看到生命周期。", "如果生命周期一路传到很多层，让代码很难读，可以考虑在某个模块入口把数据拷贝成 owned 类型。"],
                 ["Caches, parsers, HTTP headers, and zero-copy views often involve lifetimes.", "If lifetimes spread across all layers, consider owning data at module boundaries."]
               ],
               cppComparison: [
-                ["C++ `string_view` 的生命周期靠调用者保证；Rust 用类型系统强制表达这层关系。"],
+                ["C++ `string_view` 是否悬垂主要靠调用者小心；Rust 会要求你在类型里把这层依赖关系说清楚。"],
                 ["C++ `string_view` lifetime safety is a caller convention; Rust forces that relationship into types."]
               ],
               examples: [
@@ -125,4 +125,3 @@ fn content_type_or_default<'a>(headers: &'a [Header<'a>]) -> &'a str {
           ]
         });
 })();
-
