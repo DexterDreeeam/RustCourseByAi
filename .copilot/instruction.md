@@ -37,7 +37,8 @@ Every section should have:
 When adding or changing content:
 
 - Keep section order identical for both language versions by storing both versions in the same section object.
-- Keep code examples small and focused on the section's single knowledge point.
+- Code examples should be substantial enough to explain the knowledge point in context. Prefer a small but complete engineering scenario over a tiny syntax fragment.
+- Trait and generics are split across the course: beginner content teaches reading/writing basic trait bounds; advanced content teaches API design, object safety, associated types, sealed traits, semver, and dispatch costs.
 - If a code example contains explanatory comments, Chinese pages should show Chinese comments and English pages should show English comments.
 - If a concept differs sharply between Rust and C++, explicitly describe the trade-off.
 - Engineering explanations should answer: "How would this appear in a real project?"
