@@ -64,23 +64,76 @@ jobs:
                 ["C++ include directories often leak internals; Rust private-by-default modules and `pub use` make it easier to narrow APIs."]
               ],
               examples: [
-                sharedExample("Workspace + lib.rs 边界", "Workspace + lib.rs boundary", "rust", `// root Cargo.toml
+                sharedExample("Workspace + 多文件模块边界", "Workspace + multi-file module boundary", "rust", `// root Cargo.toml
 // [workspace]
 // members = ["crates/course-core", "crates/course-cli"]
 // resolver = "2"
 
 // crates/course-core/src/lib.rs
-mod model;
-mod parser;
-mod validate;
+mod model;    // 内部文件：src/model.rs
+mod parser;   // 内部文件：src/parser.rs
+mod validate; // 内部文件：src/validate.rs
 
+// 只有这里 pub use 的类型，才是调用方推荐使用的入口。
 pub use model::{Course, Lesson};
 pub use parser::ParseError;
 
+// 对外公开函数：CLI、server、tests 都应该从这里加载课程。
 pub fn load_course(input: &str) -> Result<Course, ParseError> {
     let course = parser::parse(input)?;
     validate::course(&course)?;
     Ok(course)
+}
+
+// crates/course-core/src/model.rs
+#[derive(Debug, Clone)]
+pub struct Course {
+    pub title: String,
+    pub lessons: Vec<Lesson>,
+}
+
+#[derive(Debug, Clone)]
+pub struct Lesson {
+    pub slug: String,
+    pub title: String,
+}
+
+// crates/course-core/src/parser.rs
+use crate::model::{Course, Lesson};
+
+#[derive(Debug)]
+pub enum ParseError {
+    Empty,
+    InvalidLine(String),
+}
+
+pub(crate) fn parse(input: &str) -> Result<Course, ParseError> {
+    if input.trim().is_empty() {
+        return Err(ParseError::Empty);
+    }
+
+    let lessons = input
+        .lines()
+        .map(|line| Lesson {
+            slug: line.trim().to_owned(),
+            title: line.trim().replace('-', " "),
+        })
+        .collect();
+
+    Ok(Course { title: "Rust Course".to_owned(), lessons })
+}
+
+// crates/course-core/src/validate.rs
+use crate::model::Course;
+use crate::parser::ParseError;
+
+pub(crate) fn course(course: &Course) -> Result<(), ParseError> {
+    for lesson in &course.lessons {
+        if lesson.slug.contains(' ') {
+            return Err(ParseError::InvalidLine(lesson.slug.clone()));
+        }
+    }
+    Ok(())
 }`)
               ],
               references: ["rust-lang/cargo", "rust-lang/rust-analyzer"]

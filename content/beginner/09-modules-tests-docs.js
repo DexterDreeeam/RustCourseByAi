@@ -25,9 +25,9 @@
               ],
               examples: [
                 sharedExample("Rust: 对外稳定，对内可重构", "Rust: stable outside, refactorable inside", "rust", `// src/lib.rs
-mod parse;
-mod model;
-mod validate;
+mod parse;    // 私有模块：外部不能 course_core::parse::toml(...)
+mod model;    // 私有模块：外部不能依赖文件结构
+mod validate; // 私有模块：校验细节可以以后重构
 
 pub use model::{Course, Lesson};
 pub use parse::CourseParseError;
@@ -38,14 +38,42 @@ pub fn from_toml(input: &str) -> Result<Course, CourseParseError> {
     Ok(course)
 }
 
-#[cfg(test)]
-mod tests {
-    use super::from_toml;
+// src/parse.rs
+use crate::model::{Course, Lesson};
 
-    #[test]
-    fn rejects_empty_course() {
-        assert!(from_toml("").is_err());
+#[derive(Debug)]
+pub enum CourseParseError {
+    Empty,
+}
+
+pub(crate) fn toml(input: &str) -> Result<Course, CourseParseError> {
+    if input.trim().is_empty() {
+        return Err(CourseParseError::Empty);
     }
+    Ok(Course {
+        title: "Rust Course".to_owned(),
+        lessons: vec![Lesson { title: "Ownership".to_owned() }],
+    })
+}
+
+// src/model.rs
+#[derive(Debug)]
+pub struct Course {
+    pub title: String,
+    pub lessons: Vec<Lesson>,
+}
+
+#[derive(Debug)]
+pub struct Lesson {
+    pub title: String,
+}
+
+// tests/load_course.rs
+use course_core::from_toml;
+
+#[test]
+fn rejects_empty_course() {
+    assert!(from_toml("").is_err());
 }`)
               ],
               references: ["rust-lang/cargo", "rust-lang/rust-analyzer"]
