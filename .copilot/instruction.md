@@ -83,6 +83,7 @@ Use these repositories as long-term references for examples, comparisons, and en
 - Navigation should show chapter and section hierarchy for the active part.
 - Do not show a redundant sidebar title such as `目录` or `Contents` above the navigation tabs.
 - Do not show lesson-level breadcrumb or part/chapter pills above or below the lesson title.
+- Do not show a repeated global course intro/hero banner above every lesson. If an overview is important, make it a normal lesson instead.
 - Display the project name as `Rust Course By AI` in visible UI text.
 - The top title banner should show only near the top of the page and slide out while the reader scrolls through content; do not show it again at the bottom.
 - Code blocks should show the source language.

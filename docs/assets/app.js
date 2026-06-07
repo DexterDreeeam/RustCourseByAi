@@ -2,12 +2,11 @@
   const data = window.RUST_COURSE_DATA;
   const root = document.getElementById("courseRoot");
   const nav = document.getElementById("sidebarNav");
-  const hero = document.getElementById("hero");
   const languageToggle = document.getElementById("languageToggle");
   const brandSubtitle = document.getElementById("brandSubtitle");
   const header = document.querySelector(".site-header");
 
-  if (!data || !root || !nav || !hero || !languageToggle) {
+  if (!data || !root || !nav || !languageToggle) {
     return;
   }
 
@@ -97,23 +96,6 @@
 
   function renderList(items) {
     return `<ul>${(items || []).map((item) => `<li>${formatInline(item)}</li>`).join("")}</ul>`;
-  }
-
-  function renderHero() {
-    const text = data.hero[state.language];
-    hero.innerHTML = `
-      <div class="eyebrow">${escapeHtml(text.eyebrow)}</div>
-      <h1>${escapeHtml(text.title)}</h1>
-      <p>${escapeHtml(text.description)}</p>
-      <div class="hero-grid">
-        ${text.cards.map((card) => `
-          <div class="hero-card">
-            <strong>${escapeHtml(card.title)}</strong>
-            <span>${escapeHtml(card.text)}</span>
-          </div>
-        `).join("")}
-      </div>
-    `;
   }
 
   function renderNav() {
@@ -261,7 +243,6 @@
   }
 
   function render() {
-    renderHero();
     renderNav();
     renderLesson();
   }
