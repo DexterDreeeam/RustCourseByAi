@@ -78,6 +78,8 @@ Use these repositories as long-term references for examples, comparisons, and en
 
 - Language switching must keep the reader on the same lesson.
 - Section URLs should be hash-based and shareable.
-- Navigation should show part, chapter, and section hierarchy.
+- On desktop, the left navigation should stay fixed in place while the main content scrolls.
+- Beginner and advanced parts should be switched with top tabs; do not show both parts' full navigation at the same time.
+- Navigation should show chapter and section hierarchy for the active part.
 - Code blocks should show the source language.
 - Reference repositories used by a lesson should be visible in the rendered page.
