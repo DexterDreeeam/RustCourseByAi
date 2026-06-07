@@ -161,18 +161,32 @@
       <section class="examples">
         <h2>${labels[state.language].examples}</h2>
         <div class="examples-grid">
-          ${(examples || []).map((example) => `
-            <div class="code-card ${example.mistakes ? "has-mistakes" : ""}">
-              <div class="code-header">
-                <span>${escapeHtml(pick(example.title))}</span>
-                <span>${escapeHtml(example.language)}</span>
-              </div>
-              <pre><code class="language-${escapeHtml(example.language)}">${escapeHtml(pick(example.code))}</code></pre>
-              ${renderMistakes(example)}
-            </div>
-          `).join("")}
+          ${(examples || []).map(renderExample).join("")}
         </div>
       </section>
+    `;
+  }
+
+  function renderExample(example) {
+    if (example.kind === "text") {
+      return `
+        <div class="explanation-card">
+          <h3>${escapeHtml(pick(example.title))}</h3>
+          ${renderParagraphs(asArray(pick(example.paragraphs)))}
+          ${example.diagram ? `<pre class="example-diagram">${escapeHtml(pick(example.diagram))}</pre>` : ""}
+        </div>
+      `;
+    }
+
+    return `
+      <div class="code-card ${example.mistakes ? "has-mistakes" : ""}">
+        <div class="code-header">
+          <span>${escapeHtml(pick(example.title))}</span>
+          <span>${escapeHtml(example.language)}</span>
+        </div>
+        <pre><code class="language-${escapeHtml(example.language)}">${escapeHtml(pick(example.code))}</code></pre>
+        ${renderMistakes(example)}
+      </div>
     `;
   }
 

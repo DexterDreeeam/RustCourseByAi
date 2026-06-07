@@ -48,6 +48,7 @@ When adding or changing content:
 
 - Keep section order identical for both language versions by storing both versions in the same section object.
 - Code examples should be substantial enough to explain the knowledge point in context. Prefer a small but complete engineering scenario over a tiny syntax fragment.
+- Not every example entry must be a code block. Use explanatory text cards for diagrams, definitions, and conceptual transitions; reserve code cards for actual source code.
 - When explaining modules/crates/workspaces, examples should include multiple files such as `lib.rs`, internal module files, and tests/CLI entry points so readers can see what is public and what stays internal.
 - Trait and generics are split across the course: beginner content teaches reading/writing basic trait bounds; advanced content teaches API design, object safety, associated types, sealed traits, semver, and dispatch costs.
 - If a code example contains explanatory comments, Chinese pages should show Chinese comments and English pages should show English comments.
