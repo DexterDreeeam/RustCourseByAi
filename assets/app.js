@@ -63,6 +63,15 @@
     return flatSections.some((item) => item.section.id === id) ? id : null;
   }
 
+  function getCurrentItem() {
+    return flatSections.find((item) => item.section.id === state.sectionId) || flatSections[0];
+  }
+
+  function getFirstSectionInPart(partId) {
+    const item = flatSections.find((entry) => entry.part.id === partId);
+    return item ? item.section.id : flatSections[0].section.id;
+  }
+
   function pick(value) {
     if (typeof value === "string") {
       return value;
@@ -112,13 +121,28 @@
   }
 
   function renderNav() {
+    const activePartId = getCurrentItem().part.id;
+    const activePart = data.parts.find((part) => part.id === activePartId) || data.parts[0];
+
     tocTitle.textContent = labels[state.language].toc;
     brandSubtitle.textContent = labels[state.language].brandSubtitle;
     languageToggle.textContent = labels[state.language].languageButton;
-    nav.innerHTML = data.parts.map((part) => `
+    nav.innerHTML = `
+      <div class="part-tabs" role="tablist" aria-label="${escapeHtml(labels[state.language].part)}">
+        ${data.parts.map((part) => `
+          <button
+            class="part-tab ${part.id === activePartId ? "active" : ""}"
+            type="button"
+            role="tab"
+            aria-selected="${part.id === activePartId ? "true" : "false"}"
+            data-part="${escapeHtml(part.id)}"
+          >
+            ${escapeHtml(pick(part.title))}
+          </button>
+        `).join("")}
+      </div>
       <div class="nav-part">
-        <p class="nav-part-title">${escapeHtml(pick(part.title))}</p>
-        ${part.chapters.map((chapter) => `
+        ${activePart.chapters.map((chapter) => `
           <div class="nav-chapter">
             <p class="nav-chapter-title">${escapeHtml(pick(chapter.title))}</p>
             ${chapter.sections.map((section) => `
@@ -129,7 +153,15 @@
           </div>
         `).join("")}
       </div>
-    `).join("");
+    `;
+
+    nav.querySelectorAll("[data-part]").forEach((button) => {
+      button.addEventListener("click", () => {
+        if (button.dataset.part !== activePartId) {
+          setSection(getFirstSectionInPart(button.dataset.part), true);
+        }
+      });
+    });
 
     nav.querySelectorAll("[data-section]").forEach((button) => {
       button.addEventListener("click", () => setSection(button.dataset.section, true));
@@ -178,7 +210,7 @@
 
   function renderLesson() {
     const index = flatSections.findIndex((item) => item.section.id === state.sectionId);
-    const current = flatSections[index] || flatSections[0];
+    const current = getCurrentItem();
     const { part, chapter, section } = current;
     const previous = flatSections[index - 1];
     const next = flatSections[index + 1];
