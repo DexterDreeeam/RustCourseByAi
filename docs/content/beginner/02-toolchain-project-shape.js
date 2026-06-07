@@ -65,123 +65,67 @@ jobs:
               ],
               examples: [
                 textExample(
-                  "包含关系图：workspace、package、crate、module",
-                  "Containment: workspace, package, crate, module",
+                  "从外到内：workspace、package、crate、module",
+                  "From outside to inside: workspace, package, crate, module",
                   [
-                    "从大到小看：workspace 管多个 package；package 是 Cargo 管理的项目单元；package 里会产生一个或多个 crate；crate 里面再用 module 组织代码。",
-                    "注意：package 和 crate 的名字经常很像，但它们不是同一个概念。package 是 Cargo.toml 这一层，crate 是 rustc 真正编译出来的库或可执行程序。"
+                    "workspace 是最外层的工作区，它自己通常不编译代码，而是列出要一起管理的 package。",
+                    "package 是一个有 `Cargo.toml` 的项目单元。Cargo 先看到 package，再根据里面的入口文件决定要编译出哪些 crate。",
+                    "crate 不是“任意一个 .rs 文件”。crate 是一次编译的入口和结果。默认情况下，`src/lib.rs`、`src/main.rs`、`src/bin/*.rs` 这类 crate root 才会形成 crate。",
+                    "module 是 crate 里面的名字空间。`src/parser.rs`、`src/parser/token.rs` 这类文件通常只是 module 的代码，不是单独的 crate。"
                   ],
                   [
-                    "From large to small: a workspace contains packages; a package is the Cargo-managed project unit; a package produces one or more crates; crates organize code with modules.",
-                    "Package names and crate names often look similar, but they are not the same concept. A package is the Cargo.toml level; a crate is what rustc actually compiles."
+                    "A workspace is the outer working area. It usually does not compile code by itself; it lists packages managed together.",
+                    "A package is a project unit with Cargo.toml. Cargo sees the package first, then uses source roots to decide which crates to compile.",
+                    "A crate is not just any .rs file. A crate is a compilation root and result. By default, src/lib.rs, src/main.rs, and src/bin/*.rs are crate roots.",
+                    "A module is a namespace inside a crate. Files such as src/parser.rs and src/parser/token.rs usually hold module code, not separate crates."
                   ],
-                  `workspace
-└── package: course-core
-    ├── Cargo.toml
-    └── crate: course_core
-        ├── crate root: src/lib.rs
-        ├── module: model    -> src/model.rs
-        ├── module: parser   -> src/parser.rs
-        └── module: validate -> src/validate.rs
-
-workspace
-└── package: course-cli
-    ├── Cargo.toml
-    └── crate: course_cli
-        └── crate root: src/main.rs
-
-记法：
-- workspace：一组 package 的工作区
-- package：有 Cargo.toml 的项目单元
-- crate：一次编译出来的库或可执行程序
-- module：crate 内部的代码组织和可见性边界`
+                  `rust-course/                         # workspace 目录
+├── Cargo.toml                       # [workspace]，列出成员 package
+└── crates/
+    ├── course-core/                 # package: course-core
+    │   ├── Cargo.toml               # [package] name = "course-core"
+    │   └── src/
+    │       ├── lib.rs               # crate root -> library crate: course_core
+    │       ├── parser.rs            # module: parser，不是 crate
+    │       ├── model.rs             # module: model，不是 crate
+    │       ├── validate.rs          # module: validate，不是 crate
+    │       └── bin/
+    │           └── inspect.rs       # crate root -> binary crate: inspect
+    └── course-cli/                  # package: course-cli
+        ├── Cargo.toml               # [package] name = "course-cli"
+        └── src/main.rs              # crate root -> binary crate: course-cli`
                 ),
                 textExample(
-                  "package 和 crate 的区别",
-                  "Difference between package and crate",
+                  "什么文件算 crate？什么文件只是 module？",
+                  "Which files are crates and which are modules?",
                   [
-                    "`package` 看 `Cargo.toml`：下面的 `crates/course-tools/Cargo.toml` 就定义了一个 package，名字叫 `course-tools`。",
-                    "`crate` 看编译入口：同一个 package 里的 `src/lib.rs` 会编译成一个 library crate，`src/bin/check.rs` 会编译成另一个 binary crate。",
-                    "所以一个 package 里面可以有多个 crate。package 名可以是 `course-tools`，但 Rust 代码里引用 library crate 时通常写 `course_tools`，因为代码路径不能写连字符。"
+                    "`src/lib.rs` 是 library crate 的根文件，所以它算一个 crate root。",
+                    "`src/main.rs` 或 `src/bin/inspect.rs` 是 binary crate 的根文件，所以它们也算 crate root。",
+                    "`src/parser.rs` 不是 crate root。它是被 `mod parser;` 接进 `course_core` 这个 crate 里的 module 文件。",
+                    "所以判断一个 `.rs` 文件是不是 crate，关键不是看扩展名，而是看它是不是 Cargo/rustc 的编译入口。"
                   ],
                   [
-                    "A package is the project Cargo sees: it has Cargo.toml with package name, version, dependencies, features, and build configuration.",
-                    "A crate is the compilation unit rustc sees: a library crate usually comes from src/lib.rs, and binary crates usually come from src/main.rs or src/bin/*.rs.",
-                    "One package can produce one library crate and multiple binary crates. In this example the package is named course-core, while Rust code usually refers to the library crate as course_core because Rust paths cannot contain hyphens."
-                  ],
-                  `workspace
-└── package: course-tools
-    ├── Cargo.toml           # [package] name = "course-tools"
-    └── src
-        ├── lib.rs           # crate 1: library crate，代码里叫 course_tools
-        └── bin
-            └── check.rs     # crate 2: binary crate，命令名通常叫 check
-
-这就是“一个 package 产生两个 crate”的例子：
-- package：course-tools
-- crate 1：course_tools 这个库
-- crate 2：check 这个可执行程序`
+                    "`src/lib.rs` is the root of a library crate.",
+                    "`src/main.rs` or `src/bin/inspect.rs` are roots of binary crates.",
+                    "`src/parser.rs` is not a crate root. It is a module file included into the `course_core` crate by `mod parser;`.",
+                    "So a `.rs` file is a crate only when it is a Cargo/rustc compilation entry point."
+                  ]
                 ),
-                sharedExample("course-tools/Cargo.toml: 一个 package", "course-tools/Cargo.toml: one package", "toml", `[package]
-name = "course-tools"
-version = "0.1.0"
-edition = "2021"
-
-[dependencies]
-course-core = { path = "../course-core" }`),
-                sharedExample("course-tools/src/lib.rs: library crate", "course-tools/src/lib.rs: library crate", "rust", `pub fn normalize_slug(raw: &str) -> String {
-    raw.trim().to_ascii_lowercase().replace(' ', "-")
-}`),
-                sharedExample("course-tools/src/bin/check.rs: binary crate", "course-tools/src/bin/check.rs: binary crate", "rust", `use course_tools::normalize_slug;
-
-fn main() {
-    let slug = normalize_slug(" Ownership Basics ");
-    println!("{slug}");
-}`),
-                textExample(
-                  "module 和文件不是一回事",
-                  "Modules and files are not the same thing",
-                  [
-                    "module 是 Rust 语言里的名字空间和可见性边界；文件只是保存 module 代码的一种常见方式。",
-                    "小模块可以直接写在当前文件里；大模块通常拆成 `parser.rs` 这样的文件；更大的模块还可以继续拆成 `parser/token.rs`、`parser/ast.rs` 这样的子模块文件。"
-                  ],
-                  [
-                    "A module is a Rust namespace and visibility boundary; a file is just a common place to store module code.",
-                    "Small modules can be inline; larger modules usually move into files such as parser.rs; even larger modules can have submodules such as parser/token.rs and parser/ast.rs."
-                  ],
-                  `module inline_parser
-└── 写在当前文件里，不需要单独文件
-
-module parser
-└── 通常对应 src/parser.rs
-
-module parser::token
-└── 通常对应 src/parser/token.rs`
-                ),
-                sharedExample("内联 module: 写在当前文件里", "Inline module: written in the current file", "rust", `// src/lib.rs
-mod inline_parser {
-    pub(crate) fn parse_line(line: &str) -> &str {
-        line.trim()
-    }
-}`),
-                sharedExample("文件 module: src/lib.rs 声明 parser", "File module: src/lib.rs declares parser", "rust", `// src/lib.rs
-mod parser;`),
-                sharedExample("文件 module: src/parser.rs 承载 parser 模块", "File module: src/parser.rs stores parser module", "rust", `// src/parser.rs
-pub(crate) fn parse_line(line: &str) -> &str {
-    line.trim()
-}`),
-                sharedExample("子模块文件: parser 继续拆 token/ast", "Submodule files: parser splits token/ast", "rust", `// src/parser.rs
-mod token;
-mod ast;
-
-// src/parser/token.rs
-pub(crate) struct Token;
-
-// src/parser/ast.rs
-pub(crate) struct Ast;`),
                 sharedExample("root Cargo.toml: workspace 只负责组织成员", "root Cargo.toml: workspace organizes members", "toml", `[workspace]
 members = ["crates/course-core", "crates/course-cli"]
 resolver = "2"`),
+                sharedExample("crates/course-core/Cargo.toml: 一个 package，可产生两个 crate", "crates/course-core/Cargo.toml: one package can produce two crates", "toml", `[package]
+name = "course-core"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "course_core"
+path = "src/lib.rs"
+
+[[bin]]
+name = "inspect"
+path = "src/bin/inspect.rs"`),
                 sharedExample("crates/course-core/src/lib.rs: 对外入口", "crates/course-core/src/lib.rs: public entry point", "rust", `mod model;    // 内部文件：src/model.rs
 mod parser;   // 内部文件：src/parser.rs
 mod validate; // 内部文件：src/validate.rs
@@ -274,6 +218,14 @@ fn is_valid_slug(slug: &str, rule: &SlugRule) -> bool {
             || ch.is_ascii_digit()
             || (rule.allow_dash && ch == '-')
     })
+}`),
+                sharedExample("crates/course-core/src/bin/inspect.rs: 同一 package 里的 binary crate", "crates/course-core/src/bin/inspect.rs: binary crate in the same package", "rust", `use course_core::load_course;
+
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let input = "ownership-basics";
+    let course = load_course(input)?;
+    println!("{} has {} lessons", course.title, course.lessons.len());
+    Ok(())
 }`),
                 sharedExample("crates/course-cli/Cargo.toml: 依赖 core crate", "crates/course-cli/Cargo.toml: depend on the core crate", "toml", `[dependencies]
 course-core = { path = "../course-core" }`),

@@ -50,6 +50,7 @@ When adding or changing content:
 - Code examples should be substantial enough to explain the knowledge point in context. Prefer a small but complete engineering scenario over a tiny syntax fragment.
 - Not every example entry must be a code block. Use explanatory text cards for diagrams, definitions, and conceptual transitions; reserve code cards for actual source code.
 - When explaining modules/crates/workspaces, examples should include multiple files such as `lib.rs`, internal module files, and tests/CLI entry points so readers can see what is public and what stays internal.
+- When explaining crate, explicitly identify crate roots such as `src/lib.rs`, `src/main.rs`, or `src/bin/*.rs`; do not imply every `.rs` file is a crate.
 - Trait and generics are split across the course: beginner content teaches reading/writing basic trait bounds; advanced content teaches API design, object safety, associated types, sealed traits, semver, and dispatch costs.
 - If a code example contains explanatory comments, Chinese pages should show Chinese comments and English pages should show English comments.
 - Prefer adding `mistakes` to examples when an incorrect usage would clarify the concept. Mistake blocks should show wrong code in red, the compiler/runtime error it triggers, and why the approach is wrong.
