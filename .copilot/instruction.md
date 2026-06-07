@@ -31,13 +31,14 @@ Every section should have:
 - `syntax.zh` and `syntax.en`.
 - `engineering.zh` and `engineering.en`.
 - `cppComparison.zh` and `cppComparison.en`.
-- `examples`, each with a language label such as `rust`, `cpp`, or `toml`.
+- `examples`, each with a language label such as `rust`, `cpp`, or `toml`. Example `code` may be a shared string or localized `code.zh` / `code.en` object.
 - Optional `references` containing repository names from the reference table below.
 
 When adding or changing content:
 
 - Keep section order identical for both language versions by storing both versions in the same section object.
 - Keep code examples small and focused on the section's single knowledge point.
+- If a code example contains explanatory comments, Chinese pages should show Chinese comments and English pages should show English comments.
 - If a concept differs sharply between Rust and C++, explicitly describe the trade-off.
 - Engineering explanations should answer: "How would this appear in a real project?"
 

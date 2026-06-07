@@ -135,7 +135,17 @@ window.RUST_COURSE_DATA = {
                 {
                   title: { zh: "Rust: 所有权移动", en: "Rust: ownership move" },
                   language: "rust",
-                  code: `fn consume(name: String) {
+                  code: {
+                    zh: `fn consume(name: String) {
+    println!("hello {name}");
+}
+
+fn main() {
+    let user = String::from("Ada");
+    consume(user);
+    // 所有权已经移动到 consume，user 不能再继续使用。
+}`,
+                    en: `fn consume(name: String) {
     println!("hello {name}");
 }
 
@@ -144,6 +154,7 @@ fn main() {
     consume(user);
     // user can no longer be used here because ownership moved.
 }`
+                  }
                 },
                 {
                   title: { zh: "C++: 调用约定需要人工判断", en: "C++: ownership depends on convention" },
