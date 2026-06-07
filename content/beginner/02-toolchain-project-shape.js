@@ -52,7 +52,7 @@ jobs:
                 ["Distinguish Rust's four organization levels.", "Know when to evolve from one crate into a workspace."]
               ],
               syntax: [
-                ["从大到小看：workspace 管多个 package；package 是一个可发布/可构建的项目；package 里会产生一个或多个 crate；crate 里面再用 module 组织代码。", "`src/lib.rs` 通常生成 library crate，`src/main.rs` 通常生成 binary crate；`mod xxx;` 会把 `xxx.rs` 或 `xxx/mod.rs` 接进当前 crate 的模块树。"],
+                ["从大到小看：workspace 管多个 package；package 是一个可发布/可构建的项目；package 里会产生一个或多个 crate；crate 里面再用 module 组织代码。", "module 不等于文件。module 是 Rust 里的命名空间和可见性边界；文件只是承载 module 代码的常见方式。", "`src/lib.rs` 通常生成 library crate，`src/main.rs` 通常生成 binary crate；`mod xxx;` 可以把 `xxx.rs`、`xxx/mod.rs` 或当前文件里的内联模块接进当前 crate 的模块树。"],
                 ["A package is a publishing unit, a crate is a compilation unit, a module is a visibility boundary, and a workspace coordinates packages.", "`src/lib.rs` exposes library APIs, while `src/main.rs` is a binary entry point."]
               ],
               engineering: [
@@ -84,6 +84,25 @@ workspace
 - package：有 Cargo.toml 的项目单元
 - crate：一次编译出来的库或可执行程序
 - module：crate 内部的代码组织和可见性边界`),
+                sharedExample("module 与文件：不是严格一一对应", "Modules and files are not strictly one-to-one", "rust", `// 1. 内联 module：模块直接写在当前文件里，不需要单独文件。
+mod inline_parser {
+    pub(crate) fn parse_line(line: &str) -> &str {
+        line.trim()
+    }
+}
+
+// 2. 文件 module：下面这句通常对应 src/parser.rs。
+mod parser;
+
+// 3. 目录 module：parser.rs 里面还可以继续声明子模块：
+// src/parser.rs
+// mod token; // 对应 src/parser/token.rs
+// mod ast;   // 对应 src/parser/ast.rs
+
+// 结论：
+// - module 是代码名字空间/可见性边界
+// - 文件只是放 module 代码的一种方式
+// - 小模块可以内联，大模块通常拆到文件或目录里`),
                 sharedExample("root Cargo.toml: workspace 只负责组织成员", "root Cargo.toml: workspace organizes members", "toml", `[workspace]
 members = ["crates/course-core", "crates/course-cli"]
 resolver = "2"`),
