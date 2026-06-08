@@ -8,12 +8,12 @@
               id: "ownership-api-design",
               title: ["用所有权设计 API", "Design APIs with ownership"],
               goals: [
-                ["能根据函数签名判断资源归属。", "会选择 `T`、`&T`、`&mut T`、`&str`、`&[T]`。"],
-                ["Read resource ownership from function signatures.", "Choose between `T`, `&T`, `&mut T`, `&str`, and `&[T]`."]
+                ["能根据函数签名判断资源归属。", "理解 borrow/借用：函数临时访问调用方的数据，但不拥有它。", "会选择 `T`、`&T`、`&mut T`、`&str`、`&[T]`。"],
+                ["Read resource ownership from function signatures.", "Understand borrow as temporary access to caller-owned data.", "Choose between `T`, `&T`, `&mut T`, `&str`, and `&[T]`."]
               ],
               syntax: [
-                ["传 `T` 表示拿走所有权，传 `&T` 表示只读观察，传 `&mut T` 表示独占修改。", "返回 owned value 通常表示创建新资源或转移资源。"],
-                ["Passing `T` means taking ownership, `&T` observes, and `&mut T` mutates exclusively.", "Returning an owned value usually creates or transfers a resource."]
+                ["所有权回答“这份值归谁管，谁负责释放”。借用回答“能不能临时看一下或改一下”。函数拿到借用时，所有者不变，函数不能负责释放这份数据，也不能随便把引用保存到更久的地方。", "`&T` 是共享借用：只读访问，可以同时有多个读者。适合查询、校验、格式化、计算长度；调用结束后，调用方继续拥有原值。", "`&mut T` 是可变借用：可以修改原值，但同一时间只能有一个，且不能和正在使用的 `&T` 混在一起。适合追加元素、填充缓冲区、原地更新状态。", "传 `T` 才是拿走所有权：函数可以保存、丢弃或继续转移它；调用方除非从返回值拿回所有权，否则不能再用原变量。", "`&str`、`&[T]` 是字符串和数组切片的借用视图，不拥有底层数据。API 只是读取时优先借用；需要长期保存时再转成 `String`、`Vec<T>` 等 owned 类型。", "返回 owned value 通常表示创建新资源或转移资源；返回引用表示结果依赖输入数据，需要讲清楚生命周期关系。"],
+                ["Ownership answers “who controls this value and frees it”. Borrowing answers “may this function temporarily read or modify it”. When a function receives a borrow, the owner stays the same; the function does not free the data and cannot freely store the reference somewhere longer-lived.", "`&T` is a shared borrow: read-only access, with multiple readers allowed. It fits queries, validation, formatting, and length checks; after the call, the caller still owns the value.", "`&mut T` is a mutable borrow: it may modify the original value, but only one mutable borrow may exist at a time, and it cannot overlap with an actively used `&T`. It fits appending, filling buffers, and in-place state updates.", "Passing `T` is what takes ownership: the function may store, drop, or move it onward; unless ownership is returned, the caller cannot use the original variable afterward.", "`&str` and `&[T]` are borrowed views into strings and slices; they do not own the underlying data. Prefer borrowing when an API only reads data; convert to owned `String` or `Vec<T>` only when data must be stored.", "Returning an owned value usually creates or transfers a resource; returning a reference means the result depends on input data and needs a clear lifetime relationship."]
               ],
               engineering: [
                 ["API 边界越清晰，调用方越少猜测谁负责释放、缓存或修改。", "如果为了通过编译到处加 `clone`，通常说明 API 边界还没想清楚。"],
@@ -24,6 +24,89 @@
                 ["C++ expresses intent with `const&`, `unique_ptr`, and `shared_ptr`; Rust also checks ordinary references."]
               ],
               examples: [
+                withMistakes(
+                  localizedExample("Rust: borrow 是临时访问权限", "Rust: borrow is temporary access", "rust", `fn print_summary(title: &str, tags: &[String]) {
+    println!("{title}: {} tags", tags.len());
+}
+
+fn add_tag(tags: &mut Vec<String>, tag: &str) {
+    tags.push(tag.to_owned());
+}
+
+fn main() {
+    let title = String::from("Rust course");
+    let mut tags = vec![String::from("ownership")];
+
+    print_summary(&title, &tags);      // 共享借用：只读，title/tags 仍归 main 所有
+    add_tag(&mut tags, "borrowing");   // 可变借用：临时独占修改 tags
+    print_summary(&title, &tags);      // 借用结束后还能继续使用原值
+}`, `fn print_summary(title: &str, tags: &[String]) {
+    println!("{title}: {} tags", tags.len());
+}
+
+fn add_tag(tags: &mut Vec<String>, tag: &str) {
+    tags.push(tag.to_owned());
+}
+
+fn main() {
+    let title = String::from("Rust course");
+    let mut tags = vec![String::from("ownership")];
+
+    print_summary(&title, &tags);      // shared borrow: read-only; main still owns title/tags
+    add_tag(&mut tags, "borrowing");   // mutable borrow: temporary exclusive access to tags
+    print_summary(&title, &tags);      // after the borrow ends, the original values are usable
+}`),
+                  [
+                    {
+                      title: t("错误：借用还在用时转移所有权", "Wrong: move ownership while a borrow is still used"),
+                      language: "rust",
+                      code: t(
+                        `fn main() {
+    let title = String::from("Rust course");
+    let view = &title;        // 借用 title
+    let moved = title;        // 试图把所有权 move 走
+    println!("{view}");       // view 还要继续用
+}`,
+                        `fn main() {
+    let title = String::from("Rust course");
+    let view = &title;        // borrows title
+    let moved = title;        // tries to move ownership away
+    println!("{view}");       // view is still used
+}`
+                      ),
+                      error: t(
+                        ["error[E0505]: cannot move out of `title` because it is borrowed", "`view` 还会使用 `title` 的数据，此时不能把 `title` 的所有权转走。"],
+                        ["error[E0505]: cannot move out of `title` because it is borrowed", "`view` still uses data inside `title`, so ownership of `title` cannot be moved away yet."]
+                      ),
+                      explanation: t(
+                        ["借用不是复制。只要某个引用还活着并会被使用，原值就必须留在原处，不能被 move 到别处。"],
+                        ["A borrow is not a copy. While a reference is still alive and used, the original value must stay in place and cannot be moved elsewhere."]
+                      )
+                    },
+                    {
+                      title: t("错误：没有 mut 却想做可变借用", "Wrong: mutable borrow without a mutable binding"),
+                      language: "rust",
+                      code: t(
+                        `fn main() {
+    let tags = vec![String::from("ownership")];
+    add_tag(&mut tags, "borrowing");
+}`,
+                        `fn main() {
+    let tags = vec![String::from("ownership")];
+    add_tag(&mut tags, "borrowing");
+}`
+                      ),
+                      error: t(
+                        ["error[E0596]: cannot borrow `tags` as mutable, as it is not declared as mutable", "`&mut tags` 表示允许函数修改 `tags`，所以绑定本身必须写成 `let mut tags`。"],
+                        ["error[E0596]: cannot borrow `tags` as mutable, as it is not declared as mutable", "`&mut tags` lets the function modify `tags`, so the binding itself must be `let mut tags`."]
+                      ),
+                      explanation: t(
+                        ["Rust 把“是否允许修改”写在调用点：只读传 `&tags`，要改传 `&mut tags`，并且变量要声明为 `mut`。"],
+                        ["Rust makes mutation explicit at the call site: pass `&tags` for read-only access, pass `&mut tags` for mutation, and declare the variable as `mut`."]
+                      )
+                    }
+                  ]
+                ),
                 localizedExample("Rust: 解析后保存 owned 数据", "Rust: parse borrowed input and store owned data", "rust", `#[derive(Debug)]
 struct User {
     normalized_name: String,
@@ -66,7 +149,7 @@ fn create_user(input: &str) -> Result<User, &'static str> {
     Ok(User { normalized_name: normalized })
 }`),
                 withMistakes(
-                  localizedExample("Rust: 用参数类型表达资源归属", "Rust: encode ownership in parameter types", "rust", `// &str 只观察输入；String 拿走所有权并长期保存
+                  localizedExample("Rust: 用参数类型表达资源归属", "Rust: encode ownership in parameter types", "rust", `// &str 只读访问输入；String 拿走所有权并长期保存
 fn observe_len(name: &str) -> usize {
     name.trim().len()
 }
