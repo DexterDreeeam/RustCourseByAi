@@ -6,6 +6,7 @@
   --panel-soft: #161e2d;
   --text: #e6edf7;
   --muted: #9aa8bd;
+  --muted-dim: #6a778f;
   --line: #263247;
   --accent: #7dd3fc;
   --accent-strong: #38bdf8;
@@ -204,10 +205,11 @@ a {
 }
 
 .nav-chapter-title {
-  color: var(--muted);
-  font-size: 0.84rem;
+  color: var(--muted-dim);
+  font-size: 0.7rem;
   font-weight: 700;
-  margin: 0.8rem 0 0.3rem;
+  line-height: 1.2;
+  margin: 0.75rem 0 0.2rem;
 }
 
 .nav-section {
