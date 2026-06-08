@@ -460,6 +460,10 @@ a {
   white-space: nowrap;
 }
 
+.method-signature-code {
+  color: var(--text);
+}
+
 .code-card {
   overflow: hidden;
   border: 1px solid rgba(148, 163, 184, 0.16);
