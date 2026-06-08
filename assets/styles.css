@@ -407,6 +407,33 @@ a {
   min-width: 70rem;
 }
 
+.method-search-results,
+.method-table-groups {
+  display: grid;
+  gap: 1rem;
+}
+
+.method-search-results[hidden],
+.method-table-groups[hidden] {
+  display: none;
+}
+
+.method-search-results h4,
+.method-table-group h4 {
+  color: var(--accent);
+  margin: 0.2rem 0 0.4rem;
+}
+
+.method-table-group {
+  border-top: 1px solid rgba(148, 163, 184, 0.16);
+  padding-top: 0.9rem;
+}
+
+.method-result-table,
+.method-group-table {
+  min-width: 52rem;
+}
+
 .compare-table th,
 .compare-table td {
   border: 1px solid rgba(148, 163, 184, 0.18);

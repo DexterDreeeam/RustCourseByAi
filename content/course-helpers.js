@@ -44,6 +44,13 @@
     searchPlaceholder: t(zhPlaceholder, enPlaceholder)
   });
 
+  const methodTableExample = (zhTitle, enTitle, groups, zhPlaceholder, enPlaceholder) => ({
+    kind: "methodTable",
+    title: t(zhTitle, enTitle),
+    groups,
+    searchPlaceholder: t(zhPlaceholder, enPlaceholder)
+  });
+
   const lesson = ({
     id,
     title,
@@ -64,6 +71,6 @@
     references
   });
 
-  window.Course = { t, block, sharedExample, localizedExample, textExample, tableExample, searchableTableExample, withMistakes, lesson };
+  window.Course = { t, block, sharedExample, localizedExample, textExample, tableExample, searchableTableExample, methodTableExample, withMistakes, lesson };
   window.RUST_COURSE_CHAPTERS = window.RUST_COURSE_CHAPTERS || { beginner: [], advanced: [] };
 })();
