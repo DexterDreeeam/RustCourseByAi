@@ -394,7 +394,6 @@
 
     if (example.kind === "table") {
       const renderCell = (cell, tag) => `<${tag}>${formatInline(pick(cell))}</${tag}>`;
-      const renderSignatureCell = (cell) => `<td>${formatRustSignature(pick(cell))}</td>`;
       return `
         <div class="explanation-card table-card">
           <h3>${escapeHtml(pick(example.title))}</h3>
@@ -432,6 +431,7 @@
 
     if (example.kind === "methodTable") {
       const renderCell = (cell, tag) => `<${tag}>${formatInline(pick(cell))}</${tag}>`;
+      const renderSignatureCell = (cell) => `<td>${formatRustSignature(pick(cell))}</td>`;
       const allRows = example.groups.flatMap((group) =>
         group.rows.map((row) => ({
           group: pick(group.title),
