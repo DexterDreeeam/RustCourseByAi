@@ -6,7 +6,7 @@
   --panel-soft: #161e2d;
   --text: #e6edf7;
   --muted: #9aa8bd;
-  --muted-dim: #4a5266;
+  --nav-chapter: #b89b63;
   --line: #263247;
   --accent: #7dd3fc;
   --accent-strong: #38bdf8;
@@ -205,7 +205,7 @@ a {
 }
 
 .nav-chapter-title {
-  color: var(--muted-dim);
+  color: var(--nav-chapter);
   font-size: 0.7rem;
   font-weight: 700;
   line-height: 1.2;
