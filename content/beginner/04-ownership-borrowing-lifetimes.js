@@ -462,10 +462,10 @@ fn main() {
             }),
             lesson({
               id: "lifetimes-in-practice",
-              title: ["读懂生命周期标注", "Reading lifetimes in practice"],
+              title: ["生命周期标注", "Lifetime annotations"],
               goals: [
-                ["知道 `&'a str`、`fn f<'a>`、`'static` 分别在说什么。", "能从函数签名里看出返回引用依赖哪一个输入。", "能读懂结构体里保存引用时为什么要写生命周期。"],
-                ["Understand what `&'a str`, `fn f<'a>`, and `'static` mean.", "Read from a function signature which input a returned reference depends on.", "Understand why structs storing references need lifetime annotations."]
+                ["知道 `&'a str`、`fn f<'a>`、`'static` 分别在说什么。", "能从函数签名里看出返回值与输入的依赖关系。"],
+                ["Understand what `&'a str`, `fn f<'a>`, and `'static` mean.", "Read the dependency between return values and inputs from a function signature."]
               ],
               syntax: [
                 ["生命周期说的是“一个引用在多长范围内还能安全使用”。它不会让数据活得更久，只是让编译器检查：引用不能比它指向的数据活得更久。", "`'a` 不是字符串、字符或运行时变量，只是一个生命周期参数名。可以把它读成“生命周期 a”或“某个生命周期”；名字也可以写成 `'input`。", "`&'a str` 表示“这个 `str` 引用在生命周期 `'a` 内有效”。`fn first<'a>(x: &'a str, y: &'a str) -> &'a str` 里的 `<'a>` 是声明这个名字，后面的 `&'a` 是把参数和返回值绑到同一个有效期关系上。", "这类签名的意思不是返回值一定来自第一个参数，而是：返回的引用必须来自 `x` 或 `y` 这种至少能活到 `'a` 的输入，调用方不能把返回值用到输入失效之后。", "`'static` 是特殊生命周期，表示引用的数据能活到整个程序结束，例如字符串字面量。普通函数里编译器经常能自动推断生命周期，所以不一定都要手写 `<'a>`；当函数返回引用且有多个输入引用，或结构体字段保存引用时，通常就需要写清楚。"],
@@ -480,7 +480,8 @@ fn main() {
                 ["C++ `string_view` lifetime safety is a caller convention; Rust forces that relationship into types."]
               ],
               examples: [
-                localizedExample("Rust: 从 &'a str 开始读", "Rust: start with &'a str", "rust", `// 读法：'a 是“某个生命周期”的名字。
+                withMistakes(
+                  localizedExample("Rust: 返回值依赖多个输入", "Rust: result depends on multiple inputs", "rust", `// 读法：'a 是“某个生命周期”的名字。
 // x、y 和返回值都写成 &'a str，表示返回值依赖输入数据，
 // 调用方不能让返回值比 x/y 背后的字符串活得更久。
 fn first_non_empty<'a>(x: &'a str, y: &'a str) -> &'a str {
@@ -503,6 +504,96 @@ fn main() {
     let result = first_non_empty(owned.as_str(), "fallback");
     println!("{result}");
 }`),
+                  [
+                    {
+                      title: t("错误：多个输入引用却不说明返回值关系", "Wrong: multiple input references without an output relationship"),
+                      language: "rust",
+                      code: t(
+                        `fn first_non_empty(x: &str, y: &str) -> &str {
+    if x.is_empty() { y } else { x }
+}`,
+                        `fn first_non_empty(x: &str, y: &str) -> &str {
+    if x.is_empty() { y } else { x }
+}`
+                      ),
+                      error: t(
+                        ["error[E0106]: missing lifetime specifier", "返回类型是借用，但签名没有说明它来自 `x` 还是 `y`，编译器不能替你猜。"],
+                        ["error[E0106]: missing lifetime specifier", "The return type is borrowed, but the signature does not say whether it comes from `x` or `y`, so the compiler cannot guess."]
+                      ),
+                      explanation: t(
+                        ["写成 `fn first_non_empty<'a>(x: &'a str, y: &'a str) -> &'a str`，就是告诉调用方：返回值依赖这两个输入中仍然有效的那一份数据。"],
+                        ["Writing `fn first_non_empty<'a>(x: &'a str, y: &'a str) -> &'a str` tells callers that the result depends on input data that is still valid for `'a`."]
+                      )
+                    },
+                    {
+                      title: t("错误：返回局部变量的引用", "Wrong: return a reference to a local variable"),
+                      language: "rust",
+                      code: t(
+                        `fn make_name<'a>() -> &'a str {
+    let name = String::from("rust");
+    name.as_str()
+}`,
+                        `fn make_name<'a>() -> &'a str {
+    let name = String::from("rust");
+    name.as_str()
+}`
+                      ),
+                      error: t(
+                        ["error[E0515]: cannot return value referencing local variable `name`", "`name` 在函数结束时释放，返回出去的 `&str` 会指向已经不存在的字符串。"],
+                        ["error[E0515]: cannot return value referencing local variable `name`", "`name` is dropped when the function ends, so the returned `&str` would point at a string that no longer exists."]
+                      ),
+                      explanation: t(
+                        ["生命周期标注不能延长局部变量的生命。这里应该返回 owned 的 `String`，或者返回字符串字面量这种 `&'static str`。"],
+                        ["A lifetime annotation cannot extend a local variable's life. Return an owned `String`, or return a string literal as `&'static str`."]
+                      )
+                    }
+                  ]
+                ),
+                withMistakes(
+                  localizedExample("Rust: 返回值只依赖一个输入", "Rust: result depends on one input", "rust", `// 返回值一定是 text 的一部分，所以只需要把返回值和 text 绑在一起。
+// prefix 只是用来判断，不会被返回，因此不需要写成 &'text str。
+fn strip_known_prefix<'text>(text: &'text str, prefix: &str) -> &'text str {
+    text.strip_prefix(prefix).unwrap_or(text)
+}
+
+fn main() {
+    let line = String::from("error: disk full");
+    let message = strip_known_prefix(line.as_str(), "error: ");
+    println!("{message}");
+}`, `// The result is always part of text, so only the result and text are tied together.
+// prefix is only used for checking and is not returned, so it does not need &'text str.
+fn strip_known_prefix<'text>(text: &'text str, prefix: &str) -> &'text str {
+    text.strip_prefix(prefix).unwrap_or(text)
+}
+
+fn main() {
+    let line = String::from("error: disk full");
+    let message = strip_known_prefix(line.as_str(), "error: ");
+    println!("{message}");
+}`),
+                  [
+                    {
+                      title: t("错误：签名说返回 text，却可能返回 prefix", "Wrong: the signature promises text but may return prefix"),
+                      language: "rust",
+                      code: t(
+                        `fn bad_prefix<'text>(text: &'text str, prefix: &str) -> &'text str {
+    if text.starts_with(prefix) { prefix } else { text }
+}`,
+                        `fn bad_prefix<'text>(text: &'text str, prefix: &str) -> &'text str {
+    if text.starts_with(prefix) { prefix } else { text }
+}`
+                      ),
+                      error: t(
+                        ["error: lifetime may not live long enough", "签名承诺返回值和 `text` 一样久，但 `prefix` 有自己的生命周期，不能当作 `&'text str` 返回。"],
+                        ["error: lifetime may not live long enough", "The signature promises a result valid as long as `text`, but `prefix` has its own lifetime and cannot be returned as `&'text str`."]
+                      ),
+                      explanation: t(
+                        ["生命周期标注要和真实数据来源一致。如果可能返回 `prefix`，就不能把返回值只标成依赖 `text`。"],
+                        ["Lifetime annotations must match the real data source. If the function may return `prefix`, the result cannot be annotated as depending only on `text`."]
+                      )
+                    }
+                  ]
+                ),
                 localizedExample("Rust: Header 视图和默认值", "Rust: header view with fallback", "rust", `struct Header<'a> {
     name: &'a str,
     value: &'a str,
