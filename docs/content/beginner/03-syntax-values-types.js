@@ -1,5 +1,5 @@
 (function () {
-  const { t, sharedExample, localizedExample, withMistakes, lesson } = window.Course;
+  const { t, sharedExample, localizedExample, tableExample, withMistakes, lesson } = window.Course;
   window.RUST_COURSE_CHAPTERS.beginner.push({
           id: "syntax-values-types",
           title: t("基础语法、值与类型", "Syntax, values, and types"),
@@ -271,8 +271,8 @@ fn parse_config(raw_host: &str, raw_port: &str, raw_workers: &str) -> ServerConf
                 ["Public APIs should prefer `&str` or slices and allocate owned values only when storing.", "Choose collections from the access pattern: use `Vec<T>` for ordered, indexed, push-to-end access (order); `HashMap<K,V>`/`HashSet<T>` for fast key lookup or membership tests (lookup); `BTreeMap`/`BTreeSet` to keep entries sorted with range queries (sorting); and `VecDeque<T>` for FIFO or double-ended queues (queue)."]
               ],
               cppComparison: [
-                ["`&str` 接近 `std::string_view`，`&[T]` 接近 span；不同的是，Rust 会检查这些 view 不会比原始数据活得更久。"],
-                ["`&str` resembles `std::string_view`, and `&[T]` resembles span; Rust checks that views cannot outlive sources."]
+                ["`&str` 接近 `std::string_view`，`&[T]` 接近 span；不同的是，Rust 会检查这些 view 不会比原始数据活得更久。", "常用集合大多能在 C++ 标准库找到对应：`Vec<T>`↔`std::vector`、`VecDeque<T>`↔`std::deque`、`HashMap`/`HashSet`↔`std::unordered_map`/`unordered_set`、`BTreeMap`/`BTreeSet`↔有序的 `std::map`/`std::set`。差别在于 Rust 用所有权和借用规则约束谁能改、能借多久；完整对照见本页下方的表格。"],
+                ["`&str` resembles `std::string_view`, and `&[T]` resembles span; Rust checks that views cannot outlive sources.", "Most collections map to the C++ standard library: `Vec<T>`↔`std::vector`, `VecDeque<T>`↔`std::deque`, `HashMap`/`HashSet`↔`std::unordered_map`/`unordered_set`, and `BTreeMap`/`BTreeSet`↔ordered `std::map`/`std::set`. The difference is that Rust's ownership and borrowing rules govern who may mutate and for how long; see the full comparison table at the bottom of this page."]
               ],
               examples: [
                 withMistakes(
@@ -328,7 +328,22 @@ fn main() {
     let ports = vec![80, 443, 8080];
     let common = first_two_ports(&ports);
     println!("{common:?}");
-}`)
+}`),
+                tableExample("Rust 与 C++ 常用集合对照", "Rust vs C++ common collections",
+                  [t("Rust 类型", "Rust type"), t("C++ 标准库", "C++ standard library"), t("用途与特点", "Use case / notes")],
+                  [
+                    ["`Vec<T>`", "`std::vector<T>`", t("连续动态数组；尾部增删快，下标访问 O(1)", "Contiguous growable array; fast push/pop at the end, O(1) indexing")],
+                    ["`VecDeque<T>`", "`std::deque<T>`", t("双端队列；两端进出都快", "Double-ended queue; fast push/pop at both ends")],
+                    ["`String` / `&str`", "`std::string` / `std::string_view`", t("拥有的 UTF-8 字符串 / 借用视图", "Owned UTF-8 string / borrowed view")],
+                    ["`&[T]`", "`std::span<T>`（C++20）", t("slice：连续数据的借用视图", "Slice: a borrowed view over contiguous data")],
+                    ["`HashMap<K, V>`", "`std::unordered_map<K, V>`", t("哈希表；平均 O(1) 查找，元素无序", "Hash map; average O(1) lookup, unordered")],
+                    ["`HashSet<T>`", "`std::unordered_set<T>`", t("哈希集合；去重、判断是否存在", "Hash set; dedup and membership tests")],
+                    ["`BTreeMap<K, V>`", "`std::map<K, V>`", t("有序映射；支持范围查询（Rust 用 B-tree，C++ 用红黑树）", "Ordered map with range queries (Rust uses a B-tree, C++ a red-black tree)")],
+                    ["`BTreeSet<T>`", "`std::set<T>`", t("有序集合", "Ordered set")],
+                    ["`BinaryHeap<T>`", "`std::priority_queue<T>`", t("二叉堆；快速取出最大值", "Binary heap; pop the max quickly")],
+                    ["`LinkedList<T>`", "`std::list<T>`", t("双向链表；实际很少需要", "Doubly linked list; rarely needed in practice")]
+                  ]
+                )
               ],
               references: ["BurntSushi/ripgrep"]
             })
