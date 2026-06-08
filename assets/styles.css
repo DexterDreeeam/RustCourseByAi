@@ -478,7 +478,7 @@ pre {
 }
 
 code {
-  font-family: "Cascadia Code", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-family: "Cascadia Code", "SFMono-Regular", Consolas, "Liberation Mono", "Microsoft YaHei", "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC", "Noto Sans SC", monospace;
   font-size: 0.9rem;
 }
 
