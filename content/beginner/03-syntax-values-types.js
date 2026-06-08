@@ -97,6 +97,165 @@ fn parse_config(raw_host: &str, raw_port: &str, raw_workers: &str) -> ServerConf
               references: ["rust-lang/rust"]
             }),
             lesson({
+              id: "scalar-compound-types",
+              title: ["标量与复合类型", "Scalar and compound types"],
+              goals: [
+                ["认识 Rust 的标量类型：定长整数、浮点、`bool`、`char`，看清它们和 C++ 内置类型的差异。", "认识复合类型 tuple 和定长 array，知道它们何时直接存在栈上。"],
+                ["Know Rust's scalar types: fixed-width integers, floats, `bool`, and `char`, and how they differ from C++ built-ins.", "Know the compound types `tuple` and fixed-size `array`, and when they live directly on the stack."]
+              ],
+              syntax: [
+                ["整数把位宽和符号写进类型名：`i8/i16/i32/i64/i128/isize` 有符号，`u8/u16/u32/u64/u128/usize` 无符号；不标类型时默认推断成 `i32`。`usize`/`isize` 按指针宽度走，专门用于下标、长度和容量。", "浮点只有 `f32` 和 `f64`（默认 `f64`）；`bool` 占 1 字节；`char` 占 4 字节，是一个 Unicode scalar value，而不是 C++ 里的一个字节。字面量可以用 `_` 分隔（`1_000_000`）、写进制（`0xff`、`0o77`、`0b1010`）、带后缀（`42u8`、`3.14f32`）。", "复合类型里，tuple 把若干不同类型的值打包成一个值，`()` 是空 tuple（unit 类型）；array 是 `[T; N]`，定长、同类型、连续存放，越界访问会 panic 而不是读到脏数据。"],
+                ["Integers bake width and sign into the type name: `i8/i16/i32/i64/i128/isize` are signed, the `u*` family is unsigned, and an unannotated literal defaults to `i32`. `usize`/`isize` are pointer-sized and used for indices, lengths, and capacities.", "Floats are only `f32`/`f64` (default `f64`); `bool` is one byte; `char` is four bytes and holds a Unicode scalar value, not a single byte like C++. Literals allow `_` separators, `0x/0o/0b` bases, and type suffixes such as `42u8` or `3.14f32`.", "For compound types, a tuple packs several differently typed values into one value (`()` is the unit type), and an array `[T; N]` is fixed-length, same-typed, and contiguous; out-of-bounds access panics instead of reading garbage."]
+              ],
+              engineering: [
+                ["选整数类型要看语义边界：协议字段、字节缓冲用 `u8`/`u16` 这种明确宽度；下标、长度、容量统一用 `usize`，避免和有符号类型来回转换。", "Rust 没有隐式数值转换，跨类型运算都要显式 `as` 或 `try_into()`；这看着啰嗦，但能让截断和符号变化在 code review 时一眼看出来。"],
+                ["Pick integer types from semantics: protocol fields and byte buffers use `u8`/`u16`, while indices, lengths, and capacities use `usize` to avoid signed/unsigned churn.", "Rust has no implicit numeric conversion, so every cross-type operation needs `as` or `try_into()`; it looks verbose but makes truncation and sign changes obvious during review."]
+              ],
+              cppComparison: [
+                ["C++ 的 `int`、`long` 宽度依平台而定，Rust 把位宽写进类型名，跨平台行为一致。`usize` 对应 `size_t`；`char` 在 C++ 是一个字节，在 Rust 是 4 字节的 Unicode scalar，要表示一个原始字节用 `u8`。", "C++ 整数溢出是未定义行为，Rust 把它定义清楚了：debug build 直接 panic，release build 按二进制补码 wrap，并提供 `checked_/wrapping_/saturating_/overflowing_` 系列方法显式选择行为。"],
+                ["C++ `int`/`long` widths are platform-dependent; Rust bakes the width into the type name for consistent cross-platform behavior. `usize` maps to `size_t`; `char` is one byte in C++ but a 4-byte Unicode scalar in Rust, so use `u8` for a raw byte.", "Integer overflow is UB in C++ but defined in Rust: debug builds panic, release builds wrap with two's complement, and the `checked_/wrapping_/saturating_/overflowing_` methods let you choose explicitly."]
+              ],
+              examples: [
+                withMistakes(
+                  localizedExample("Rust: 标量与复合类型", "Rust: scalar and compound types", "rust", `fn describe_packet() {
+    // 定长整数：协议里常见的无符号字节与端口
+    let version: u8 = 4;
+    let port: u16 = 8080;
+    let payload_len: usize = 1024; // 长度与下标统一用 usize
+
+    // 浮点、布尔、字符
+    let ratio: f64 = 0.75;
+    let is_tls: bool = true;
+    let marker: char = '中'; // char 是 4 字节 Unicode scalar，放得下非 ASCII
+
+    // tuple：把不同类型打包成一个值
+    let header: (u8, u16, usize) = (version, port, payload_len);
+    let (v, p, len) = header; // 解构出三个绑定
+
+    // array：定长、同类型、连续存放，越界会 panic
+    let ports: [u16; 3] = [80, 443, 8080];
+    let first = ports[0];
+
+    println!("{v} {p} {len} {ratio} {is_tls} {marker} {first}");
+}`, `fn describe_packet() {
+    // Fixed-width integers: a common unsigned byte and port in protocols
+    let version: u8 = 4;
+    let port: u16 = 8080;
+    let payload_len: usize = 1024; // lengths and indices use usize
+
+    // Float, bool, and char
+    let ratio: f64 = 0.75;
+    let is_tls: bool = true;
+    let marker: char = 'λ'; // char is a 4-byte Unicode scalar, not one byte
+
+    // Tuple: pack values of different types into one value
+    let header: (u8, u16, usize) = (version, port, payload_len);
+    let (v, p, len) = header; // destructure into three bindings
+
+    // Array: fixed-length, same-typed, contiguous; out-of-bounds panics
+    let ports: [u16; 3] = [80, 443, 8080];
+    let first = ports[0];
+
+    println!("{v} {p} {len} {ratio} {is_tls} {marker} {first}");
+}`),
+                  [
+                    {
+                      title: t("错误：不同整数类型直接相加", "Wrong: add different integer types directly"),
+                      language: "rust",
+                      code: t(
+                        `fn total(a: i32, b: i64) -> i64 {
+    a + b
+}`,
+                        `fn total(a: i32, b: i64) -> i64 {
+    a + b
+}`
+                      ),
+                      error: t(
+                        ["error[E0308]: mismatched types", "`a` 是 `i32`、`b` 是 `i64`，Rust 不会自动把窄类型提升到宽类型，需要显式写成 `a as i64 + b`。"],
+                        ["error[E0308]: mismatched types", "`a` is `i32` and `b` is `i64`; Rust will not auto-promote the narrower type, so write `a as i64 + b` explicitly."]
+                      ),
+                      explanation: t(
+                        ["Rust 没有隐式数值转换；显式 `as` 或 `try_into()` 让宽度变化在 review 时一眼可见，避免悄悄发生截断或符号翻转。"],
+                        ["Rust has no implicit numeric conversion; explicit `as` or `try_into()` makes width changes visible in review and avoids silent truncation or sign flips."]
+                      )
+                    },
+                    {
+                      title: t("错误：用双引号写 char", "Wrong: use double quotes for a char"),
+                      language: "rust",
+                      code: t(
+                        `fn marker() -> char {
+    "x"
+}`,
+                        `fn marker() -> char {
+    "x"
+}`
+                      ),
+                      error: t(
+                        ["error[E0308]: mismatched types: expected `char`, found `&str`", "双引号写出来的是字符串 slice `&str`，单个字符要用单引号 `'x'`。"],
+                        ["error[E0308]: mismatched types: expected `char`, found `&str`", "Double quotes produce a string slice `&str`; a single character needs single quotes `'x'`."]
+                      ),
+                      explanation: t(
+                        ["`char` 是一个 Unicode scalar，用单引号；`\"x\"` 是长度可变的字符串视图，两者是完全不同的类型。"],
+                        ["A `char` is a single Unicode scalar written with single quotes; `\"x\"` is a variable-length string view, an entirely different type."]
+                      )
+                    },
+                    {
+                      title: t("错误：忽略整数溢出", "Wrong: ignore integer overflow"),
+                      language: "rust",
+                      code: t(
+                        `fn next_id(id: u8) -> u8 {
+    id + 1
+}`,
+                        `fn next_id(id: u8) -> u8 {
+    id + 1
+}`
+                      ),
+                      error: t(
+                        ["thread 'main' panicked at 'attempt to add with overflow'（debug build）", "`u8` 最大是 255，`next_id(255)` 在 debug build 会直接 panic；release build 则会 wrap 成 0。"],
+                        ["thread 'main' panicked at 'attempt to add with overflow' (debug build)", "`u8` maxes out at 255, so `next_id(255)` panics in a debug build and wraps to 0 in release."]
+                      ),
+                      explanation: t(
+                        ["溢出在 Rust 是被定义的行为，但默认会 panic 提醒你；想明确选择行为就用 `checked_add`/`wrapping_add`/`saturating_add`。"],
+                        ["Overflow is defined behavior in Rust but panics by default to warn you; choose behavior explicitly with `checked_add`/`wrapping_add`/`saturating_add`."]
+                      )
+                    }
+                  ]
+                ),
+                localizedExample("Rust: 显式选择溢出行为", "Rust: choose overflow behavior explicitly", "rust", `fn main() {
+    let x: u8 = 250;
+
+    // 溢出时返回 None，强制调用方处理
+    println!("{:?}", x.checked_add(10));
+
+    // 按 2^8 取模 wrap（release build 的默认行为）
+    println!("{}", x.wrapping_add(10));
+
+    // 饱和：超过上界就停在 255
+    println!("{}", x.saturating_add(10));
+
+    // 同时拿到结果和“是否溢出”的标志
+    let (value, overflowed) = x.overflowing_add(10);
+    println!("{value} {overflowed}");
+}`, `fn main() {
+    let x: u8 = 250;
+
+    // Returns None on overflow, forcing the caller to handle it
+    println!("{:?}", x.checked_add(10));
+
+    // Wraps modulo 2^8 (the default in release builds)
+    println!("{}", x.wrapping_add(10));
+
+    // Saturates: stops at the upper bound 255
+    println!("{}", x.saturating_add(10));
+
+    // Get both the result and an overflow flag
+    let (value, overflowed) = x.overflowing_add(10);
+    println!("{value} {overflowed}");
+}`)
+              ],
+              references: ["rust-lang/rust"]
+            }),
+            lesson({
               id: "strings-slices-collections",
               title: ["String、slice 与常用集合", "String, slices, and common collections"],
               goals: [
