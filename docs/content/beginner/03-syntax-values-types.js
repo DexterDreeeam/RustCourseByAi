@@ -20,8 +20,8 @@
                 ["Pick integer types from semantics: protocol fields and byte buffers use `u8`/`u16`, while indices, lengths, and capacities use `usize` to avoid signed/unsigned churn.", "Rust has no implicit numeric conversion, so every cross-type operation needs `as` or `try_into()`; it looks verbose but makes truncation and sign changes obvious during review."]
               ],
               cppComparison: [
-                ["C++ 的 `int`、`long` 宽度依平台而定，Rust 把位宽写进类型名，跨平台行为一致。`usize` 对应 `size_t`；`char` 在 C++ 是一个字节，在 Rust 是 4 字节，要表示一个原始字节用 `u8`。", "C++ 整数溢出是未定义行为，Rust 把它定义清楚了：debug build 直接 panic，release build 按二进制补码 wrap，并提供 `checked_/wrapping_/saturating_/overflowing_` 系列方法显式选择行为。"],
-                ["C++ `int`/`long` widths are platform-dependent; Rust bakes the width into the type name for consistent cross-platform behavior. `usize` maps to `size_t`; `char` is one byte in C++ but 4 bytes in Rust, so use `u8` for a raw byte.", "Integer overflow is UB in C++ but defined in Rust: debug builds panic, release builds wrap with two's complement, and the `checked_/wrapping_/saturating_/overflowing_` methods let you choose explicitly."]
+                ["C++ 的 `int`、`long` 宽度依平台而定，Rust 把位宽写进类型名，跨平台行为一致。`usize` 对应 `size_t`；`char` 在 C++ 是一个字节，在 Rust 是 4 字节，要表示一个原始字节用 `u8`。", "C++ 整数溢出是未定义行为，Rust 把它定义清楚了：默认 debug build 直接 panic，release build 按二进制补码 wrap——这由 `overflow-checks` 标志控制，可在 release profile 里开启让它也 panic；另外提供 `checked_/wrapping_/saturating_/overflowing_` 系列方法显式选择行为。"],
+                ["C++ `int`/`long` widths are platform-dependent; Rust bakes the width into the type name for consistent cross-platform behavior. `usize` maps to `size_t`; `char` is one byte in C++ but 4 bytes in Rust, so use `u8` for a raw byte.", "Integer overflow is UB in C++ but defined in Rust: by default debug builds panic and release builds wrap with two's complement — this is controlled by the `overflow-checks` flag, which you can enable in the release profile to panic there too — and the `checked_/wrapping_/saturating_/overflowing_` methods let you choose explicitly."]
               ],
               examples: [
                 withMistakes(
