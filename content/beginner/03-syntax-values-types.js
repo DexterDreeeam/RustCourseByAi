@@ -5,98 +5,6 @@
           title: t("基础语法、值与类型", "Syntax, values, and types"),
           sections: [
             lesson({
-              id: "bindings-mutability-shadowing",
-              title: ["绑定、可变性与 shadowing", "Bindings, mutability, and shadowing"],
-              goals: [
-                ["理解 `let` 绑定不是 C++ 变量声明的简单替代。", "用 shadowing 表达一步步 normalization：从原始输入变成可用配置。"],
-                ["Understand `let` bindings as more than C++ variable declarations.", "Use shadowing to express step-by-step normalization."]
-              ],
-              syntax: [
-                ["Rust 默认不可变，`mut` 明确标出哪里会改值；shadowing 会创建一个新的同名绑定，也可以改变类型。", "`const` 是编译时就确定的常量，`static` 是有固定地址的全局值。"],
-                ["Rust is immutable by default; `mut` marks state changes; shadowing creates a new binding and may change type.", "`const` is a compile-time constant, while `static` is a global value with a fixed address."]
-              ],
-              engineering: [
-                ["配置解析、CLI 参数清洗、路径 normalization 都适合用 shadowing 表达从 raw input 到 typed value 的过程。", "代码审查时看到 `mut` 就应该问：这个状态变化是否必要，作用域是否足够小。"],
-                ["Config parsing, CLI cleanup, and path normalization fit shadowing from raw input to typed values.", "During review, every `mut` should trigger the question: is this mutation necessary and scoped tightly?"]
-              ],
-              cppComparison: [
-                ["C++ 也能用 `const` 写不可变风格，但 Rust 把不可变作为默认值，减少了团队纪律成本。"],
-                ["C++ can use `const` for immutable style, but Rust makes immutability the default and reduces reliance on team discipline."]
-              ],
-              examples: [
-                withMistakes(
-                  localizedExample("Rust: CLI config normalization", "Rust: CLI config normalization", "rust", `#[derive(Debug)]
-struct ServerConfig {
-    host: String,
-    port: u16,
-    workers: usize,
-}
-
-fn parse_config(raw_host: &str, raw_port: &str, raw_workers: &str) -> ServerConfig {
-    let host = raw_host.trim();
-    let host = if host.is_empty() { "127.0.0.1" } else { host };
-    // 上面这一行是 shadowing：创建新的 host 绑定，覆盖同名旧绑定；不是修改旧变量。
-
-    let port = raw_port.trim();
-    let port: u16 = port.parse().expect("port must be a number");
-
-    let workers = raw_workers.trim();
-    let workers: usize = workers.parse().unwrap_or(4);
-
-    // 每一步 shadowing 都让值更接近最终需要的强类型配置。
-    ServerConfig { host: host.to_owned(), port, workers }
-}`, `#[derive(Debug)]
-struct ServerConfig {
-    host: String,
-    port: u16,
-    workers: usize,
-}
-
-fn parse_config(raw_host: &str, raw_port: &str, raw_workers: &str) -> ServerConfig {
-    let host = raw_host.trim();
-    let host = if host.is_empty() { "127.0.0.1" } else { host };
-    // This is shadowing: create a new host binding with the same name; do not mutate the old one.
-
-    let port = raw_port.trim();
-    let port: u16 = port.parse().expect("port must be a number");
-
-    let workers = raw_workers.trim();
-    let workers: usize = workers.parse().unwrap_or(4);
-
-    // Each shadowing step narrows meaning until we have typed config.
-    ServerConfig { host: host.to_owned(), port, workers }
-}`),
-                  [
-                    {
-                      title: t("错误：修改不可变绑定", "Wrong: mutate an immutable binding"),
-                      language: "rust",
-                      code: t(
-                        `fn normalize_port(raw: &str) -> u16 {
-    let port = raw.trim();
-    port = "8080";
-    port.parse().unwrap()
-}`,
-                        `fn normalize_port(raw: &str) -> u16 {
-    let port = raw.trim();
-    port = "8080";
-    port.parse().unwrap()
-}`
-                      ),
-                      error: t(
-                        ["error[E0384]: cannot assign twice to immutable variable `port`", "`let port` 默认不可变；如果要重新绑定，应该写新的 `let port = ...`，如果要原地修改才使用 `mut`。"],
-                        ["error[E0384]: cannot assign twice to immutable variable `port`", "`let port` is immutable by default; use a new `let port = ...` binding for shadowing, or `mut` only for true in-place mutation."]
-                      ),
-                      explanation: t(
-                        ["这里想表达的是 normalization 的步骤，不是反复修改同一个变量；shadowing 比 `mut` 更能说明每一步的含义变化。"],
-                        ["This is a normalization pipeline, not repeated mutation of one variable; shadowing communicates each meaning change better than `mut`."]
-                      )
-                    }
-                  ]
-                )
-              ],
-              references: ["rust-lang/rust"]
-            }),
-            lesson({
               id: "scalar-compound-types",
               title: ["标量与复合类型", "Scalar and compound types"],
               goals: [
@@ -252,6 +160,98 @@ fn parse_config(raw_host: &str, raw_port: &str, raw_workers: &str) -> ServerConf
     let (value, overflowed) = x.overflowing_add(10);
     println!("{value} {overflowed}");
 }`)
+              ],
+              references: ["rust-lang/rust"]
+            }),
+            lesson({
+              id: "bindings-mutability-shadowing",
+              title: ["绑定、可变性与 shadowing", "Bindings, mutability, and shadowing"],
+              goals: [
+                ["理解 `let` 绑定不是 C++ 变量声明的简单替代。", "用 shadowing 表达一步步 normalization：从原始输入变成可用配置。"],
+                ["Understand `let` bindings as more than C++ variable declarations.", "Use shadowing to express step-by-step normalization."]
+              ],
+              syntax: [
+                ["Rust 默认不可变，`mut` 明确标出哪里会改值；shadowing 会创建一个新的同名绑定，也可以改变类型。", "`const` 是编译时就确定的常量，`static` 是有固定地址的全局值。"],
+                ["Rust is immutable by default; `mut` marks state changes; shadowing creates a new binding and may change type.", "`const` is a compile-time constant, while `static` is a global value with a fixed address."]
+              ],
+              engineering: [
+                ["配置解析、CLI 参数清洗、路径 normalization 都适合用 shadowing 表达从 raw input 到 typed value 的过程。", "代码审查时看到 `mut` 就应该问：这个状态变化是否必要，作用域是否足够小。"],
+                ["Config parsing, CLI cleanup, and path normalization fit shadowing from raw input to typed values.", "During review, every `mut` should trigger the question: is this mutation necessary and scoped tightly?"]
+              ],
+              cppComparison: [
+                ["C++ 也能用 `const` 写不可变风格，但 Rust 把不可变作为默认值，减少了团队纪律成本。"],
+                ["C++ can use `const` for immutable style, but Rust makes immutability the default and reduces reliance on team discipline."]
+              ],
+              examples: [
+                withMistakes(
+                  localizedExample("Rust: CLI config normalization", "Rust: CLI config normalization", "rust", `#[derive(Debug)]
+struct ServerConfig {
+    host: String,
+    port: u16,
+    workers: usize,
+}
+
+fn parse_config(raw_host: &str, raw_port: &str, raw_workers: &str) -> ServerConfig {
+    let host = raw_host.trim();
+    let host = if host.is_empty() { "127.0.0.1" } else { host };
+    // 上面这一行是 shadowing：创建新的 host 绑定，覆盖同名旧绑定；不是修改旧变量。
+
+    let port = raw_port.trim();
+    let port: u16 = port.parse().expect("port must be a number");
+
+    let workers = raw_workers.trim();
+    let workers: usize = workers.parse().unwrap_or(4);
+
+    // 每一步 shadowing 都让值更接近最终需要的强类型配置。
+    ServerConfig { host: host.to_owned(), port, workers }
+}`, `#[derive(Debug)]
+struct ServerConfig {
+    host: String,
+    port: u16,
+    workers: usize,
+}
+
+fn parse_config(raw_host: &str, raw_port: &str, raw_workers: &str) -> ServerConfig {
+    let host = raw_host.trim();
+    let host = if host.is_empty() { "127.0.0.1" } else { host };
+    // This is shadowing: create a new host binding with the same name; do not mutate the old one.
+
+    let port = raw_port.trim();
+    let port: u16 = port.parse().expect("port must be a number");
+
+    let workers = raw_workers.trim();
+    let workers: usize = workers.parse().unwrap_or(4);
+
+    // Each shadowing step narrows meaning until we have typed config.
+    ServerConfig { host: host.to_owned(), port, workers }
+}`),
+                  [
+                    {
+                      title: t("错误：修改不可变绑定", "Wrong: mutate an immutable binding"),
+                      language: "rust",
+                      code: t(
+                        `fn normalize_port(raw: &str) -> u16 {
+    let port = raw.trim();
+    port = "8080";
+    port.parse().unwrap()
+}`,
+                        `fn normalize_port(raw: &str) -> u16 {
+    let port = raw.trim();
+    port = "8080";
+    port.parse().unwrap()
+}`
+                      ),
+                      error: t(
+                        ["error[E0384]: cannot assign twice to immutable variable `port`", "`let port` 默认不可变；如果要重新绑定，应该写新的 `let port = ...`，如果要原地修改才使用 `mut`。"],
+                        ["error[E0384]: cannot assign twice to immutable variable `port`", "`let port` is immutable by default; use a new `let port = ...` binding for shadowing, or `mut` only for true in-place mutation."]
+                      ),
+                      explanation: t(
+                        ["这里想表达的是 normalization 的步骤，不是反复修改同一个变量；shadowing 比 `mut` 更能说明每一步的含义变化。"],
+                        ["This is a normalization pipeline, not repeated mutation of one variable; shadowing communicates each meaning change better than `mut`."]
+                      )
+                    }
+                  ]
+                )
               ],
               references: ["rust-lang/rust"]
             }),
