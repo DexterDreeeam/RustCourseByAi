@@ -16,6 +16,7 @@
       engineering: "工程用法",
       comparison: "Rust 与 C++ 对照",
       examples: "代码示例",
+      tables: "速查表",
       references: "参考项目",
       previous: "上一节",
       next: "下一节",
@@ -30,6 +31,7 @@
       engineering: "Engineering usage",
       comparison: "Rust vs C++",
       examples: "Code examples",
+      tables: "Reference tables",
       references: "Reference projects",
       previous: "Previous",
       next: "Next",
@@ -345,14 +347,21 @@
   }
 
   function renderExamples(examples) {
+    const heading = (examples || []).every((example) => example.kind === "table" || example.kind === "searchableTable")
+      ? labels[state.language].tables
+      : labels[state.language].examples;
     return `
       <section class="examples">
-        <h2>${labels[state.language].examples}</h2>
+        <h2>${heading}</h2>
         <div class="examples-grid">
           ${(examples || []).map(renderExample).join("")}
         </div>
       </section>
     `;
+  }
+
+  function cellText(cell) {
+    return pick(cell);
   }
 
   function renderExample(example) {
@@ -375,6 +384,28 @@
             <table class="compare-table">
               <thead><tr>${example.headers.map((header) => renderCell(header, "th")).join("")}</tr></thead>
               <tbody>${example.rows.map((row) => `<tr>${row.map((cell) => renderCell(cell, "td")).join("")}</tr>`).join("")}</tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    if (example.kind === "searchableTable") {
+      const renderCell = (cell, tag) => `<${tag}>${formatInline(pick(cell))}</${tag}>`;
+      return `
+        <div class="explanation-card table-card searchable-table-card">
+          <h3>${escapeHtml(pick(example.title))}</h3>
+          <label class="table-search">
+            <span>${escapeHtml(pick(example.searchPlaceholder))}</span>
+            <input class="table-search-input" type="search" data-table-search placeholder="${escapeHtml(pick(example.searchPlaceholder))}">
+          </label>
+          <div class="table-scroll">
+            <table class="compare-table searchable-table">
+              <thead><tr>${example.headers.map((header) => renderCell(header, "th")).join("")}</tr></thead>
+              <tbody>${example.rows.map((row) => {
+                const searchText = row.map(cellText).join(" ").toLowerCase();
+                return `<tr data-search="${escapeHtml(searchText)}">${row.map((cell) => renderCell(cell, "td")).join("")}</tr>`;
+              }).join("")}</tbody>
             </table>
           </div>
         </div>
@@ -483,6 +514,15 @@
     if (next) {
       nextButton.addEventListener("click", () => setSection(next.section.id, true));
     }
+    root.querySelectorAll("[data-table-search]").forEach((input) => {
+      input.addEventListener("input", () => {
+        const card = input.closest(".searchable-table-card");
+        const query = input.value.trim().toLowerCase();
+        card.querySelectorAll("[data-search]").forEach((row) => {
+          row.hidden = query && !row.dataset.search.includes(query);
+        });
+      });
+    });
   }
 
   function setSection(id, updateHash) {

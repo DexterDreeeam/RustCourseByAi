@@ -1,5 +1,5 @@
 (function () {
-  const { t, sharedExample, localizedExample, tableExample, withMistakes, lesson } = window.Course;
+  const { t, sharedExample, localizedExample, tableExample, searchableTableExample, withMistakes, lesson } = window.Course;
   window.RUST_COURSE_CHAPTERS.beginner.push({
           id: "syntax-values-types",
           title: t("基础语法、值与类型", "Syntax, values, and types"),
@@ -351,160 +351,109 @@ fn main() {
               id: "common-method-vocabulary",
               title: ["常用方法速查", "Common method vocabulary"],
               goals: [
-                ["知道常见方法名在表达什么动作。", "能读懂 `entry().or_insert()`、`to_owned()`、`to_ascii_lowercase()`、`as_str()`、`unwrap_or()` 这类链式调用。"],
-                ["Recognize what common method names are doing.", "Read chains such as `entry().or_insert()`, `to_owned()`, `to_ascii_lowercase()`, `as_str()`, and `unwrap_or()`."]
+                ["用表格查询常见方法的接口类型、输入参数和返回值。", "用搜索栏按方法名、类型、参数或返回值过滤。"],
+                ["Look up common methods by interface type, input parameters, and return type.", "Use the search box to filter by method, type, parameter, or return type."]
               ],
               syntax: [
-                ["先按前缀读：`as_` 通常是临时借用视图或廉价转换，例如 `as_str()` 把 `String` 当成 `&str` 用；`to_` 通常会生成新值或 owned 数据，例如 `to_owned()`、`to_string()`、`to_ascii_lowercase()`；`into_` 通常会消费原值并转换所有权。", "`entry(key).or_insert(default)` 是 `HashMap` 的“查找或插入”写法：如果 key 已存在就返回已有 value 的可变引用；不存在就插入 default，再返回这个新 value 的可变引用。", "`unwrap()` 是把 `Option`/`Result` 里的值直接取出来，失败就 panic；入门阶段更常见也更安全的读法是 `unwrap_or(default)` 提供默认值，或者 `expect(\"message\")` 让 panic 信息更清楚。", "`wrap` 本身不是常见通用方法；你更可能看到 `wrapping_add`、`wrapping_sub`，意思是整数溢出时按位宽回绕。`unwrap` 则是另一件事：拆开 `Option` 或 `Result`。"],
-                ["Read prefixes first: `as_` usually means a temporary borrowed view or cheap conversion, such as `as_str()` viewing a `String` as `&str`; `to_` usually creates a new value or owned data, such as `to_owned()`, `to_string()`, or `to_ascii_lowercase()`; `into_` usually consumes the original value and converts ownership.", "`entry(key).or_insert(default)` is the `HashMap` find-or-insert pattern: if the key exists, it returns a mutable reference to the existing value; otherwise it inserts the default and returns a mutable reference to the new value.", "`unwrap()` extracts the value inside an `Option` or `Result` and panics on failure; beginner code is often clearer with `unwrap_or(default)` for a fallback or `expect(\"message\")` for a better panic message.", "`wrap` itself is not a common general method; you are more likely seeing `wrapping_add` or `wrapping_sub`, meaning integer overflow wraps around the type width. `unwrap` is separate: it opens an `Option` or `Result`."]
+                ["这节只做速查表：重点看方法属于哪个接口类型、需要什么参数、返回什么类型。"],
+                ["This section is a lookup table: focus on the interface type, input parameters, and return type."]
               ],
               engineering: [
-                ["不要把这些方法当成需要死记硬背的 API 列表；先看它们是否在“借用视图、生成 owned 数据、查找或插入、处理失败、选择溢出行为”。读懂这几类动作，遇到新方法也能猜出大意。", "工程代码里方法链很常见，但链条太长会隐藏错误处理和所有权变化；不熟悉时可以先拆成几行有名字的中间变量。"],
-                ["Do not treat these as an API list to memorize. First ask whether the method is borrowing a view, creating owned data, finding or inserting, handling failure, or choosing overflow behavior. Once those actions are clear, new methods become easier to infer.", "Method chains are common in production Rust, but long chains can hide error handling and ownership changes; when learning, split them into named intermediate bindings."]
+                ["读不懂链式调用时，先查每一步返回值；下一步方法一定是在上一步返回的类型上调用。"],
+                ["When a method chain is unclear, look up each step's return type first; the next method is called on that returned type."]
               ],
               cppComparison: [
-                ["C++ 里很多转换靠构造函数、隐式转换或 `operator[]` 完成；Rust 更倾向把动作写成明确方法名：`as_str` 只是借用，`to_owned` 明确分配/复制，`entry` 明确表达“没有就插入”。"],
-                ["C++ often uses constructors, implicit conversions, or `operator[]`; Rust tends to spell the action out in method names: `as_str` only borrows, `to_owned` explicitly allocates/copies, and `entry` explicitly says find-or-insert."]
+                ["C++ 里很多动作靠构造函数、隐式转换或 `operator[]`；Rust 更常把动作写成方法名，并把失败、借用、所有权转移体现在返回类型里。"],
+                ["C++ often uses constructors, implicit conversions, or `operator[]`; Rust more often spells the action as a method and exposes failure, borrowing, and ownership transfer in the return type."]
               ],
               examples: [
-                localizedExample("Rust: 字符串方法怎么读", "Rust: reading string methods", "rust", `fn normalize_tag(raw: &str) -> String {
-    let trimmed: &str = raw.trim();                 // 去掉首尾空白，仍然是借用视图
-    let lower: String = trimmed.to_ascii_lowercase(); // 生成新的 String，不会原地修改 raw
-    lower
-}
-
-fn main() {
-    let owned = String::from("  Rust  ");
-    let borrowed: &str = owned.as_str();       // String -> &str，只是借用
-    let copied: String = borrowed.to_owned();  // &str -> String，生成 owned 数据
-    let normalized = normalize_tag(borrowed);
-
-    println!("{borrowed} {copied} {normalized}");
-}`, `fn normalize_tag(raw: &str) -> String {
-    let trimmed: &str = raw.trim();                  // remove surrounding whitespace; still a borrowed view
-    let lower: String = trimmed.to_ascii_lowercase(); // create a new String; raw is not modified in place
-    lower
-}
-
-fn main() {
-    let owned = String::from("  Rust  ");
-    let borrowed: &str = owned.as_str();       // String -> &str, just a borrow
-    let copied: String = borrowed.to_owned();  // &str -> String, create owned data
-    let normalized = normalize_tag(borrowed);
-
-    println!("{borrowed} {copied} {normalized}");
-}`),
-                withMistakes(
-                  localizedExample("Rust: entry().or_insert() 统计次数", "Rust: count with entry().or_insert()", "rust", `use std::collections::HashMap;
-
-fn count_words(line: &str) -> HashMap<String, usize> {
-    let mut counts = HashMap::new();
-
-    for word in line.split_whitespace() {
-        let word = word.to_ascii_lowercase();
-        let count = counts.entry(word).or_insert(0);
-        *count += 1;
-    }
-
-    counts
-}`, `use std::collections::HashMap;
-
-fn count_words(line: &str) -> HashMap<String, usize> {
-    let mut counts = HashMap::new();
-
-    for word in line.split_whitespace() {
-        let word = word.to_ascii_lowercase();
-        let count = counts.entry(word).or_insert(0);
-        *count += 1;
-    }
-
-    counts
-}`),
+                searchableTableExample("常用方法接口表", "Common method interface table",
+                  [t("接口类型", "Interface type"), t("方法/函数", "Method/function"), t("输入参数", "Input parameters"), t("返回值", "Return type"), t("说明", "Notes")],
                   [
-                    {
-                      title: t("错误：忘了 or_insert 返回的是引用", "Wrong: forget that or_insert returns a reference"),
-                      language: "rust",
-                      code: t(
-                        `use std::collections::HashMap;
-
-fn count_one(counts: &mut HashMap<String, usize>, word: String) {
-    counts.entry(word).or_insert(0) += 1;
-}`,
-                        `use std::collections::HashMap;
-
-fn count_one(counts: &mut HashMap<String, usize>, word: String) {
-    counts.entry(word).or_insert(0) += 1;
-}`
-                      ),
-                      error: t(
-                        ["error[E0368]: binary assignment operation `+=` cannot be applied to type `&mut usize`", "`or_insert(0)` 返回的是 `&mut usize`，需要先用 `*` 解引用到里面的数字：`*counts.entry(word).or_insert(0) += 1;`。"],
-                        ["error[E0368]: binary assignment operation `+=` cannot be applied to type `&mut usize`", "`or_insert(0)` returns `&mut usize`, so dereference it first: `*counts.entry(word).or_insert(0) += 1;`."]
-                      ),
-                      explanation: t(
-                        ["`entry` API 让你直接拿到 map 中 value 的可变位置；`*count += 1` 修改的是 map 里的那个数字，不是临时拷贝。"],
-                        ["The `entry` API gives direct mutable access to the value slot in the map; `*count += 1` updates the number stored in the map, not a temporary copy."]
-                      )
-                    }
-                  ]
-                ),
-                withMistakes(
-                  localizedExample("Rust: unwrap_or、expect 与 wrapping_add", "Rust: unwrap_or, expect, and wrapping_add", "rust", `fn parse_workers(raw: &str) -> usize {
-    raw.trim().parse::<usize>().unwrap_or(4)
-}
-
-fn parse_port(raw: &str) -> u16 {
-    raw.trim().parse::<u16>().expect("port must be a number")
-}
-
-fn next_byte(id: u8) -> u8 {
-    id.wrapping_add(1) // 255 后回绕到 0
-}`, `fn parse_workers(raw: &str) -> usize {
-    raw.trim().parse::<usize>().unwrap_or(4)
-}
-
-fn parse_port(raw: &str) -> u16 {
-    raw.trim().parse::<u16>().expect("port must be a number")
-}
-
-fn next_byte(id: u8) -> u8 {
-    id.wrapping_add(1) // wraps from 255 back to 0
-}`),
-                  [
-                    {
-                      title: t("错误：在用户输入上直接 unwrap", "Wrong: unwrap user input directly"),
-                      language: "rust",
-                      code: t(
-                        `fn parse_workers(raw: &str) -> usize {
-    raw.parse::<usize>().unwrap()
-}`,
-                        `fn parse_workers(raw: &str) -> usize {
-    raw.parse::<usize>().unwrap()
-}`
-                      ),
-                      error: t(
-                        ["thread 'main' panicked at 'called `Result::unwrap()` on an `Err` value'", "只要用户输入不是数字，`unwrap()` 就会 panic。"],
-                        ["thread 'main' panicked at 'called `Result::unwrap()` on an `Err` value'", "`unwrap()` panics whenever the user input is not a number."]
-                      ),
-                      explanation: t(
-                        ["示例代码里偶尔用 `unwrap` 简化流程；真实输入边界更适合返回 `Result`，或者用 `unwrap_or` 提供默认值。"],
-                        ["Examples sometimes use `unwrap` to stay short; real input boundaries should return `Result` or use `unwrap_or` for a fallback."]
-                      )
-                    }
-                  ]
-                ),
-                tableExample("常见方法名速查", "Common method quick reference",
-                  [t("方法", "Method"), t("可以怎么读", "How to read it"), t("重点", "Key point")],
-                  [
-                    ["`as_str()`", t("把 `String` 当 `&str` 借用", "borrow a `String` as `&str`"), t("不分配，不拿走所有权", "no allocation, no ownership move")],
-                    ["`to_owned()` / `to_string()`", t("生成 owned 的 `String` 或 owned 副本", "create owned `String` or owned copy"), t("通常会分配/复制", "usually allocates/copies")],
-                    ["`to_ascii_lowercase()`", t("生成新的小写字符串", "create a new lowercase string"), t("只处理 ASCII 大小写；不会原地修改原字符串", "ASCII case only; does not mutate in place")],
-                    ["`trim()`", t("去掉首尾空白，返回 `&str`", "remove surrounding whitespace and return `&str`"), t("返回的是借用视图", "returns a borrowed view")],
-                    ["`split_whitespace()`", t("按空白拆成迭代器", "split on whitespace into an iterator"), t("常和 `for`、`map`、`collect` 一起用", "often used with `for`, `map`, and `collect`")],
-                    ["`entry(k).or_insert(v)`", t("查找 key；没有就插入默认值", "find key, insert default if missing"), t("返回 `&mut V`，修改时常写 `*... += 1`", "returns `&mut V`; often update with `*... += 1`")],
-                    ["`unwrap_or(v)`", t("有值就取出，没有/失败就用默认值", "extract value, or use fallback on missing/failure"), t("适合默认值场景", "fits fallback defaults")],
-                    ["`expect(\"...\")`", t("取出值；失败时 panic 并显示你写的消息", "extract value; panic with your message on failure"), t("比裸 `unwrap()` 更容易定位问题", "easier to debug than bare `unwrap()`")],
-                    ["`wrapping_add()`", t("整数溢出时回绕", "wrap around on integer overflow"), t("和 `unwrap` 无关", "unrelated to `unwrap`")]
-                  ]
+                    ["`String`", "`String::new()`", t("无", "none"), "`String`", t("创建空字符串", "create an empty string")],
+                    ["`String`", "`String::from(s)`", "`s: &str`", "`String`", t("从字符串 slice 复制出 owned 字符串", "copy from a string slice into an owned string")],
+                    ["`String`", "`s.as_str()`", "`&self`", "`&str`", t("把 owned 字符串临时借用成字符串 slice", "borrow an owned string as a string slice")],
+                    ["`String`", "`s.push_str(part)`", "`&mut self`, `part: &str`", "`()`", t("把字符串片段追加到原字符串末尾", "append a string slice in place")],
+                    ["`String`", "`s.push(ch)`", "`&mut self`, `ch: char`", "`()`", t("追加一个 Unicode 字符", "append one Unicode character")],
+                    ["`String`", "`s.clear()`", "`&mut self`", "`()`", t("清空内容，保留容量", "clear contents while keeping capacity")],
+                    ["`String` / `&str`", "`s.len()`", "`&self`", "`usize`", t("字节长度，不是字符数", "byte length, not character count")],
+                    ["`String` / `&str`", "`s.is_empty()`", "`&self`", "`bool`", t("长度是否为 0", "whether length is zero")],
+                    ["`&str`", "`s.trim()`", "`&self`", "`&str`", t("去掉首尾空白，返回原字符串的一段借用视图", "remove surrounding whitespace and return a borrowed view")],
+                    ["`&str`", "`s.trim_start()` / `s.trim_end()`", "`&self`", "`&str`", t("只去掉开头或结尾空白", "trim only the start or the end")],
+                    ["`&str`", "`s.to_owned()`", "`&self`", "`String`", t("复制成 owned 字符串", "copy into an owned string")],
+                    ["`&str` / `String`", "`s.to_string()`", "`&self`", "`String`", t("通过 `ToString` 生成字符串", "create a string through `ToString`")],
+                    ["`&str` / `String`", "`s.to_ascii_lowercase()`", "`&self`", "`String`", t("生成新的 ASCII 小写字符串", "create a new ASCII-lowercase string")],
+                    ["`&str` / `String`", "`s.to_lowercase()`", "`&self`", "`String`", t("生成新的 Unicode 小写字符串", "create a new Unicode-lowercase string")],
+                    ["`&str`", "`s.contains(pattern)`", "`pattern: &str` 或 `char`", "`bool`", t("是否包含子串或字符", "whether it contains a substring or character")],
+                    ["`&str`", "`s.starts_with(prefix)`", "`prefix: &str` 或 `char`", "`bool`", t("是否以前缀开头", "whether it starts with a prefix")],
+                    ["`&str`", "`s.ends_with(suffix)`", "`suffix: &str` 或 `char`", "`bool`", t("是否以后缀结尾", "whether it ends with a suffix")],
+                    ["`&str`", "`s.split_whitespace()`", "`&self`", "`SplitWhitespace<'_>`", t("按空白分割，返回迭代器", "split on whitespace and return an iterator")],
+                    ["`&str`", "`s.split(sep)`", "`sep: &str` 或 `char`", "`Split<'_, P>`", t("按指定分隔符分割，返回迭代器", "split by a separator and return an iterator")],
+                    ["`&str`", "`s.split_once(sep)`", "`sep: &str` 或 `char`", "`Option<(&str, &str)>`", t("只分割第一次，失败返回 `None`", "split once; return `None` if not found")],
+                    ["`&str`", "`s.parse::<T>()`", "`&self`", "`Result<T, T::Err>`", t("把字符串解析成目标类型", "parse a string into a target type")],
+                    ["`&str`", "`s.chars()`", "`&self`", "`Chars<'_>`", t("按 Unicode scalar 迭代", "iterate Unicode scalar values")],
+                    ["`&str`", "`s.bytes()`", "`&self`", "`Bytes<'_>`", t("按 UTF-8 原始字节迭代", "iterate raw UTF-8 bytes")],
+                    ["`Vec<T>`", "`Vec::new()`", t("无", "none"), "`Vec<T>`", t("创建空动态数组", "create an empty growable array")],
+                    ["`Vec<T>`", "`Vec::with_capacity(n)`", "`n: usize`", "`Vec<T>`", t("预留容量，减少后续分配", "reserve capacity to reduce later allocations")],
+                    ["`Vec<T>`", "`v.push(value)`", "`&mut self`, `value: T`", "`()`", t("尾部追加元素", "append an element to the end")],
+                    ["`Vec<T>`", "`v.pop()`", "`&mut self`", "`Option<T>`", t("弹出尾部元素；空时返回 `None`", "remove the last element; `None` if empty")],
+                    ["`Vec<T>` / `&[T]`", "`v.len()`", "`&self`", "`usize`", t("元素个数", "number of elements")],
+                    ["`Vec<T>` / `&[T]`", "`v.is_empty()`", "`&self`", "`bool`", t("是否没有元素", "whether there are no elements")],
+                    ["`Vec<T>`", "`v.as_slice()`", "`&self`", "`&[T]`", t("把 `Vec` 借用成 slice", "borrow a `Vec` as a slice")],
+                    ["`Vec<T>` / `&[T]`", "`v.get(index)`", "`index: usize`", "`Option<&T>`", t("安全下标访问，越界返回 `None`", "safe indexing; `None` if out of bounds")],
+                    ["`&[T]`", "`slice.first()` / `slice.last()`", "`&self`", "`Option<&T>`", t("第一个或最后一个元素", "first or last element")],
+                    ["`&[T]`", "`slice.iter()`", "`&self`", "`Iter<'_, T>`", t("迭代共享引用 `&T`", "iterate shared references `&T`")],
+                    ["`&mut [T]`", "`slice.iter_mut()`", "`&mut self`", "`IterMut<'_, T>`", t("迭代可变引用 `&mut T`", "iterate mutable references `&mut T`")],
+                    ["`Vec<T>`", "`v.into_iter()`", "`self`", "`IntoIter<T>`", t("消费 `Vec`，迭代 owned 元素 `T`", "consume the `Vec` and iterate owned `T` values")],
+                    ["`&[T]`", "`slice.to_vec()`", "`&self`，`T: Clone`", "`Vec<T>`", t("复制 slice 为 owned `Vec`", "clone a slice into an owned `Vec`")],
+                    ["`Vec<T>` / `&mut [T]`", "`sort()`", "`&mut self`，`T: Ord`", "`()`", t("原地排序", "sort in place")],
+                    ["`Vec<T>` / `&mut [T]`", "`sort_by_key(f)`", "`&mut self`, `f: FnMut(&T) -> K`", "`()`", t("按 key 原地排序", "sort in place by a key")],
+                    ["`Vec<T>` / `&[T]`", "`contains(x)`", "`x: &T`，`T: PartialEq`", "`bool`", t("是否包含某个元素", "whether it contains an element")],
+                    ["`HashMap<K, V>`", "`HashMap::new()`", t("无", "none"), "`HashMap<K, V>`", t("创建空哈希表", "create an empty hash map")],
+                    ["`HashMap<K, V>`", "`map.insert(k, v)`", "`k: K`, `v: V`", "`Option<V>`", t("插入键值；旧值存在时返回旧值", "insert key/value; return old value if replaced")],
+                    ["`HashMap<K, V>`", "`map.get(&k)`", "`&self`, `&K`", "`Option<&V>`", t("按 key 读取 value", "read a value by key")],
+                    ["`HashMap<K, V>`", "`map.get_mut(&k)`", "`&mut self`, `&K`", "`Option<&mut V>`", t("按 key 取得可变 value", "get a mutable value by key")],
+                    ["`HashMap<K, V>`", "`map.contains_key(&k)`", "`&self`, `&K`", "`bool`", t("key 是否存在", "whether a key exists")],
+                    ["`HashMap<K, V>`", "`map.remove(&k)`", "`&mut self`, `&K`", "`Option<V>`", t("删除 key 并返回 owned value", "remove a key and return the owned value")],
+                    ["`HashMap<K, V>`", "`map.entry(k)`", "`&mut self`, `k: K`", "`Entry<K, V>`", t("进入“查找或插入”接口", "enter the find-or-insert API")],
+                    ["`Entry<K, V>`", "`entry.or_insert(v)`", "`v: V`", "`&mut V`", t("没有 key 就插入 `v`，返回 value 的可变引用", "insert `v` if missing and return a mutable reference to the value")],
+                    ["`Entry<K, V>`", "`entry.or_insert_with(f)`", "`f: FnOnce() -> V`", "`&mut V`", t("没有 key 时才调用 `f` 创建默认值", "call `f` to create the default only if missing")],
+                    ["`HashMap<K, V>`", "`map.iter()`", "`&self`", "`Iter<'_, K, V>`", t("迭代 `(&K, &V)`", "iterate `(&K, &V)`")],
+                    ["`HashMap<K, V>`", "`map.keys()` / `map.values()`", "`&self`", "`Keys<'_, K, V>` / `Values<'_, K, V>`", t("只迭代 key 或 value", "iterate only keys or values")],
+                    ["`HashMap<K, V>`", "`map.len()` / `map.is_empty()`", "`&self`", "`usize` / `bool`", t("元素个数 / 是否为空", "number of entries / whether empty")],
+                    ["`Option<T>`", "`opt.unwrap()`", "`self`", "`T`", t("取出 `Some(T)`；`None` 时 panic", "extract `Some(T)`; panic on `None`")],
+                    ["`Option<T>`", "`opt.unwrap_or(default)`", "`self`, `default: T`", "`T`", t("没有值时使用默认值", "use a fallback when missing")],
+                    ["`Option<T>`", "`opt.map(f)`", "`f: FnOnce(T) -> U`", "`Option<U>`", t("只在 `Some` 时转换内部值", "transform the inner value only when `Some`")],
+                    ["`Option<T>`", "`opt.and_then(f)`", "`f: FnOnce(T) -> Option<U>`", "`Option<U>`", t("连续执行可能失败的步骤", "chain steps that may return `None`")],
+                    ["`Option<T>`", "`opt.ok_or(err)`", "`err: E`", "`Result<T, E>`", t("把 `Option` 转成 `Result`", "convert `Option` into `Result`")],
+                    ["`Option<T>`", "`is_some()` / `is_none()`", "`&self`", "`bool`", t("是否有值 / 是否为空", "whether it has a value / is empty")],
+                    ["`Result<T, E>`", "`res.unwrap()`", "`self`", "`T`", t("取出 `Ok(T)`；`Err` 时 panic", "extract `Ok(T)`; panic on `Err`")],
+                    ["`Result<T, E>`", "`res.expect(msg)`", "`self`, `msg: &str`", "`T`", t("失败时带消息 panic", "panic with a message on failure")],
+                    ["`Result<T, E>`", "`res.unwrap_or(default)`", "`self`, `default: T`", "`T`", t("失败时使用默认值", "use a fallback on error")],
+                    ["`Result<T, E>`", "`res.map(f)`", "`f: FnOnce(T) -> U`", "`Result<U, E>`", t("只转换 `Ok` 值", "transform only the `Ok` value")],
+                    ["`Result<T, E>`", "`res.map_err(f)`", "`f: FnOnce(E) -> F`", "`Result<T, F>`", t("只转换错误值", "transform only the error value")],
+                    ["`Result<T, E>`", "`res.ok()`", "`self`", "`Option<T>`", t("丢弃错误信息，转成 `Option`", "discard error details and convert to `Option`")],
+                    ["`Iterator<Item = T>`", "`iter.map(f)`", "`f: FnMut(T) -> U`", "`Map<I, F>`", t("逐项转换，仍是迭代器", "transform each item; still an iterator")],
+                    ["`Iterator<Item = T>`", "`iter.filter(f)`", "`f: FnMut(&T) -> bool`", "`Filter<I, F>`", t("保留满足条件的元素", "keep items that match a predicate")],
+                    ["`Iterator<Item = T>`", "`iter.filter_map(f)`", "`f: FnMut(T) -> Option<U>`", "`FilterMap<I, F>`", t("过滤并转换，跳过 `None`", "filter and transform, skipping `None`")],
+                    ["`Iterator<Item = T>`", "`iter.find(f)`", "`f: FnMut(&T) -> bool`", "`Option<T>`", t("找到第一个满足条件的元素", "find the first matching item")],
+                    ["`Iterator<Item = T>`", "`iter.any(f)` / `iter.all(f)`", "`f: FnMut(T) -> bool`", "`bool`", t("是否任意满足 / 是否全部满足", "whether any / all items match")],
+                    ["`Iterator<Item = T>`", "`iter.collect::<C>()`", "`self`, `C: FromIterator<T>`", "`C`", t("收集成 `Vec`、`HashMap`、`String` 等集合", "collect into `Vec`, `HashMap`, `String`, etc.")],
+                    ["`Iterator<Item = T>`", "`iter.fold(init, f)`", "`init: Acc`, `f: FnMut(Acc, T) -> Acc`", "`Acc`", t("累加归约成一个值", "reduce into one accumulated value")],
+                    ["`Iterator<Item = T>`", "`iter.enumerate()`", "`self`", "`Enumerate<I>`", t("给每项附上下标 `(usize, T)`", "attach an index `(usize, T)` to each item")],
+                    ["`Iterator<Item = T>`", "`iter.take(n)` / `iter.skip(n)`", "`n: usize`", "`Take<I>` / `Skip<I>`", t("只取前 n 个 / 跳过前 n 个", "take the first n / skip the first n")],
+                    ["整数类型", "`checked_add(rhs)`", "`rhs: Self`", "`Option<Self>`", t("溢出时返回 `None`", "return `None` on overflow")],
+                    ["整数类型", "`wrapping_add(rhs)`", "`rhs: Self`", "`Self`", t("溢出时按位宽回绕；这不是 `unwrap`", "wrap on overflow; unrelated to `unwrap`")],
+                    ["整数类型", "`saturating_add(rhs)`", "`rhs: Self`", "`Self`", t("溢出时停在最大值", "saturate at the maximum on overflow")],
+                    ["整数类型", "`overflowing_add(rhs)`", "`rhs: Self`", "`(Self, bool)`", t("返回结果和是否溢出", "return the result and an overflow flag")],
+                    ["`Clone`", "`value.clone()`", "`&self`", "`Self`", t("显式复制/克隆一个值", "explicitly copy/clone a value")],
+                    ["`Default`", "`Default::default()`", t("无", "none"), "`Self`", t("创建类型的默认值", "create a type's default value")],
+                    ["宏", "`format!(...)`", t("格式字符串和参数", "format string and arguments"), "`String`", t("格式化成 owned 字符串", "format into an owned string")],
+                    ["宏", "`vec![...]`", t("元素列表或 `value; n`", "element list or `value; n`"), "`Vec<T>`", t("创建 `Vec`", "create a `Vec`")],
+                    ["宏", "`println!(...)`", t("格式字符串和参数", "format string and arguments"), "`()`", t("输出到标准输出", "print to standard output")]
+                  ],
+                  "搜索方法、类型、参数或返回值",
+                  "Search methods, types, parameters, or return values"
                 )
               ],
               references: ["rust-lang/rust"]
