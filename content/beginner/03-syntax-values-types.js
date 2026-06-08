@@ -267,8 +267,8 @@ fn parse_config(raw_host: &str, raw_port: &str, raw_workers: &str) -> ServerConf
                 ["`String` owns heap memory, `&str` is a string view; `Vec<T>` owns a contiguous array, and `&[T]` is a slice view.", "Collection APIs often use borrowing to avoid unnecessary allocation."]
               ],
               engineering: [
-                ["公共 API 优先接收 `&str` 或 `&[T]` 这样的 borrowed view；只有函数需要长期保存数据时，才转成 `String` 或 `Vec<T>` 这种 owned type。", "集合选择应该来自访问模式：顺序、查找、排序、队列。"],
-                ["Public APIs should prefer `&str` or slices and allocate owned values only when storing.", "Choose collections from access patterns: order, lookup, sorting, or queueing."]
+                ["公共 API 优先接收 `&str` 或 `&[T]` 这样的 borrowed view；只有函数需要长期保存数据时，才转成 `String` 或 `Vec<T>` 这种 owned type。", "集合选择应该来自访问模式（access pattern）：要按顺序存取、用下标、在尾部追加，用 `Vec<T>`（order）；要按 key 快速查找或判断是否存在，用 `HashMap<K,V>`/`HashSet<T>`（lookup）；要让元素始终保持有序、支持范围查询，用 `BTreeMap`/`BTreeSet`（sorting）；要先进先出或两端进出的队列，用 `VecDeque<T>`（queue）。"],
+                ["Public APIs should prefer `&str` or slices and allocate owned values only when storing.", "Choose collections from the access pattern: use `Vec<T>` for ordered, indexed, push-to-end access (order); `HashMap<K,V>`/`HashSet<T>` for fast key lookup or membership tests (lookup); `BTreeMap`/`BTreeSet` to keep entries sorted with range queries (sorting); and `VecDeque<T>` for FIFO or double-ended queues (queue)."]
               ],
               cppComparison: [
                 ["`&str` 接近 `std::string_view`，`&[T]` 接近 span；不同的是，Rust 会检查这些 view 不会比原始数据活得更久。"],
