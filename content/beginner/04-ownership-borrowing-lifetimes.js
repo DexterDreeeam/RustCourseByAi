@@ -633,6 +633,53 @@ fn main() {
                   ]
                 ),
                 withMistakes(
+                  localizedExample("Rust: 'static 表示程序级数据", "Rust: 'static means program-lifetime data", "rust", `static COURSE_NAME: &'static str = "Rust Course";
+
+fn fallback_title() -> &'static str {
+    "Untitled"
+}
+
+fn main() {
+    // 字符串字面量写在程序里，本身就是 &'static str。
+    let topic: &'static str = "ownership";
+    println!("{COURSE_NAME}: {topic} / {}", fallback_title());
+}`, `static COURSE_NAME: &'static str = "Rust Course";
+
+fn fallback_title() -> &'static str {
+    "Untitled"
+}
+
+fn main() {
+    // String literals are stored in the program and are &'static str.
+    let topic: &'static str = "ownership";
+    println!("{COURSE_NAME}: {topic} / {}", fallback_title());
+}`),
+                  [
+                    {
+                      title: t("错误：把运行期创建的 String 引用写成 'static", "Wrong: mark a reference to a runtime String as 'static"),
+                      language: "rust",
+                      code: t(
+                        `fn runtime_title() -> &'static str {
+    let title = String::from("ownership");
+    title.as_str()
+}`,
+                        `fn runtime_title() -> &'static str {
+    let title = String::from("ownership");
+    title.as_str()
+}`
+                      ),
+                      error: t(
+                        ["error[E0515]: cannot return value referencing local variable `title`", "`title` 是函数运行时创建的 `String`，函数结束就释放；它的引用不可能是 `&'static str`。"],
+                        ["error[E0515]: cannot return value referencing local variable `title`", "`title` is a `String` created at runtime and dropped when the function returns; a reference to it cannot be `&'static str`."]
+                      ),
+                      explanation: t(
+                        ["`'static` 不是“让引用永久有效”的按钮。固定文本可以直接返回字符串字面量；运行期拼出来的文本要返回 owned 的 `String`。"],
+                        ["`'static` is not a button that makes a reference live forever. For fixed text, return a string literal; for text built at runtime, return an owned `String`."]
+                      )
+                    }
+                  ]
+                ),
+                withMistakes(
                   localizedExample("Rust: 返回值只依赖一个输入", "Rust: result depends on one input", "rust", `// 返回值一定是 text 的一部分，所以只需要把返回值和 text 绑在一起。
 // prefix 只是用来判断，不会被返回，因此不需要写成 &'text str。
 fn strip_known_prefix<'text>(text: &'text str, prefix: &str) -> &'text str {
