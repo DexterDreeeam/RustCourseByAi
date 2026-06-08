@@ -96,6 +96,23 @@
     return escapeHtml(value).replace(/`([^`]+)`/g, "<code>$1</code>");
   }
 
+  function formatRustSignature(value) {
+    const text = String(value || "");
+    const pattern = /`([^`]+)`/g;
+    let out = "";
+    let lastIndex = 0;
+    let match;
+    while ((match = pattern.exec(text)) !== null) {
+      out += escapeHtml(text.slice(lastIndex, match.index));
+      out += `<code class="method-signature-code language-rust">${highlightCode(match[1], "rust")}</code>`;
+      lastIndex = pattern.lastIndex;
+    }
+    if (lastIndex === 0) {
+      return `<code class="method-signature-code language-rust">${highlightCode(text, "rust")}</code>`;
+    }
+    return out + escapeHtml(text.slice(lastIndex));
+  }
+
   const RUST_KEYWORDS = new Set([
     "as", "async", "await", "break", "const", "continue", "crate", "dyn", "else", "enum",
     "extern", "fn", "for", "if", "impl", "in", "let", "loop", "match", "mod", "move", "mut",
@@ -377,6 +394,7 @@
 
     if (example.kind === "table") {
       const renderCell = (cell, tag) => `<${tag}>${formatInline(pick(cell))}</${tag}>`;
+      const renderSignatureCell = (cell) => `<td>${formatRustSignature(pick(cell))}</td>`;
       return `
         <div class="explanation-card table-card">
           <h3>${escapeHtml(pick(example.title))}</h3>
@@ -437,7 +455,7 @@
                 <tbody>${allRows.map((row) => `
                   <tr data-search="${escapeHtml(row.searchText)}">
                     <td>${formatInline(row.group)}</td>
-                    ${renderCell(row.signature, "td")}
+                    ${renderSignatureCell(row.signature)}
                     ${renderCell(row.note, "td")}
                   </tr>
                 `).join("")}</tbody>
@@ -451,7 +469,7 @@
                 <div class="table-scroll">
                   <table class="compare-table method-group-table">
                     <thead><tr><th>${state.language === "zh" ? "签名" : "Signature"}</th><th>${state.language === "zh" ? "说明" : "Notes"}</th></tr></thead>
-                    <tbody>${group.rows.map((row) => `<tr>${renderCell(row[0], "td")}${renderCell(row[1], "td")}</tr>`).join("")}</tbody>
+                    <tbody>${group.rows.map((row) => `<tr>${renderSignatureCell(row[0])}${renderCell(row[1], "td")}</tr>`).join("")}</tbody>
                   </table>
                 </div>
               </section>

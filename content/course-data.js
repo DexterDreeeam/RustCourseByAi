@@ -10,12 +10,12 @@
       members: ["cpp-to-rust-map", "toolchain-project-shape"]
     },
     { id: "syntax-values-types", members: ["syntax-values-types"] },
-    { id: "ownership-borrowing-lifetimes", members: ["ownership-borrowing-lifetimes"] },
     {
       id: "data-modeling-and-errors",
       title: t("数据建模与错误处理", "Data modeling and error handling"),
       members: ["data-modeling", "error-boundaries"]
     },
+    { id: "ownership-borrowing-lifetimes", members: ["ownership-borrowing-lifetimes"] },
     {
       id: "traits-generics-collections",
       title: t("trait、泛型、集合与迭代器", "Traits, generics, collections, and iterators"),
