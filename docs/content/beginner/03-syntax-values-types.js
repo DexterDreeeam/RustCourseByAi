@@ -346,6 +346,168 @@ fn main() {
                 )
               ],
               references: ["BurntSushi/ripgrep"]
+            }),
+            lesson({
+              id: "common-method-vocabulary",
+              title: ["常用方法速查", "Common method vocabulary"],
+              goals: [
+                ["知道常见方法名在表达什么动作。", "能读懂 `entry().or_insert()`、`to_owned()`、`to_ascii_lowercase()`、`as_str()`、`unwrap_or()` 这类链式调用。"],
+                ["Recognize what common method names are doing.", "Read chains such as `entry().or_insert()`, `to_owned()`, `to_ascii_lowercase()`, `as_str()`, and `unwrap_or()`."]
+              ],
+              syntax: [
+                ["先按前缀读：`as_` 通常是临时借用视图或廉价转换，例如 `as_str()` 把 `String` 当成 `&str` 用；`to_` 通常会生成新值或 owned 数据，例如 `to_owned()`、`to_string()`、`to_ascii_lowercase()`；`into_` 通常会消费原值并转换所有权。", "`entry(key).or_insert(default)` 是 `HashMap` 的“查找或插入”写法：如果 key 已存在就返回已有 value 的可变引用；不存在就插入 default，再返回这个新 value 的可变引用。", "`unwrap()` 是把 `Option`/`Result` 里的值直接取出来，失败就 panic；入门阶段更常见也更安全的读法是 `unwrap_or(default)` 提供默认值，或者 `expect(\"message\")` 让 panic 信息更清楚。", "`wrap` 本身不是常见通用方法；你更可能看到 `wrapping_add`、`wrapping_sub`，意思是整数溢出时按位宽回绕。`unwrap` 则是另一件事：拆开 `Option` 或 `Result`。"],
+                ["Read prefixes first: `as_` usually means a temporary borrowed view or cheap conversion, such as `as_str()` viewing a `String` as `&str`; `to_` usually creates a new value or owned data, such as `to_owned()`, `to_string()`, or `to_ascii_lowercase()`; `into_` usually consumes the original value and converts ownership.", "`entry(key).or_insert(default)` is the `HashMap` find-or-insert pattern: if the key exists, it returns a mutable reference to the existing value; otherwise it inserts the default and returns a mutable reference to the new value.", "`unwrap()` extracts the value inside an `Option` or `Result` and panics on failure; beginner code is often clearer with `unwrap_or(default)` for a fallback or `expect(\"message\")` for a better panic message.", "`wrap` itself is not a common general method; you are more likely seeing `wrapping_add` or `wrapping_sub`, meaning integer overflow wraps around the type width. `unwrap` is separate: it opens an `Option` or `Result`."]
+              ],
+              engineering: [
+                ["不要把这些方法当成需要死记硬背的 API 列表；先看它们是否在“借用视图、生成 owned 数据、查找或插入、处理失败、选择溢出行为”。读懂这几类动作，遇到新方法也能猜出大意。", "工程代码里方法链很常见，但链条太长会隐藏错误处理和所有权变化；不熟悉时可以先拆成几行有名字的中间变量。"],
+                ["Do not treat these as an API list to memorize. First ask whether the method is borrowing a view, creating owned data, finding or inserting, handling failure, or choosing overflow behavior. Once those actions are clear, new methods become easier to infer.", "Method chains are common in production Rust, but long chains can hide error handling and ownership changes; when learning, split them into named intermediate bindings."]
+              ],
+              cppComparison: [
+                ["C++ 里很多转换靠构造函数、隐式转换或 `operator[]` 完成；Rust 更倾向把动作写成明确方法名：`as_str` 只是借用，`to_owned` 明确分配/复制，`entry` 明确表达“没有就插入”。"],
+                ["C++ often uses constructors, implicit conversions, or `operator[]`; Rust tends to spell the action out in method names: `as_str` only borrows, `to_owned` explicitly allocates/copies, and `entry` explicitly says find-or-insert."]
+              ],
+              examples: [
+                localizedExample("Rust: 字符串方法怎么读", "Rust: reading string methods", "rust", `fn normalize_tag(raw: &str) -> String {
+    let trimmed: &str = raw.trim();                 // 去掉首尾空白，仍然是借用视图
+    let lower: String = trimmed.to_ascii_lowercase(); // 生成新的 String，不会原地修改 raw
+    lower
+}
+
+fn main() {
+    let owned = String::from("  Rust  ");
+    let borrowed: &str = owned.as_str();       // String -> &str，只是借用
+    let copied: String = borrowed.to_owned();  // &str -> String，生成 owned 数据
+    let normalized = normalize_tag(borrowed);
+
+    println!("{borrowed} {copied} {normalized}");
+}`, `fn normalize_tag(raw: &str) -> String {
+    let trimmed: &str = raw.trim();                  // remove surrounding whitespace; still a borrowed view
+    let lower: String = trimmed.to_ascii_lowercase(); // create a new String; raw is not modified in place
+    lower
+}
+
+fn main() {
+    let owned = String::from("  Rust  ");
+    let borrowed: &str = owned.as_str();       // String -> &str, just a borrow
+    let copied: String = borrowed.to_owned();  // &str -> String, create owned data
+    let normalized = normalize_tag(borrowed);
+
+    println!("{borrowed} {copied} {normalized}");
+}`),
+                withMistakes(
+                  localizedExample("Rust: entry().or_insert() 统计次数", "Rust: count with entry().or_insert()", "rust", `use std::collections::HashMap;
+
+fn count_words(line: &str) -> HashMap<String, usize> {
+    let mut counts = HashMap::new();
+
+    for word in line.split_whitespace() {
+        let word = word.to_ascii_lowercase();
+        let count = counts.entry(word).or_insert(0);
+        *count += 1;
+    }
+
+    counts
+}`, `use std::collections::HashMap;
+
+fn count_words(line: &str) -> HashMap<String, usize> {
+    let mut counts = HashMap::new();
+
+    for word in line.split_whitespace() {
+        let word = word.to_ascii_lowercase();
+        let count = counts.entry(word).or_insert(0);
+        *count += 1;
+    }
+
+    counts
+}`),
+                  [
+                    {
+                      title: t("错误：忘了 or_insert 返回的是引用", "Wrong: forget that or_insert returns a reference"),
+                      language: "rust",
+                      code: t(
+                        `use std::collections::HashMap;
+
+fn count_one(counts: &mut HashMap<String, usize>, word: String) {
+    counts.entry(word).or_insert(0) += 1;
+}`,
+                        `use std::collections::HashMap;
+
+fn count_one(counts: &mut HashMap<String, usize>, word: String) {
+    counts.entry(word).or_insert(0) += 1;
+}`
+                      ),
+                      error: t(
+                        ["error[E0368]: binary assignment operation `+=` cannot be applied to type `&mut usize`", "`or_insert(0)` 返回的是 `&mut usize`，需要先用 `*` 解引用到里面的数字：`*counts.entry(word).or_insert(0) += 1;`。"],
+                        ["error[E0368]: binary assignment operation `+=` cannot be applied to type `&mut usize`", "`or_insert(0)` returns `&mut usize`, so dereference it first: `*counts.entry(word).or_insert(0) += 1;`."]
+                      ),
+                      explanation: t(
+                        ["`entry` API 让你直接拿到 map 中 value 的可变位置；`*count += 1` 修改的是 map 里的那个数字，不是临时拷贝。"],
+                        ["The `entry` API gives direct mutable access to the value slot in the map; `*count += 1` updates the number stored in the map, not a temporary copy."]
+                      )
+                    }
+                  ]
+                ),
+                withMistakes(
+                  localizedExample("Rust: unwrap_or、expect 与 wrapping_add", "Rust: unwrap_or, expect, and wrapping_add", "rust", `fn parse_workers(raw: &str) -> usize {
+    raw.trim().parse::<usize>().unwrap_or(4)
+}
+
+fn parse_port(raw: &str) -> u16 {
+    raw.trim().parse::<u16>().expect("port must be a number")
+}
+
+fn next_byte(id: u8) -> u8 {
+    id.wrapping_add(1) // 255 后回绕到 0
+}`, `fn parse_workers(raw: &str) -> usize {
+    raw.trim().parse::<usize>().unwrap_or(4)
+}
+
+fn parse_port(raw: &str) -> u16 {
+    raw.trim().parse::<u16>().expect("port must be a number")
+}
+
+fn next_byte(id: u8) -> u8 {
+    id.wrapping_add(1) // wraps from 255 back to 0
+}`),
+                  [
+                    {
+                      title: t("错误：在用户输入上直接 unwrap", "Wrong: unwrap user input directly"),
+                      language: "rust",
+                      code: t(
+                        `fn parse_workers(raw: &str) -> usize {
+    raw.parse::<usize>().unwrap()
+}`,
+                        `fn parse_workers(raw: &str) -> usize {
+    raw.parse::<usize>().unwrap()
+}`
+                      ),
+                      error: t(
+                        ["thread 'main' panicked at 'called `Result::unwrap()` on an `Err` value'", "只要用户输入不是数字，`unwrap()` 就会 panic。"],
+                        ["thread 'main' panicked at 'called `Result::unwrap()` on an `Err` value'", "`unwrap()` panics whenever the user input is not a number."]
+                      ),
+                      explanation: t(
+                        ["示例代码里偶尔用 `unwrap` 简化流程；真实输入边界更适合返回 `Result`，或者用 `unwrap_or` 提供默认值。"],
+                        ["Examples sometimes use `unwrap` to stay short; real input boundaries should return `Result` or use `unwrap_or` for a fallback."]
+                      )
+                    }
+                  ]
+                ),
+                tableExample("常见方法名速查", "Common method quick reference",
+                  [t("方法", "Method"), t("可以怎么读", "How to read it"), t("重点", "Key point")],
+                  [
+                    ["`as_str()`", t("把 `String` 当 `&str` 借用", "borrow a `String` as `&str`"), t("不分配，不拿走所有权", "no allocation, no ownership move")],
+                    ["`to_owned()` / `to_string()`", t("生成 owned 的 `String` 或 owned 副本", "create owned `String` or owned copy"), t("通常会分配/复制", "usually allocates/copies")],
+                    ["`to_ascii_lowercase()`", t("生成新的小写字符串", "create a new lowercase string"), t("只处理 ASCII 大小写；不会原地修改原字符串", "ASCII case only; does not mutate in place")],
+                    ["`trim()`", t("去掉首尾空白，返回 `&str`", "remove surrounding whitespace and return `&str`"), t("返回的是借用视图", "returns a borrowed view")],
+                    ["`split_whitespace()`", t("按空白拆成迭代器", "split on whitespace into an iterator"), t("常和 `for`、`map`、`collect` 一起用", "often used with `for`, `map`, and `collect`")],
+                    ["`entry(k).or_insert(v)`", t("查找 key；没有就插入默认值", "find key, insert default if missing"), t("返回 `&mut V`，修改时常写 `*... += 1`", "returns `&mut V`; often update with `*... += 1`")],
+                    ["`unwrap_or(v)`", t("有值就取出，没有/失败就用默认值", "extract value, or use fallback on missing/failure"), t("适合默认值场景", "fits fallback defaults")],
+                    ["`expect(\"...\")`", t("取出值；失败时 panic 并显示你写的消息", "extract value; panic with your message on failure"), t("比裸 `unwrap()` 更容易定位问题", "easier to debug than bare `unwrap()`")],
+                    ["`wrapping_add()`", t("整数溢出时回绕", "wrap around on integer overflow"), t("和 `unwrap` 无关", "unrelated to `unwrap`")]
+                  ]
+                )
+              ],
+              references: ["rust-lang/rust"]
             })
           ]
         });
