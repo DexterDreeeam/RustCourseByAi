@@ -347,7 +347,7 @@
   }
 
   function renderExamples(examples) {
-    const heading = (examples || []).every((example) => example.kind === "table" || example.kind === "searchableTable")
+    const heading = (examples || []).every((example) => example.kind === "table" || example.kind === "searchableTable" || example.kind === "methodTable")
       ? labels[state.language].tables
       : labels[state.language].examples;
     return `
@@ -407,6 +407,55 @@
                 return `<tr data-search="${escapeHtml(searchText)}">${row.map((cell) => renderCell(cell, "td")).join("")}</tr>`;
               }).join("")}</tbody>
             </table>
+          </div>
+        </div>
+      `;
+    }
+
+    if (example.kind === "methodTable") {
+      const renderCell = (cell, tag) => `<${tag}>${formatInline(pick(cell))}</${tag}>`;
+      const allRows = example.groups.flatMap((group) =>
+        group.rows.map((row) => ({
+          group: pick(group.title),
+          signature: row[0],
+          note: row[1],
+          searchText: [pick(group.title), pick(row[0]), pick(row[1])].join(" ").toLowerCase()
+        }))
+      );
+      return `
+        <div class="explanation-card table-card searchable-table-card method-table-card">
+          <h3>${escapeHtml(pick(example.title))}</h3>
+          <label class="table-search">
+            <span>${escapeHtml(pick(example.searchPlaceholder))}</span>
+            <input class="table-search-input" type="search" data-method-table-search placeholder="${escapeHtml(pick(example.searchPlaceholder))}">
+          </label>
+          <div class="method-search-results" data-method-search-results hidden>
+            <h4>${state.language === "zh" ? "搜索结果汇总" : "Search results"}</h4>
+            <div class="table-scroll">
+              <table class="compare-table method-result-table">
+                <thead><tr><th>${state.language === "zh" ? "接口类型" : "Interface type"}</th><th>${state.language === "zh" ? "签名" : "Signature"}</th><th>${state.language === "zh" ? "说明" : "Notes"}</th></tr></thead>
+                <tbody>${allRows.map((row) => `
+                  <tr data-search="${escapeHtml(row.searchText)}">
+                    <td>${formatInline(row.group)}</td>
+                    ${renderCell(row.signature, "td")}
+                    ${renderCell(row.note, "td")}
+                  </tr>
+                `).join("")}</tbody>
+              </table>
+            </div>
+          </div>
+          <div class="method-table-groups" data-method-table-groups>
+            ${example.groups.map((group) => `
+              <section class="method-table-group">
+                <h4>${escapeHtml(pick(group.title))}</h4>
+                <div class="table-scroll">
+                  <table class="compare-table method-group-table">
+                    <thead><tr><th>${state.language === "zh" ? "签名" : "Signature"}</th><th>${state.language === "zh" ? "说明" : "Notes"}</th></tr></thead>
+                    <tbody>${group.rows.map((row) => `<tr>${renderCell(row[0], "td")}${renderCell(row[1], "td")}</tr>`).join("")}</tbody>
+                  </table>
+                </div>
+              </section>
+            `).join("")}
           </div>
         </div>
       `;
@@ -520,6 +569,19 @@
         const query = input.value.trim().toLowerCase();
         card.querySelectorAll("[data-search]").forEach((row) => {
           row.hidden = query && !row.dataset.search.includes(query);
+        });
+      });
+    });
+    root.querySelectorAll("[data-method-table-search]").forEach((input) => {
+      input.addEventListener("input", () => {
+        const card = input.closest(".method-table-card");
+        const query = input.value.trim().toLowerCase();
+        const results = card.querySelector("[data-method-search-results]");
+        const groups = card.querySelector("[data-method-table-groups]");
+        results.hidden = !query;
+        groups.hidden = Boolean(query);
+        card.querySelectorAll("[data-method-search-results] [data-search]").forEach((row) => {
+          row.hidden = !row.dataset.search.includes(query);
         });
       });
     });
