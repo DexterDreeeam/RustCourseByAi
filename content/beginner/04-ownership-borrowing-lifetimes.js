@@ -1,5 +1,5 @@
 (function () {
-  const { t, sharedExample, localizedExample, withMistakes, lesson } = window.Course;
+  const { t, sharedExample, localizedExample, textExample, withMistakes, lesson } = window.Course;
   window.RUST_COURSE_CHAPTERS.beginner.push({
           id: "ownership-borrowing-lifetimes",
           title: t("所有权、借用与生命周期", "Ownership, borrowing, and lifetimes"),
@@ -551,8 +551,8 @@ fn main() {
                 ["Understand what `&'a str`, `fn f<'a>`, and `'static` mean.", "Read the dependency between return values and inputs from a function signature."]
               ],
               syntax: [
-                ["生命周期说的是“一个引用在多长范围内还能安全使用”。它不会让数据活得更久，只是让编译器检查：引用不能比它指向的数据活得更久。", "`'a` 不是字符串、字符或运行时变量，只是一个生命周期参数名。可以把它读成“生命周期 a”或“某个生命周期”；名字也可以写成 `'input`。", "`&'a str` 表示“这个 `str` 引用在生命周期 `'a` 内有效”。`fn first<'a>(x: &'a str, y: &'a str) -> &'a str` 里的 `<'a>` 是声明这个名字，后面的 `&'a` 是把参数和返回值绑到同一个有效期关系上。", "这类签名的意思不是返回值一定来自第一个参数，而是：返回的引用必须来自 `x` 或 `y` 这种至少能活到 `'a` 的输入，调用方不能把返回值用到输入失效之后。", "`'static` 是特殊生命周期，表示引用的数据能活到整个程序结束，例如字符串字面量。普通函数里编译器经常能自动推断生命周期，所以不一定都要手写 `<'a>`；当函数返回引用且有多个输入引用，或结构体字段保存引用时，通常就需要写清楚。"],
-                ["Lifetimes describe the scope where a reference remains safe to use. They do not make data live longer; they let the compiler check that a reference never outlives the data it points at.", "`'a` is not a string, character, or runtime variable. It is a lifetime parameter name, read as \"lifetime a\" or \"some lifetime\"; longer names such as `'input` are also valid.", "`&'a str` means \"this `str` reference is valid for lifetime `'a`\". In `fn first<'a>(x: &'a str, y: &'a str) -> &'a str`, `<'a>` declares the name, and `&'a` ties the parameters and return value into the same validity relationship.", "That signature does not mean the result must be the first parameter. It means the returned reference must come from input data that is valid for `'a`, so the caller cannot use the result after the input has expired.", "`'static` is the special lifetime for data valid until the program ends, such as string literals. The compiler can infer lifetimes in many ordinary functions, so `<'a>` is not always written; it is usually needed when a function returns a reference with multiple input references, or when a struct stores references."]
+                ["生命周期说的是“一个引用在多长范围内还能安全使用”。它不会让数据活得更久，只是让编译器检查：引用不能比它指向的数据活得更久。", "`'a` 不是字符串、字符或运行时变量，只是一个生命周期参数名。可以把它读成“生命周期 a”或“某个生命周期”；名字也可以写成 `'input`。", "`&'a str` 表示“这个 `str` 引用在生命周期 `'a` 内有效”。`fn first<'a>(x: &'a str, y: &'a str) -> &'a str` 里的 `<'a>` 是声明这个名字，后面的 `&'a` 是把参数和返回值绑到同一个有效期关系上。", "这类签名的意思不是返回值一定来自第一个参数，而是：返回的引用必须来自 `x` 或 `y` 这种至少能活到 `'a` 的输入，调用方不能把返回值用到输入失效之后。", "`struct Header<'a>` 的意思是：`Header` 这个结构体里保存了引用字段，`'a` 是这些引用共同的有效期名字。`Header<'a>` 不拥有字符串本体，它只能在被借用的字符串还活着时存在。", "`'static` 是特殊生命周期，表示引用的数据能活到整个程序结束，例如字符串字面量。普通函数里编译器经常能自动推断生命周期，所以不一定都要手写 `<'a>`；当函数返回引用且有多个输入引用，或结构体字段保存引用时，通常就需要写清楚。"],
+                ["Lifetimes describe the scope where a reference remains safe to use. They do not make data live longer; they let the compiler check that a reference never outlives the data it points at.", "`'a` is not a string, character, or runtime variable. It is a lifetime parameter name, read as \"lifetime a\" or \"some lifetime\"; longer names such as `'input` are also valid.", "`&'a str` means \"this `str` reference is valid for lifetime `'a`\". In `fn first<'a>(x: &'a str, y: &'a str) -> &'a str`, `<'a>` declares the name, and `&'a` ties the parameters and return value into the same validity relationship.", "That signature does not mean the result must be the first parameter. It means the returned reference must come from input data that is valid for `'a`, so the caller cannot use the result after the input has expired.", "`struct Header<'a>` means the `Header` struct stores reference fields, and `'a` names the validity period shared by those references. `Header<'a>` does not own the strings themselves; it can only exist while the borrowed strings are still alive.", "`'static` is the special lifetime for data valid until the program ends, such as string literals. The compiler can infer lifetimes in many ordinary functions, so `<'a>` is not always written; it is usually needed when a function returns a reference with multiple input references, or when a struct stores references."]
               ],
               engineering: [
                 ["缓存、解析器、HTTP header、少拷贝的数据视图里经常会看到生命周期。", "如果生命周期一路传到很多层，让代码很难读，可以考虑在某个模块入口把数据拷贝成 owned 类型。"],
@@ -677,37 +677,114 @@ fn main() {
                     }
                   ]
                 ),
-                localizedExample("Rust: Header 视图和默认值", "Rust: header view with fallback", "rust", `struct Header<'a> {
-    name: &'a str,
-    value: &'a str,
+                textExample("struct 上的生命周期是什么意思", "What a lifetime on a struct means",
+                  [
+                    "`struct Header<'a>` 不是说 `Header` 自己活多久，而是说：这个结构体里面有引用字段，这些引用必须指向某些仍然活着的数据。",
+                    "`name: &'a str` 和 `value: &'a str` 表示：`name`、`value` 都只是借用外部字符串，不能比外部字符串活得更久。",
+                    "如果不想在结构体上写生命周期，就不要在结构体里存引用；改成 `name: String`、`value: String`，让结构体拥有数据。"
+                  ],
+                  [
+                    "`struct Header<'a>` does not say how long `Header` itself lives. It says the struct contains reference fields, and those references must point to data that is still alive.",
+                    "`name: &'a str` and `value: &'a str` mean both fields borrow external strings and cannot outlive those strings.",
+                    "If you do not want a lifetime on the struct, do not store references in it; use `name: String` and `value: String` so the struct owns the data."
+                  ],
+                  `Header<'a>
+  name  -> &'a str  -> external string data
+  value -> &'a str  -> external string data`
+                ),
+                withMistakes(
+                  localizedExample("Rust: Header 借用外部字符串", "Rust: Header borrows external strings", "rust", `// 'text 是名字，表示 Header 里的引用都依赖外部文本。
+struct Header<'text> {
+    name: &'text str,
+    value: &'text str,
 }
 
-fn find_header<'a>(headers: &'a [Header<'a>], name: &str) -> Option<&'a str> {
-    headers
-        .iter()
-        .find(|header| header.name.eq_ignore_ascii_case(name))
-        .map(|header| header.value)
+impl<'text> Header<'text> {
+    fn value(&self) -> &'text str {
+        self.value
+    }
 }
 
-fn content_type_or_default<'a>(headers: &'a [Header<'a>]) -> &'a str {
-    // 返回值来自 headers 或 'static 默认值，都能满足 'a。
-    find_header(headers, "content-type").unwrap_or("application/octet-stream")
-}`, `struct Header<'a> {
-    name: &'a str,
-    value: &'a str,
+fn main() {
+    let name = String::from("content-type");
+    let value = String::from("text/plain");
+
+    // header 不拥有 name/value 的字符串数据，只是借用它们。
+    let header = Header {
+        name: name.as_str(),
+        value: value.as_str(),
+    };
+
+    println!("{} = {}", header.name, header.value());
+}`, `// 'text is just a name saying Header's references depend on external text.
+struct Header<'text> {
+    name: &'text str,
+    value: &'text str,
 }
 
-fn find_header<'a>(headers: &'a [Header<'a>], name: &str) -> Option<&'a str> {
-    headers
-        .iter()
-        .find(|header| header.name.eq_ignore_ascii_case(name))
-        .map(|header| header.value)
+impl<'text> Header<'text> {
+    fn value(&self) -> &'text str {
+        self.value
+    }
 }
 
-fn content_type_or_default<'a>(headers: &'a [Header<'a>]) -> &'a str {
-    // The result comes from headers or a 'static fallback, both valid for 'a.
-    find_header(headers, "content-type").unwrap_or("application/octet-stream")
-}`)
+fn main() {
+    let name = String::from("content-type");
+    let value = String::from("text/plain");
+
+    // header does not own the string data in name/value; it only borrows them.
+    let header = Header {
+        name: name.as_str(),
+        value: value.as_str(),
+    };
+
+    println!("{} = {}", header.name, header.value());
+}`),
+                  [
+                    {
+                      title: t("错误：返回借用了局部字符串的 Header", "Wrong: return a Header borrowing local strings"),
+                      language: "rust",
+                      code: t(
+                        `struct Header<'text> {
+    name: &'text str,
+    value: &'text str,
+}
+
+fn make_header<'text>() -> Header<'text> {
+    let name = String::from("content-type");
+    let value = String::from("text/plain");
+
+    Header {
+        name: name.as_str(),
+        value: value.as_str(),
+    }
+}`,
+                        `struct Header<'text> {
+    name: &'text str,
+    value: &'text str,
+}
+
+fn make_header<'text>() -> Header<'text> {
+    let name = String::from("content-type");
+    let value = String::from("text/plain");
+
+    Header {
+        name: name.as_str(),
+        value: value.as_str(),
+    }
+}`
+                      ),
+                      error: t(
+                        ["error[E0515]: cannot return value referencing local variable", "`name` 和 `value` 在函数结束时释放，返回的 `Header` 会保存指向已释放字符串的引用。"],
+                        ["error[E0515]: cannot return value referencing local variable", "`name` and `value` are dropped when the function ends, so the returned `Header` would contain references to freed strings."]
+                      ),
+                      explanation: t(
+                        ["生命周期标注不会让局部字符串活得更久。要从函数里返回 header，就让结构体拥有数据：`struct Header { name: String, value: String }`。"],
+                        ["A lifetime annotation does not make local strings live longer. To return a header from the function, make the struct own its data: `struct Header { name: String, value: String }`."]
+                      )
+                    }
+                  ]
+                )
               ],
               references: ["rust-lang/rust"]
             })

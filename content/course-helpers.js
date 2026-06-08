@@ -36,6 +36,14 @@
     rows
   });
 
+  const searchableTableExample = (zhTitle, enTitle, headers, rows, zhPlaceholder, enPlaceholder) => ({
+    kind: "searchableTable",
+    title: t(zhTitle, enTitle),
+    headers,
+    rows,
+    searchPlaceholder: t(zhPlaceholder, enPlaceholder)
+  });
+
   const lesson = ({
     id,
     title,
@@ -56,6 +64,6 @@
     references
   });
 
-  window.Course = { t, block, sharedExample, localizedExample, textExample, tableExample, withMistakes, lesson };
+  window.Course = { t, block, sharedExample, localizedExample, textExample, tableExample, searchableTableExample, withMistakes, lesson };
   window.RUST_COURSE_CHAPTERS = window.RUST_COURSE_CHAPTERS || { beginner: [], advanced: [] };
 })();
