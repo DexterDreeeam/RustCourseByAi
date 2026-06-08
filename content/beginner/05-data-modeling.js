@@ -12,8 +12,8 @@
                 ["Separate the roles of `struct`, `impl`, and newtypes.", "Know where a newtype constructor lives and why callers cannot bypass it."]
               ],
               syntax: [
-                ["`struct` 定义一个类型里有哪些字段：字段叫什么、字段类型是什么、字段是否对外公开。比如 `LessonDraft { title, body }` 表示一个草稿对象里有标题和正文。", "`impl Type { ... }` 是给这个类型写函数的地方。Rust 没有 `constructor` 关键字；`new` 只是约定俗成的名字。只有那些“创建这个类型并返回 `Self` / `Result<Self, ...>`”的函数，才是我们口头说的构造函数；`impl` 里也可以写普通关联函数，例如 `max_title_len() -> usize`，它不构造对象。", "`&self` 表示方法只是借用当前对象来读字段或计算结果；`&mut self` 表示方法要借用当前对象并修改它的字段；`self` 表示方法拿走当前对象的所有权，可以把它拆开、转换成别的类型，调用后原变量不能再用。", "newtype 是“用一个字段包住另一个已有类型”，例如 `pub struct PublishedLesson(LessonDraft);`。它有点像继承里“把一个已有类型变成更具体的类型”的目的，但 Rust 这里不是继承：没有父子类型关系，不会自动继承内部类型的方法，也不能把 `PublishedLesson` 自动当成 `LessonDraft` 传参。"],
-                ["A `struct` defines which fields a type has: field names, field types, and field visibility. For example, `LessonDraft { title, body }` means a draft object has a title and body.", "`impl Type { ... }` is where functions for that type live. Rust has no `constructor` keyword; `new` is only a convention. Only functions that create the type and return `Self` / `Result<Self, ...>` are what we informally call constructors; an `impl` can also contain ordinary associated functions such as `max_title_len() -> usize`, which do not construct an object.", "`&self` means the method only borrows the current object to read fields or compute a result; `&mut self` means it borrows the current object and changes its fields; `self` means it takes ownership of the current object, so it may dismantle or convert it and the original variable cannot be used afterward.", "A newtype wraps one existing type in a one-field struct, such as `pub struct PublishedLesson(LessonDraft);`. It is similar to inheritance only in the goal of giving an existing type a more specific identity, but it is not inheritance: there is no parent/child type relationship, methods are not inherited automatically, and `PublishedLesson` is not automatically usable as `LessonDraft`."]
+                ["`struct` 定义一个类型里有哪些字段：字段叫什么、字段类型是什么、字段是否对外公开。比如 `LessonDraft { title, body }` 表示一个草稿对象里有标题和正文。", "`impl Type { ... }` 是给这个类型写函数的地方。Rust 没有 `constructor` 关键字；`new` 只是约定俗成的名字。只有那些“创建当前类型并返回 `Self` / `Result<Self, ...>`”的函数，才是我们口头说的构造函数；`impl` 里也可以写普通关联函数，例如 `max_title_len() -> usize`，它不构造对象。", "`Self` 不是另写出来的新类型名。在 `impl LessonDraft { ... }` 里面，`Self` 就等于 `LessonDraft`；在 `impl PublishedLesson { ... }` 里面，`Self` 就等于 `PublishedLesson`。所以 `-> Self` 是返回当前类型，`Self { ... }` 是构造当前普通 struct，`Self(...)` 是构造当前 tuple struct/newtype。", "`&self` 表示方法只是借用当前对象来读字段或计算结果；`&mut self` 表示方法要借用当前对象并修改它的字段；`self` 表示方法拿走当前对象的所有权，可以把它拆开、转换成别的类型，调用后原变量不能再用。", "newtype 是“用一个字段包住另一个已有类型”，例如 `pub struct PublishedLesson(LessonDraft);`。它有点像继承里“把一个已有类型变成更具体的类型”的目的，但 Rust 这里不是继承：没有父子类型关系，不会自动继承内部类型的方法，也不能把 `PublishedLesson` 自动当成 `LessonDraft` 传参。"],
+                ["A `struct` defines which fields a type has: field names, field types, and field visibility. For example, `LessonDraft { title, body }` means a draft object has a title and body.", "`impl Type { ... }` is where functions for that type live. Rust has no `constructor` keyword; `new` is only a convention. Only functions that create the current type and return `Self` / `Result<Self, ...>` are what we informally call constructors; an `impl` can also contain ordinary associated functions such as `max_title_len() -> usize`, which do not construct an object.", "`Self` is not a separate type name you declare. Inside `impl LessonDraft { ... }`, `Self` means `LessonDraft`; inside `impl PublishedLesson { ... }`, `Self` means `PublishedLesson`. So `-> Self` returns the current type, `Self { ... }` constructs the current ordinary struct, and `Self(...)` constructs the current tuple struct/newtype.", "`&self` means the method only borrows the current object to read fields or compute a result; `&mut self` means it borrows the current object and changes its fields; `self` means it takes ownership of the current object, so it may dismantle or convert it and the original variable cannot be used afterward.", "A newtype wraps one existing type in a one-field struct, such as `pub struct PublishedLesson(LessonDraft);`. It is similar to inheritance only in the goal of giving an existing type a more specific identity, but it is not inheritance: there is no parent/child type relationship, methods are not inherited automatically, and `PublishedLesson` is not automatically usable as `LessonDraft`."]
               ],
               engineering: [
                 ["字段很多时，用普通 `struct` 把对象说明白；状态或身份更具体时，用 newtype 包住已有类型，例如 `PublishedLesson(LessonDraft)` 表示“已经发布过的课程”，不能和普通草稿混用。", "newtype 的字段通常保持私有，把状态转换或校验集中在 `new` 里；外部模块只拿到已经合法的领域对象。"],
@@ -40,6 +40,7 @@ pub struct LessonDraft {
 }
 
 impl LessonDraft {
+    // 在 impl LessonDraft 里，Self 就是 LessonDraft。
     pub fn new(title: String, body: String) -> Self {
         Self { title, body }
     }
@@ -64,6 +65,7 @@ impl LessonDraft {
 pub struct PublishedLesson(LessonDraft);
 
 impl PublishedLesson {
+    // 在 impl PublishedLesson 里，Self 就是 PublishedLesson。
     pub fn new(draft: LessonDraft) -> Result<Self, &'static str> {
         // ...
         Ok(Self(draft))
@@ -79,6 +81,7 @@ pub struct LessonDraft {
 }
 
 impl LessonDraft {
+    // Inside impl LessonDraft, Self means LessonDraft.
     pub fn new(title: String, body: String) -> Self {
         Self { title, body }
     }
@@ -103,6 +106,7 @@ impl LessonDraft {
 pub struct PublishedLesson(LessonDraft);
 
 impl PublishedLesson {
+    // Inside impl PublishedLesson, Self means PublishedLesson.
     pub fn new(draft: LessonDraft) -> Result<Self, &'static str> {
         // ...
         Ok(Self(draft))
