@@ -462,14 +462,14 @@ fn main() {
             }),
             lesson({
               id: "lifetimes-in-practice",
-              title: ["生命周期该怎么读", "Reading lifetimes in practice"],
+              title: ["读懂生命周期标注", "Reading lifetimes in practice"],
               goals: [
-                ["把生命周期理解为“这个引用依赖哪份数据”。", "能读懂返回引用和结构体里保存引用的代码。"],
-                ["Understand lifetimes as descriptions of reference relationships.", "Read functions returning references and structs storing references."]
+                ["知道 `&'a str`、`fn f<'a>`、`'static` 分别在说什么。", "能从函数签名里看出返回引用依赖哪一个输入。", "能读懂结构体里保存引用时为什么要写生命周期。"],
+                ["Understand what `&'a str`, `fn f<'a>`, and `'static` mean.", "Read from a function signature which input a returned reference depends on.", "Understand why structs storing references need lifetime annotations."]
               ],
               syntax: [
-                ["生命周期参数不会改变程序运行方式，只是在说明引用之间的有效关系：谁必须至少和谁一样久。", "常见函数里编译器会自动推断，所以不一定都要手写 `<'a>`。"],
-                ["Lifetime parameters do not change runtime behavior; they describe which references must live at least as long as others.", "Lifetime elision removes `<'a>` from common cases."]
+                ["生命周期说的是“一个引用在多长范围内还能安全使用”。它不会让数据活得更久，只是让编译器检查：引用不能比它指向的数据活得更久。", "`'a` 不是字符串、字符或运行时变量，只是一个生命周期参数名。可以把它读成“生命周期 a”或“某个生命周期”；名字也可以写成 `'input`。", "`&'a str` 表示“这个 `str` 引用在生命周期 `'a` 内有效”。`fn first<'a>(x: &'a str, y: &'a str) -> &'a str` 里的 `<'a>` 是声明这个名字，后面的 `&'a` 是把参数和返回值绑到同一个有效期关系上。", "这类签名的意思不是返回值一定来自第一个参数，而是：返回的引用必须来自 `x` 或 `y` 这种至少能活到 `'a` 的输入，调用方不能把返回值用到输入失效之后。", "`'static` 是特殊生命周期，表示引用的数据能活到整个程序结束，例如字符串字面量。普通函数里编译器经常能自动推断生命周期，所以不一定都要手写 `<'a>`；当函数返回引用且有多个输入引用，或结构体字段保存引用时，通常就需要写清楚。"],
+                ["Lifetimes describe the scope where a reference remains safe to use. They do not make data live longer; they let the compiler check that a reference never outlives the data it points at.", "`'a` is not a string, character, or runtime variable. It is a lifetime parameter name, read as \"lifetime a\" or \"some lifetime\"; longer names such as `'input` are also valid.", "`&'a str` means \"this `str` reference is valid for lifetime `'a`\". In `fn first<'a>(x: &'a str, y: &'a str) -> &'a str`, `<'a>` declares the name, and `&'a` ties the parameters and return value into the same validity relationship.", "That signature does not mean the result must be the first parameter. It means the returned reference must come from input data that is valid for `'a`, so the caller cannot use the result after the input has expired.", "`'static` is the special lifetime for data valid until the program ends, such as string literals. The compiler can infer lifetimes in many ordinary functions, so `<'a>` is not always written; it is usually needed when a function returns a reference with multiple input references, or when a struct stores references."]
               ],
               engineering: [
                 ["缓存、解析器、HTTP header、少拷贝的数据视图里经常会看到生命周期。", "如果生命周期一路传到很多层，让代码很难读，可以考虑在某个模块入口把数据拷贝成 owned 类型。"],
@@ -480,6 +480,29 @@ fn main() {
                 ["C++ `string_view` lifetime safety is a caller convention; Rust forces that relationship into types."]
               ],
               examples: [
+                localizedExample("Rust: 从 &'a str 开始读", "Rust: start with &'a str", "rust", `// 读法：'a 是“某个生命周期”的名字。
+// x、y 和返回值都写成 &'a str，表示返回值依赖输入数据，
+// 调用方不能让返回值比 x/y 背后的字符串活得更久。
+fn first_non_empty<'a>(x: &'a str, y: &'a str) -> &'a str {
+    if x.is_empty() { y } else { x }
+}
+
+fn main() {
+    let owned = String::from("rust");
+    let result = first_non_empty(owned.as_str(), "fallback");
+    println!("{result}");
+}`, `// Read this as: 'a is the name of "some lifetime".
+// x, y, and the return value are all &'a str, so the result depends on input data.
+// The caller cannot use the result after the strings behind x/y have expired.
+fn first_non_empty<'a>(x: &'a str, y: &'a str) -> &'a str {
+    if x.is_empty() { y } else { x }
+}
+
+fn main() {
+    let owned = String::from("rust");
+    let result = first_non_empty(owned.as_str(), "fallback");
+    println!("{result}");
+}`),
                 localizedExample("Rust: Header 视图和默认值", "Rust: header view with fallback", "rust", `struct Header<'a> {
     name: &'a str,
     value: &'a str,
