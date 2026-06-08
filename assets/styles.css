@@ -160,6 +160,9 @@ a {
   width: var(--sidebar-rail-width);
   max-height: none;
   overflow: auto;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.35) transparent;
   border: 1px solid rgba(148, 163, 184, 0.16);
   border-top: 0;
   border-bottom: 0;
@@ -169,6 +172,23 @@ a {
   box-shadow: var(--shadow);
   padding: var(--page-gutter) 1rem var(--page-gutter) var(--page-gutter);
   transition: top 220ms ease;
+}
+
+.sidebar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.35);
+  border-radius: 999px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.55);
 }
 
 .header-hidden .sidebar {
