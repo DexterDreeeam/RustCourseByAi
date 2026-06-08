@@ -178,6 +178,21 @@
       `;
     }
 
+    if (example.kind === "table") {
+      const renderCell = (cell, tag) => `<${tag}>${formatInline(pick(cell))}</${tag}>`;
+      return `
+        <div class="explanation-card table-card">
+          <h3>${escapeHtml(pick(example.title))}</h3>
+          <div class="table-scroll">
+            <table class="compare-table">
+              <thead><tr>${example.headers.map((header) => renderCell(header, "th")).join("")}</tr></thead>
+              <tbody>${example.rows.map((row) => `<tr>${row.map((cell) => renderCell(cell, "td")).join("")}</tr>`).join("")}</tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
     return `
       <div class="code-card ${example.mistakes ? "has-mistakes" : ""}">
         <div class="code-header">

@@ -29,6 +29,13 @@
     mistakes
   });
 
+  const tableExample = (zhTitle, enTitle, headers, rows) => ({
+    kind: "table",
+    title: t(zhTitle, enTitle),
+    headers,
+    rows
+  });
+
   const lesson = ({
     id,
     title,
@@ -49,6 +56,6 @@
     references
   });
 
-  window.Course = { t, block, sharedExample, localizedExample, textExample, withMistakes, lesson };
+  window.Course = { t, block, sharedExample, localizedExample, textExample, tableExample, withMistakes, lesson };
   window.RUST_COURSE_CHAPTERS = window.RUST_COURSE_CHAPTERS || { beginner: [], advanced: [] };
 })();
