@@ -12,12 +12,12 @@
                 ["Separate the roles of `struct`, `impl`, and newtypes.", "Know where a newtype's `new` function lives and why callers cannot bypass it."]
               ],
               syntax: [
-                ["`struct` 定义一个类型里有哪些字段：字段叫什么、字段类型是什么、字段是否对外公开。比如 `LessonDraft { title, body }` 表示一个草稿对象里有标题和正文。", "`impl Type { ... }` 是给这个类型写函数的地方。Rust 里没有 C++ 那种构造函数语法；要构造值，就显式调用 `Type::new(...)`。这个 `new` 函数写在 `impl Type` 里：成功时返回 `Self`，可能失败时返回 `Result<Self, ...>`。", "`Self` 不是另写出来的新类型名。在 `impl LessonDraft { ... }` 里面，`Self` 就等于 `LessonDraft`；在 `impl PublishedLesson { ... }` 里面，`Self` 就等于 `PublishedLesson`。所以 `-> Self` 是返回当前类型，`Self { ... }` 是构造当前普通 struct，`Self(...)` 是构造当前 tuple struct/newtype。", "`&self` 表示方法只借用当前对象，读取它的数据，并基于这些数据返回结果；`&mut self` 表示方法要借用当前对象并修改它的字段；`self` 表示方法拿走当前对象的所有权，可以把它拆开、转换成别的类型，调用后原变量不能再用。", "newtype 是“用一个字段包住另一个已有类型”，例如 `pub struct PublishedLesson(LessonDraft);`。目的不是换个名字，而是把业务状态写进类型系统：公开页面的函数可以要求 `PublishedLesson`，这样普通 `LessonDraft` 必须先经过 `PublishedLesson::new(draft)?` 的校验/状态转换，不能误传。", "它和继承的相似点只是“给已有东西一个更具体身份”；Rust 这里不是继承：没有父子关系，不继承内部类型方法，也不能把 `PublishedLesson` 自动当成 `LessonDraft`。你只在 `impl PublishedLesson` 暴露发布后允许的操作，比如不允许发布后改标题，就不要提供 `rename`。"],
-                ["A `struct` defines which fields a type has: field names, field types, and field visibility. For example, `LessonDraft { title, body }` means a draft object has a title and body.", "`impl Type { ... }` is where functions for that type live. Rust has no C++-style constructor syntax; to construct a value, explicitly call `Type::new(...)`. This `new` function lives in `impl Type`: it returns `Self` when construction succeeds, or `Result<Self, ...>` when construction may fail.", "`Self` is not a separate type name you declare. Inside `impl LessonDraft { ... }`, `Self` means `LessonDraft`; inside `impl PublishedLesson { ... }`, `Self` means `PublishedLesson`. So `-> Self` returns the current type, `Self { ... }` constructs the current ordinary struct, and `Self(...)` constructs the current tuple struct/newtype.", "`&self` means the method only borrows the current object, reads its data, and returns a result based on that data; `&mut self` means it borrows the current object and changes its fields; `self` means it takes ownership of the current object, so it may dismantle or convert it and the original variable cannot be used afterward.", "A newtype wraps one existing type in a one-field struct, such as `pub struct PublishedLesson(LessonDraft);`. The purpose is not just a new name; it puts business state into the type system: a public-page function can require `PublishedLesson`, so a plain `LessonDraft` must first go through `PublishedLesson::new(draft)?` for validation/state transition and cannot be passed by accident.", "Its only similarity to inheritance is giving an existing thing a more specific identity. In Rust this is not inheritance: there is no parent/child relationship, inner methods are not inherited, and `PublishedLesson` is not automatically usable as `LessonDraft`. You expose only the operations allowed after publication in `impl PublishedLesson`; if renaming after publication is not allowed, do not provide `rename`."]
+                ["`struct` 定义一个类型里有哪些字段：字段叫什么、字段类型是什么、字段是否对外公开。比如 `LessonDraft { title, body }` 表示一个草稿对象里有标题和正文。", "`impl Type { ... }` 是给这个类型写函数的地方。Rust 里没有 C++ 那种构造函数语法；字段在当前位置可见时，可以直接写 `LessonDraft { title, body }`；如果字段不 `pub`、需要校验，或者以后不想让调用方依赖字段细节，就提供 `LessonDraft::new(...)` 这样的构造入口。", "`Self` 不是另写出来的新类型名。在 `impl LessonDraft { ... }` 里面，`Self` 就等于 `LessonDraft`；在 `impl PublishedLesson { ... }` 里面，`Self` 就等于 `PublishedLesson`。所以 `-> Self` 是返回当前类型，`Self { ... }` 是构造当前普通 struct，`Self(...)` 是构造当前 tuple struct/newtype。", "`&self` 表示方法只借用当前对象，读取它的数据，并基于这些数据返回结果；`&mut self` 表示方法要借用当前对象并修改它的字段；`self` 表示方法拿走当前对象的所有权，可以把它拆开、转换成别的类型，调用后原变量不能再用。", "newtype 在语法上就是单字段包装：`pub struct PublishedLesson(LessonDraft);`。这种没有字段名、按位置放字段的 struct 叫 tuple struct；和前面 tuple 的位置访问一样，`self.0` 就是第 1 个字段，这里就是里面包着的 `LessonDraft`。", "它和“把旧类型作为成员变量放进新类型”不是两种机器机制；区别在设计语义：`PublishedLesson` 这个值整体就是一节已发布课程，而 `CoursePage { lesson: PublishedLesson, views: u64 }` 里的 `lesson` 只是页面对象的一个成员。使用 newtype 是为了把状态转换和允许的操作收紧到新类型上。"],
+                ["A `struct` defines which fields a type has: field names, field types, and field visibility. For example, `LessonDraft { title, body }` means a draft object has a title and body.", "`impl Type { ... }` is where functions for that type live. Rust has no C++-style constructor syntax; when fields are visible at the call site, writing `LessonDraft { title, body }` is fine. If fields are not `pub`, construction needs validation, or you do not want callers to depend on field details, provide a construction entry point such as `LessonDraft::new(...)`.", "`Self` is not a separate type name you declare. Inside `impl LessonDraft { ... }`, `Self` means `LessonDraft`; inside `impl PublishedLesson { ... }`, `Self` means `PublishedLesson`. So `-> Self` returns the current type, `Self { ... }` constructs the current ordinary struct, and `Self(...)` constructs the current tuple struct/newtype.", "`&self` means the method only borrows the current object, reads its data, and returns a result based on that data; `&mut self` means it borrows the current object and changes its fields; `self` means it takes ownership of the current object, so it may dismantle or convert it and the original variable cannot be used afterward.", "Syntactically, a newtype is a one-field wrapper: `pub struct PublishedLesson(LessonDraft);`. This field-without-a-name form is a tuple struct; like tuple positional access from the earlier tuple section, `self.0` means the first field, which is the wrapped `LessonDraft` here.", "It is not a different machine mechanism from putting an old type into a new type as a field; the difference is design meaning: the whole `PublishedLesson` value is a published lesson, while `lesson` inside `CoursePage { lesson: PublishedLesson, views: u64 }` is only one member of a page object. Use a newtype to attach state transitions and allowed operations to the new type."]
               ],
               engineering: [
-                ["字段很多时，用普通 `struct` 把对象说明白；状态或身份更具体时，用 newtype 包住已有类型。目的就是让函数签名拦住错误调用：需要已发布课程的地方写 `PublishedLesson`，草稿 `LessonDraft` 就传不进去。", "newtype 的字段通常保持私有，把状态转换或校验集中在 `new` 里；外部模块只拿到已经合法的领域对象，也只能调用这个对象明确暴露的方法。"],
-                ["Use an ordinary `struct` to describe an object with multiple fields; use a newtype when state or identity becomes more specific. The point is to let function signatures block wrong calls: places that need a published lesson accept `PublishedLesson`, so a draft `LessonDraft` cannot be passed.", "Newtype fields are usually private, with state transitions or validation centralized in `new`; external modules only receive valid domain objects and can only call the methods that object explicitly exposes."]
+                ["字段很多、内部有多个组成部分时，用普通 `struct`。某个已有值本身就是你要表达的新业务概念时，用 newtype；它通常只有一个私有字段，状态转换或校验集中在 `new` 里。", "外部模块拿到的是已经合法的领域对象，也只能调用这个对象明确暴露的方法；防止把草稿传给公开页面只是这种类型边界带来的结果之一。"],
+                ["Use an ordinary `struct` when a value has multiple components. Use a newtype when an existing value itself is the new domain concept; it usually has one private field, with state transitions or validation centralized in `new`.", "External modules receive a valid domain object and can only call the methods it explicitly exposes; preventing a draft from being passed to a public page is one consequence of that type boundary."]
               ],
               cppComparison: [
                 ["C++ 里可以用 wrapper class、strong typedef，甚至继承来表达“更具体的类型”。Rust 的 newtype 更接近 wrapper class / strong typedef，不是继承：它不自动复用内部类型的方法，需要你在 `impl PublishedLesson` 里明确暴露想提供的行为。"],
@@ -27,6 +27,7 @@
                 withMistakes(
                   localizedExample("Rust: struct + impl + newtype 骨架", "Rust: struct + impl + newtype skeleton", "rust", `#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct LessonDraft {
+    // 字段没有 pub：模块外不能直接写 LessonDraft { ... }。
     title: String,
     body: String,
 }
@@ -60,10 +61,12 @@ impl PublishedLesson {
     }
 
     pub fn draft(&self) -> &LessonDraft {
+        // PublishedLesson 是 tuple struct；self.0 是第 1 个字段。
         &self.0
     }
 }`, `#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct LessonDraft {
+    // Fields are not pub: outside modules cannot write LessonDraft { ... } directly.
     title: String,
     body: String,
 }
@@ -97,6 +100,7 @@ impl PublishedLesson {
     }
 
     pub fn draft(&self) -> &LessonDraft {
+        // PublishedLesson is a tuple struct; self.0 is its first field.
         &self.0
     }
 }`),
