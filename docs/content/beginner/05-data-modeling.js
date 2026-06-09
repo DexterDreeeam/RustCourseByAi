@@ -1,5 +1,5 @@
 (function () {
-  const { t, sharedExample, localizedExample, withMistakes, lesson } = window.Course;
+  const { t, sharedExample, localizedExample, textExample, withMistakes, lesson } = window.Course;
   window.RUST_COURSE_CHAPTERS.beginner.push({
           id: "data-modeling",
           title: t("数据建模：struct、enum 与 pattern matching", "Data modeling: structs, enums, and pattern matching"),
@@ -279,6 +279,20 @@ fn next(state: DownloadState) -> DownloadState {
                         ["Do not hide missing state-machine branches behind defaults; explicit states are easier to maintain."]
                       )
                     }
+                  ]
+                ),
+                textExample(
+                  "`terminal @ ...` 是什么",
+                  "What `terminal @ ...` means",
+                  [
+                    "`@` 是 pattern binding，写法是 `name @ pattern`：先判断右边的 pattern 是否匹配；如果匹配，就把“整个被匹配到的值”绑定到左边的变量名 `name`。所以 `terminal @ DownloadState::Stored { .. }` 的意思是：如果当前状态是 `Stored`，不要拆字段，只把整个 `DownloadState::Stored { ... }` 取名为 `terminal`。",
+                    "最后一行用了 or-pattern：`terminal @ DownloadState::Stored { .. } | terminal @ DownloadState::Failed { .. } => terminal`。它表示 `Stored` 和 `Failed` 都是终态；无论匹配到哪一个，都把整个原状态绑定成 `terminal`，然后原样返回。这里的 `terminal` 不是关键字，只是变量名，换成 `done`、`state` 也可以。`|` 两边必须绑定同名、同类型的变量，所以两边都写 `terminal @ ...`。",
+                    "不用 `@` 也能写，但会啰嗦：`DownloadState::Stored { path, bytes } => DownloadState::Stored { path, bytes }`，`DownloadState::Failed { reason } => DownloadState::Failed { reason }`。`@` 的作用就是在检查具体变体的同时，保留整个值，方便直接返回或继续传给别的函数。"
+                  ],
+                  [
+                    "`@` is pattern binding. The form is `name @ pattern`: Rust first checks whether the pattern on the right matches; if it does, the whole matched value is bound to the name on the left. So `terminal @ DownloadState::Stored { .. }` means: if the current state is `Stored`, do not unpack its fields; keep the whole `DownloadState::Stored { ... }` value and call it `terminal`.",
+                    "The last arm uses an or-pattern: `terminal @ DownloadState::Stored { .. } | terminal @ DownloadState::Failed { .. } => terminal`. It says both `Stored` and `Failed` are terminal states; whichever one matches, bind the whole original state as `terminal` and return it unchanged. `terminal` is not a keyword, just a variable name; `done` or `state` would also work. Both sides of `|` must bind the same variable name with the same type, so both sides write `terminal @ ...`.",
+                    "You can write the same logic without `@`, but it is more verbose: `DownloadState::Stored { path, bytes } => DownloadState::Stored { path, bytes }`, `DownloadState::Failed { reason } => DownloadState::Failed { reason }`. `@` lets you check a specific variant while keeping the whole value for returning or passing onward."
                   ]
                 )
               ],
