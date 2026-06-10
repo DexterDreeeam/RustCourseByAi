@@ -4,7 +4,7 @@ A GitHub Pages course for C++ programmers who want to learn Rust syntax, mental 
 
 ## View the site
 
-This repository is designed to publish the static site in `docs\` with GitHub Pages. The current deployed site is published from the `gh-pages` branch, where the site files live at the branch root.
+This repository is designed to publish the static site in `docs\` with GitHub Pages. The current deployed site is published from the` gh-pages\` branch, where the site files live at the branch root.
 
 1. Open repository **Settings**.
 2. Go to **Pages**.
@@ -20,7 +20,10 @@ https://dexterdreeeam.github.io/RustCourseByAi/
 ## Repository structure
 
 ```text
+.github\copilot-instructions.md
+                           Consolidated Copilot instructions (entry point)
 .copilot\instruction.md   Project construction and content authoring principles
+docs\UX-DESIGN.md         UX, interaction, and content/formatting design contract
 docs\index.html           GitHub Pages entry point
 docs\assets\styles.css    Dark theme and responsive layout
 docs\assets\app.js        Navigation, language switching, and rendering
@@ -55,4 +58,4 @@ The deployed `gh-pages` branch contains the same site files at its root, plus th
 
 ## Logo attribution
 
-The Rust logo asset is from `rust-lang/rust-artwork` and is distributed under the Creative Commons Attribution license (CC-BY 4.0). Rust and Cargo names/logos are Rust trademarks and should follow the Rust trademark policy.
+The Rust logo asset is from `rust-lang/rust-artwork` and is distributed under the Creative Commons Attribution license (CC-BY 4.0). Rust and Cargo names/logos are Rust trademarks and should follow the Rust trademark policy.
