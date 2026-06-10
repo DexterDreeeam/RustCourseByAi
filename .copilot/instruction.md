@@ -12,8 +12,10 @@ This repository hosts a GitHub Pages tutorial site that teaches Rust to programm
 - Chinese and English content must stay conceptually aligned as an implementation requirement. Do not add a section in one language without the matching section in the other language.
 - Each lesson teaches one concrete knowledge point.
 - Each lesson must include two required explanations:
-  1. Syntax-level explanation.
-  2. Concrete engineering/project usage.
+
+    1. Syntax-level explanation.
+    2. Concrete engineering/project usage.
+
 - Lessons should assume the reader understands C++ basics, RAII, templates, references, pointers, build systems, and common project organization.
 - Prefer Rust-vs-C++ comparisons over generic Rust explanations when a comparison clarifies the idea.
 - Examples should be original or short adapted snippets. Do not copy large blocks from other repositories.
