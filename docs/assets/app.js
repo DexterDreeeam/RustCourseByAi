@@ -339,13 +339,15 @@
         } else if (RUST_LITERALS.has(word)) {
           out += span("tok-literal", word);
         } else if (isMethodRef(code, i, j, word)) {
-          out += `<span class="tok-fn method-ref" tabindex="0" data-method="${escapeHtml(word)}">${escapeHtml(word)}</span>`;
+          out += `<span class="tok-fn method-ref" tabindex="0" data-method="${escapeHtml(word)}" data-ident="${escapeHtml(word)}">${escapeHtml(word)}</span>`;
         } else if (RUST_TYPES.has(word) || (word[0] >= "A" && word[0] <= "Z")) {
           out += span("tok-type", word);
         } else if (code[j] === "(") {
-          out += span("tok-fn", word);
-        } else {
+          out += `<span class="tok-fn code-ident" data-ident="${escapeHtml(word)}">${escapeHtml(word)}</span>`;
+        } else if (word === "_") {
           out += escapeHtml(word);
+        } else {
+          out += `<span class="code-ident" data-ident="${escapeHtml(word)}">${escapeHtml(word)}</span>`;
         }
         i = j;
         continue;
@@ -804,11 +806,39 @@
     }, { passive: true });
   }
 
+  function setupIdentHighlight() {
+    let current = [];
+    const clear = () => {
+      current.forEach((el) => el.classList.remove("ident-highlight"));
+      current = [];
+    };
+    root.addEventListener("mouseover", (event) => {
+      const el = event.target.closest("[data-ident]");
+      if (!el || !root.contains(el)) {
+        return;
+      }
+      const pre = el.closest("pre");
+      if (!pre) {
+        return;
+      }
+      const name = el.dataset.ident;
+      clear();
+      current = Array.from(pre.querySelectorAll(`[data-ident="${(window.CSS && CSS.escape) ? CSS.escape(name) : name}"]`));
+      current.forEach((node) => node.classList.add("ident-highlight"));
+    });
+    root.addEventListener("mouseout", (event) => {
+      if (event.target.closest("[data-ident]")) {
+        clear();
+      }
+    });
+  }
+
   if (!window.location.hash) {
     history.replaceState(null, "", `#${encodeURIComponent(state.sectionId)}`);
   }
 
   setupMethodTooltips();
+  setupIdentHighlight();
   render();
   updateHeaderVisibility();
 })();

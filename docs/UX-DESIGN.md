@@ -60,6 +60,24 @@ The reference must read as interactive **without blurring the code glyphs**.
 Resting affordances should hint interactivity faintly but visibly; hover/focus
 feedback should be clearly present but never overwhelming or blurry.
 
+### 1.3 Same-identifier highlight on hover
+Goal: in any code example, hovering an identifier highlights **all occurrences of
+that same identifier within the same code block**, so a reader can trace where a
+variable or function name is reused.
+
+- **Scope is the single code block** (the nearest `<pre>`), so the main example
+  and each mistake block highlight independently and never bleed across blocks.
+- **Which tokens participate.** Plain identifiers (variables, fields), function
+  names (call position), and method references all carry `data-ident`. Keywords,
+  literals, types/enum variants, numbers, strings, comments, lifetimes, and the
+  bare `_` wildcard do not participate.
+- **Visual.** Highlighted occurrences get a soft accent background tint plus a 1px
+  ring (`.ident-highlight`), crisp (no blur). The hovered method reference still
+  shows its own tooltip/affordance on top.
+- **Implementation.** `setupIdentHighlight` in `app.js` uses delegated
+  `mouseover`/`mouseout` on `root`; it scopes the lookup to `el.closest("pre")`
+  and toggles `.ident-highlight` on every `[data-ident="<name>"]` within it.
+
 ---
 
 ## 2. Content & formatting conventions (chapter authoring)

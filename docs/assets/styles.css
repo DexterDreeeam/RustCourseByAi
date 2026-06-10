@@ -568,6 +568,12 @@ code {
   transition: text-shadow 140ms ease, background 140ms ease, box-shadow 140ms ease;
 }
 
+.ident-highlight {
+  border-radius: 0.2rem;
+  background: rgba(125, 211, 252, 0.2);
+  box-shadow: 0 0 0 1px rgba(125, 211, 252, 0.25);
+}
+
 .method-ref:hover,
 .method-ref:focus-visible {
   background: rgba(56, 189, 248, 0.14);
