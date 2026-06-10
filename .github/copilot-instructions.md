@@ -58,10 +58,12 @@ who already know C++. Read this file before making changes.
   (blur 0)** at rest — **no glow/large-blur, no underline**. On hover/focus, lead
   with a faint background tint + thin ring and keep the offset shadow subtle (not
   stronger than rest).
-- Hovering an identifier highlights **all occurrences of the same identifier
-  within the same code block** (`.ident-highlight`, scoped to the nearest `<pre>`).
-  Variables, fn names, and method refs participate; keywords/types/literals and
-  bare `_` do not.
+- Hovering an identifier highlights occurrences of the **same identifier in the
+  same lexical scope** within one code block (`.ident-highlight`, scoped to the
+  nearest `<pre>`). Local vars/params are scoped per enclosing `fn` body (two
+  same-named params in different functions do NOT cross-highlight); fn/item names
+  and method refs are block-global. Keywords/types/literals and bare `_` do not
+  participate.
 
 ## Page behavior (summary — full list in `.copilot/instruction.md`)
 - Language switching keeps the reader on the same lesson; section URLs are

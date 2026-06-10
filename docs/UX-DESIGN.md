@@ -61,22 +61,30 @@ Resting affordances should hint interactivity faintly but visibly; hover/focus
 feedback should be clearly present but never overwhelming or blurry.
 
 ### 1.3 Same-identifier highlight on hover
-Goal: in any code example, hovering an identifier highlights **all occurrences of
-that same identifier within the same code block**, so a reader can trace where a
-variable or function name is reused.
+Goal: in any code example, hovering an identifier highlights occurrences of the
+**same identifier in the same lexical scope** within that code block, so a reader
+can trace where a particular variable or function name is used.
 
 - **Scope is the single code block** (the nearest `<pre>`), so the main example
   and each mistake block highlight independently and never bleed across blocks.
+- **Scope-aware, not just name-matching.** Local variables and parameters are
+  scoped to their enclosing `fn` body: two different `request` parameters in two
+  different functions are treated as distinct and do **not** cross-highlight.
+  Function/item names (definition and call sites) and method references are
+  global within the block, so a function name highlights its definition and all
+  its call sites together. (Heuristic: a fresh scope id is assigned per top-level
+  `fn`, tracked by brace depth; `data-scope` carries it, `"g"` = global.)
 - **Which tokens participate.** Plain identifiers (variables, fields), function
-  names (call position), and method references all carry `data-ident`. Keywords,
-  literals, types/enum variants, numbers, strings, comments, lifetimes, and the
-  bare `_` wildcard do not participate.
+  names (call position), and method references carry `data-ident` + `data-scope`.
+  Keywords, literals, types/enum variants, numbers, strings, comments, lifetimes,
+  and the bare `_` wildcard do not participate.
 - **Visual.** Highlighted occurrences get a soft accent background tint plus a 1px
   ring (`.ident-highlight`), crisp (no blur). The hovered method reference still
   shows its own tooltip/affordance on top.
 - **Implementation.** `setupIdentHighlight` in `app.js` uses delegated
   `mouseover`/`mouseout` on `root`; it scopes the lookup to `el.closest("pre")`
-  and toggles `.ident-highlight` on every `[data-ident="<name>"]` within it.
+  and toggles `.ident-highlight` on every
+  `[data-ident="<name>"][data-scope="<scope>"]` within it.
 
 ---
 

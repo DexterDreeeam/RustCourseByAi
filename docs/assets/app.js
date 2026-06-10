@@ -203,8 +203,39 @@
     let out = "";
     let i = 0;
 
+    let braceDepth = 0;
+    let scopeCounter = 0;
+    let currentScope = "g";
+    let inFn = false;
+    let fnBodyOpened = false;
+    let expectFnName = false;
+    const identSpan = (cls, word, scope) => {
+      const clsAttr = cls ? ` class="${cls}"` : "";
+      return `<span${clsAttr} data-ident="${escapeHtml(word)}" data-scope="${scope}">${escapeHtml(word)}</span>`;
+    };
+
     while (i < n) {
       const c = code[i];
+
+      if (c === "{") {
+        braceDepth++;
+        if (inFn) fnBodyOpened = true;
+        out += escapeHtml(c);
+        i++;
+        continue;
+      }
+
+      if (c === "}") {
+        if (braceDepth > 0) braceDepth--;
+        if (inFn && braceDepth === 0 && fnBodyOpened) {
+          inFn = false;
+          fnBodyOpened = false;
+          currentScope = "g";
+        }
+        out += escapeHtml(c);
+        i++;
+        continue;
+      }
 
       if (c === "/" && code[i + 1] === "/") {
         let j = i + 2;
@@ -336,18 +367,29 @@
         }
         if (RUST_KEYWORDS.has(word)) {
           out += span("tok-keyword", word);
+          if (word === "fn") {
+            expectFnName = true;
+            if (braceDepth === 0 && !inFn) {
+              inFn = true;
+              fnBodyOpened = false;
+              currentScope = ++scopeCounter;
+            }
+          }
         } else if (RUST_LITERALS.has(word)) {
           out += span("tok-literal", word);
         } else if (isMethodRef(code, i, j, word)) {
-          out += `<span class="tok-fn method-ref" tabindex="0" data-method="${escapeHtml(word)}" data-ident="${escapeHtml(word)}">${escapeHtml(word)}</span>`;
+          out += `<span class="tok-fn method-ref" tabindex="0" data-method="${escapeHtml(word)}" data-ident="${escapeHtml(word)}" data-scope="g">${escapeHtml(word)}</span>`;
         } else if (RUST_TYPES.has(word) || (word[0] >= "A" && word[0] <= "Z")) {
           out += span("tok-type", word);
+        } else if (expectFnName) {
+          out += identSpan("tok-fn", word, "g");
+          expectFnName = false;
         } else if (code[j] === "(") {
-          out += `<span class="tok-fn code-ident" data-ident="${escapeHtml(word)}">${escapeHtml(word)}</span>`;
+          out += identSpan("tok-fn", word, "g");
         } else if (word === "_") {
           out += escapeHtml(word);
         } else {
-          out += `<span class="code-ident" data-ident="${escapeHtml(word)}">${escapeHtml(word)}</span>`;
+          out += identSpan("", word, currentScope);
         }
         i = j;
         continue;
@@ -822,8 +864,11 @@
         return;
       }
       const name = el.dataset.ident;
+      const scope = el.dataset.scope;
       clear();
-      current = Array.from(pre.querySelectorAll(`[data-ident="${(window.CSS && CSS.escape) ? CSS.escape(name) : name}"]`));
+      const esc = (window.CSS && CSS.escape) ? CSS.escape(name) : name;
+      const escScope = (window.CSS && CSS.escape) ? CSS.escape(scope) : scope;
+      current = Array.from(pre.querySelectorAll(`[data-ident="${esc}"][data-scope="${escScope}"]`));
       current.forEach((node) => node.classList.add("ident-highlight"));
     });
     root.addEventListener("mouseout", (event) => {
