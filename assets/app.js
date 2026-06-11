@@ -778,21 +778,19 @@
     const position = (el) => {
       const rect = el.getBoundingClientRect();
       const margin = 8;
+      const gap = 8;
       const tipWidth = tip.offsetWidth;
       const tipHeight = tip.offsetHeight;
       let left = rect.left;
-      let top = rect.bottom + 6;
+      let top = rect.top - tipHeight - gap;
       if (left + tipWidth > window.innerWidth - margin) {
         left = window.innerWidth - margin - tipWidth;
       }
       if (left < margin) {
         left = margin;
       }
-      if (top + tipHeight > window.innerHeight - margin) {
-        top = rect.top - tipHeight - 6;
-      }
       if (top < margin) {
-        top = margin;
+        top = rect.bottom + gap;
       }
       tip.style.left = `${left}px`;
       tip.style.top = `${top}px`;
