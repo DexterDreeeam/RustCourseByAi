@@ -112,5 +112,6 @@ Use these repositories as long-term references for examples, comparisons, and en
 ## Source control workflow
 
 - After every content or code change is finished and verified, commit it and push to GitHub (`origin` / `main`) so the maintainer can review the diff. The live GitHub Pages site is served from the `gh-pages` branch and is published separately, so a `main` push makes the change reviewable but does not by itself update the live site. Do not leave completed work uncommitted.
+- **Publish to the live site after every verified content or code change.** Mirror `docs/` onto the `gh-pages` branch: copy `docs/index.html`, `docs/.nojekyll`, `docs/assets/`, and `docs/content/` to the branch root (do not copy `docs/UX-DESIGN.md`; keep `.github/workflows/pages.yml` in place), commit with a `Deploy ...` message, and push `gh-pages`. That push triggers the `Deploy GitHub Pages` workflow (`.github/workflows/pages.yml`, which lives only on `gh-pages`) and updates the live page at https://dexterdreeeam.github.io/RustCourseByAi/. A change is not done until it is published live.
 - Use concise, descriptive commit messages that say what changed and why.
 - `git` may not be on `PATH`. When it is missing, use the git bundled with GitHub Desktop at `%LOCALAPPDATA%\GitHubDesktop\app-*\resources\app\git\cmd\git.exe` (resolve the `app-*` wildcard to the newest install).

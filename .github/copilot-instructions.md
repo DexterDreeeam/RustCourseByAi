@@ -82,6 +82,14 @@ who already know C++. Read this file before making changes.
   separately, so a `main` push makes the change reviewable but does not by itself
   update the live site. Use a concise, descriptive commit message and never leave
   finished work uncommitted.
+- **Publish to the live site after every verified content or code change.** Mirror
+  `docs/` onto the `gh-pages` branch: copy `docs/index.html`, `docs/.nojekyll`,
+  `docs/assets/`, and `docs/content/` to the branch root (do not copy
+  `docs/UX-DESIGN.md`; keep `.github/workflows/pages.yml`), commit with a
+  `Deploy ...` message, and push `gh-pages`. That push triggers the **Deploy
+  GitHub Pages** workflow (`.github/workflows/pages.yml`, present only on
+  `gh-pages`) and updates https://dexterdreeeam.github.io/RustCourseByAi/. A
+  change is not done until it is published live.
 - `git` may not be on `PATH` in this environment. If so, use the git bundled with
   GitHub Desktop at
   `%LOCALAPPDATA%\GitHubDesktop\app-*\resources\app\git\cmd\git.exe` (resolve the
