@@ -781,7 +781,9 @@
       const gap = 8;
       const tipWidth = tip.offsetWidth;
       const tipHeight = tip.offsetHeight;
-      let left = rect.left;
+      const cs = getComputedStyle(tip);
+      const insetLeft = parseFloat(cs.paddingLeft) + parseFloat(cs.borderLeftWidth);
+      let left = rect.left - insetLeft;
       let top = rect.top - tipHeight - gap;
       if (left + tipWidth > window.innerWidth - margin) {
         left = window.innerWidth - margin - tipWidth;
