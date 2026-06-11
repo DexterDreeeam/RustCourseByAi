@@ -164,6 +164,89 @@
               references: ["rust-lang/rust"]
             }),
             lesson({
+              id: "macros-vs-functions",
+              title: ["宏调用与函数调用：为什么有的带 `!`", "Macro calls vs function calls: why some end with `!`"],
+              goals: [
+                ["把 `!` 读成宏调用标记，区分宏调用和普通函数调用。", "理解为什么 `println!`、`panic!`、`assert!`、`vec!` 必须是宏，而不能写成普通函数。"],
+                ["Read `!` as a macro-invocation marker and tell macro calls apart from ordinary function calls.", "Understand why `println!`, `panic!`, `assert!`, and `vec!` must be macros rather than plain functions."]
+              ],
+              syntax: [
+                ["名字后面带 `!` 的调用（`println!`、`vec!`、`panic!`）是宏调用，不是函数调用。宏在编译早期被展开成真正的 Rust 代码，然后才参与类型检查和代码生成；普通函数则是按签名直接调用的。", "宏能做函数做不到的事：接收任意数量、任意类型的参数（`println!` 想传几个值就传几个），在编译期检查格式串和参数是否对得上，以及直接生成代码（`vec![1, 2, 3]` 会展开成一段创建并填充 `Vec` 的代码）。普通函数的参数个数和类型在签名里就固定了，做不到这些。", "宏调用的定界符可以是 `()`、`[]` 或 `{}`，三者等价；习惯上 `vec![...]` 用方括号、`println!(...)` 用圆括号。带 `!` 的名字保留给宏，普通函数名后面绝不会出现 `!`。"],
+                ["A call whose name ends with `!` (`println!`, `vec!`, `panic!`) is a macro invocation, not a function call. Macros expand into real Rust code early in compilation, before type checking and code generation; plain functions are called directly per their signature.", "Macros do what functions cannot: accept any number and mix of argument types (pass `println!` as many values as you like), check the format string against its arguments at compile time, and generate code outright (`vec![1, 2, 3]` expands into code that creates and fills a `Vec`). A plain function fixes its argument count and types in its signature, so it cannot.", "A macro's delimiters may be `()`, `[]`, or `{}` — all equivalent; conventionally `vec![...]` uses brackets and `println!(...)` uses parentheses. The `!` name is reserved for macros; an ordinary function name never carries a `!`."]
+              ],
+              engineering: [
+                ["看到 `!` 就知道这是宏：展开后它可能生成一段代码、提前 return，或直接终止进程（`panic!`、`todo!`）。想看它到底展开成什么，可以用 `cargo expand`。", "日常工程里你主要是\"用\"标准库宏；自己\"写\"宏属于进阶话题，见进阶章节的宏与代码生成。"],
+                ["Seeing `!` tells you it is a macro: after expansion it may generate code, return early, or abort the process (`panic!`, `todo!`). To see exactly what it expands to, use `cargo expand`.", "Day to day you mostly *use* standard-library macros; *writing* your own is an advanced topic — see the advanced macros and code-generation chapter."]
+              ],
+              cppComparison: [
+                ["C++ 的 `#define` 宏是纯文本替换，不懂作用域也不懂类型，很容易踩坑；Rust 宏作用在 token / 语法树上，是 hygienic 的（不会意外捕获或污染外部的变量名），而且类型安全。`println!` 之于 C++ 更像编译期检查过的 `printf`：格式串和参数对不上会直接编译报错，而不是运行时未定义行为。"],
+                ["C++ `#define` macros are raw text substitution that ignore scope and types and are easy to misuse; Rust macros operate on tokens / the syntax tree, are hygienic (they never accidentally capture or clobber outside names), and are type-safe. `println!` is closer to a compile-time-checked `printf`: a format/argument mismatch is a compile error, not run-time undefined behavior."]
+              ],
+              examples: [
+                withMistakes(
+                  sharedExample("Rust: 常见宏的用法", "Rust: common macros in use", "rust", `fn main() {
+    // println! / eprintln!：格式化输出，参数个数可变，格式串在编译期检查
+    println!("x = {}, y = {}", 1, 2);
+
+    // format!：同样的格式化规则，但返回 String 而不是直接打印
+    let label: String = format!("{}-{}", "id", 42);
+
+    // vec!：用字面量直接构造 Vec，展开成创建并填充的代码
+    let values: Vec<i32> = vec![1, 2, 3];
+
+    // assert! / assert_eq!：条件不成立就 panic，常用于测试和不变量检查
+    assert!(values.len() == 3);
+    assert_eq!(label, "id-42");
+
+    // dbg!：打印表达式的值和所在位置，并把值原样返回，方便临时调试
+    let doubled = dbg!(values.len() * 2);
+
+    // panic!：直接终止，报告不可恢复的 bug
+    if doubled == 0 {
+        panic!("长度不应该是 0");
+    }
+}`),
+                  [
+                    {
+                      title: t("错误：把宏当普通函数调用，漏掉 `!`", "Wrong: calling a macro like a function, dropping the `!`"),
+                      language: "rust",
+                      code: t(
+                        `fn main() {
+    println("hello");
+}`,
+                        `fn main() {
+    println("hello");
+}`
+                      ),
+                      error: t(
+                        ["error[E0423]: expected function, found macro `println`", "`println` 是宏不是函数，少了 `!` 编译器就去找名为 `println` 的函数，结果找不到。"],
+                        ["error[E0423]: expected function, found macro `println`", "`println` is a macro, not a function; without `!` the compiler looks for a function named `println` and cannot find one."]
+                      ),
+                      explanation: t(
+                        ["宏调用必须带 `!`：写成 `println!(\"hello\")`。`!` 不是可选的语法糖，而是告诉编译器\"这是宏，按宏展开\"。"],
+                        ["A macro invocation must include `!`: write `println!(\"hello\")`. The `!` is not optional sugar; it tells the compiler \"this is a macro, expand it as one.\""]
+                      )
+                    }
+                  ]
+                ),
+                tableExample("常用标准库宏速查", "Common standard-library macros",
+                  [t("宏", "Macro"), t("作用", "What it does")],
+                  [
+                    ["`println!` / `print!` / `eprintln!`", t("格式化输出到标准输出 / 标准错误", "format and write to stdout / stderr")],
+                    ["`format!`", t("按同样的格式化规则生成一个 `String`", "build a `String` using the same formatting rules")],
+                    ["`vec!`", t("用字面量构造 `Vec`，如 `vec![0; n]`", "construct a `Vec` from a literal, e.g. `vec![0; n]`")],
+                    ["`write!` / `writeln!`", t("向实现了 `Write`/`fmt::Write` 的目标写入格式化文本", "write formatted text into a `Write`/`fmt::Write` target")],
+                    ["`panic!`", t("立即终止当前线程，报告不可恢复的 bug", "abort the current thread, reporting an unrecoverable bug")],
+                    ["`assert!` / `assert_eq!` / `assert_ne!`", t("条件不成立就 panic，常用于测试和不变量", "panic when the condition fails; used in tests and invariants")],
+                    ["`dbg!`", t("打印表达式的值和位置，并原样返回该值", "print an expression's value and location, returning it unchanged")],
+                    ["`todo!` / `unimplemented!`", t("占位标记，一旦执行到就 panic", "placeholder markers that panic if reached")],
+                    ["`matches!`", t("判断值是否匹配某个模式，返回 `bool`", "test whether a value matches a pattern, returning a `bool`")]
+                  ]
+                )
+              ],
+              references: ["rust-lang/rust"]
+            }),
+            lesson({
               id: "bindings-mutability-shadowing",
               title: ["绑定、可变性与 shadowing", "Bindings, mutability, and shadowing"],
               goals: [
