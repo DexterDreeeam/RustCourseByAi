@@ -88,6 +88,32 @@ fn parse_port_with_question_mark(raw: &str) -> Result<u16, ConfigError> {
 
     Ok(port)
 }`),
+          sharedExample("Rust: 不 panic 地消费 Option 与 Result", "Rust: consume Option and Result without panicking", "rust", `// 1. unwrap_or / unwrap_or_else / unwrap_or_default 提供回退值，绝不 panic。
+fn read_timeout(value: Option<u64>) -> u64 {
+    value.unwrap_or(30)
+}
+
+// 2. match 把 Some/None 两条分支都显式处理掉。
+fn port_or_default(raw: Option<&str>) -> u16 {
+    match raw {
+        Some(text) => text.parse().unwrap_or(8080),
+        None => 8080,
+    }
+}
+
+// 3. ok_or 把 absence 转成 Result，再用 ? 传播给调用方决定。
+fn first_byte(data: &[u8]) -> Result<u8, ConfigError> {
+    let byte = data.first().copied().ok_or(ConfigError::MissingField("data"))?;
+    Ok(byte)
+}
+
+// 4. let ... else 在拿不到值时走早退路径，而不是 panic。
+fn parse_host(raw: Option<&str>) -> Result<String, ConfigError> {
+    let Some(host) = raw else {
+        return Err(ConfigError::MissingField("host"));
+    };
+    Ok(host.to_owned())
+}`),
           sharedExample("Rust: panic! 的正确使用场景", "Rust: when to use panic!", "rust", `// 1. 程序内部不变量被破坏：是 bug，不是可恢复失败。
 fn split_even(values: &[i32]) -> (&[i32], &[i32]) {
     if values.len() % 2 != 0 {
