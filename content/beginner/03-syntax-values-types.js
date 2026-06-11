@@ -165,7 +165,7 @@
             }),
             lesson({
               id: "macros-vs-functions",
-              title: ["宏调用与函数调用：为什么有的带 `!`", "Macro calls vs function calls: why some end with `!`"],
+              title: ["宏", "Macros"],
               goals: [
                 ["把 `!` 读成宏调用标记，区分宏调用和普通函数调用。", "理解为什么 `println!`、`panic!`、`assert!`、`vec!` 必须是宏，而不能写成普通函数。"],
                 ["Read `!` as a macro-invocation marker and tell macro calls apart from ordinary function calls.", "Understand why `println!`, `panic!`, `assert!`, and `vec!` must be macros rather than plain functions."]
