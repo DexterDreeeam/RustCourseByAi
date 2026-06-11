@@ -77,9 +77,11 @@ who already know C++. Read this file before making changes.
 - Verify visually: serve `docs/` statically and open affected lessons before
   considering a UI/UX change done.
 - **After every content or code change, commit and push it to GitHub** (`origin`
-  / `main`) once the change is verified, so the maintainer can review the diff and
-  see it live on GitHub Pages. Use a concise, descriptive commit message and never
-  leave finished work uncommitted.
+  / `main`) once the change is verified, so the maintainer can review the diff.
+  The live GitHub Pages site is served from the `gh-pages` branch and is published
+  separately, so a `main` push makes the change reviewable but does not by itself
+  update the live site. Use a concise, descriptive commit message and never leave
+  finished work uncommitted.
 - `git` may not be on `PATH` in this environment. If so, use the git bundled with
   GitHub Desktop at
   `%LOCALAPPDATA%\GitHubDesktop\app-*\resources\app\git\cmd\git.exe` (resolve the
