@@ -561,6 +561,76 @@ code {
   color: #dcdcaa;
 }
 
+.method-ref {
+  border-radius: 0.25rem;
+  cursor: help;
+  text-shadow: 1.5px 1.5px 0 rgba(56, 189, 248, 0.45);
+  transition: text-shadow 140ms ease, background 140ms ease, box-shadow 140ms ease;
+}
+
+.ident-highlight {
+  border-radius: 0.2rem;
+  background: rgba(125, 211, 252, 0.2);
+  box-shadow: 0 0 0 1px rgba(125, 211, 252, 0.25);
+}
+
+.method-ref:hover,
+.method-ref:focus-visible {
+  background: rgba(56, 189, 248, 0.14);
+  box-shadow: 0 0 0 0.12rem rgba(56, 189, 248, 0.22);
+  text-shadow: 1px 1px 0 rgba(56, 189, 248, 0.3);
+  outline: none;
+}
+
+.method-tooltip {
+  position: fixed;
+  z-index: 1200;
+  max-width: min(28rem, calc(100vw - 1rem));
+  border: 1px solid rgba(125, 211, 252, 0.28);
+  border-radius: 0.7rem;
+  background: var(--panel-strong);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.5);
+  padding: 0.7rem 0.8rem;
+  color: var(--text);
+  font-size: 0.84rem;
+  line-height: 1.55;
+  pointer-events: none;
+}
+
+.method-tooltip[hidden] {
+  display: none;
+}
+
+.method-tooltip-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.method-tooltip-item + .method-tooltip-item {
+  margin-top: 0.6rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.18);
+}
+
+.method-tooltip-sig {
+  display: block;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.method-tooltip-group {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.method-tooltip-note {
+  color: var(--muted);
+}
+
 .tok-macro {
   color: #c586c0;
 }

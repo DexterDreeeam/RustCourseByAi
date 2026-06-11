@@ -83,6 +83,49 @@
     return value[state.language] || value.zh || value.en || "";
   }
 
+  function buildMethodRegistry() {
+    const registry = new Map();
+    const add = (name, entry) => {
+      if (!registry.has(name)) {
+        registry.set(name, []);
+      }
+      const list = registry.get(name);
+      if (!list.some((existing) => existing.signature === entry.signature && pick(existing.group) === pick(entry.group))) {
+        list.push(entry);
+      }
+    };
+    const visitExamples = (examples) => {
+      (examples || []).forEach((example) => {
+        if (!example || example.kind !== "methodTable") {
+          return;
+        }
+        (example.groups || []).forEach((group) => {
+          (group.rows || []).forEach((row) => {
+            const signatureField = typeof row[0] === "string" ? row[0] : pick(row[0]);
+            const note = row[1];
+            const segments = signatureField.match(/`[^`]+`/g) || [signatureField];
+            segments.forEach((segment) => {
+              const signature = segment.replace(/`/g, "").trim();
+              const match = signature.match(/^fn\s+(?:[A-Za-z0-9_]+\s*::\s*)?([A-Za-z0-9_]+)/);
+              if (!match) {
+                return;
+              }
+              add(match[1], { group: group.title, signature, note });
+            });
+          });
+        });
+      });
+    };
+    (data.parts || []).forEach((part) =>
+      (part.chapters || []).forEach((chapter) =>
+        (chapter.sections || []).forEach((section) => visitExamples(section.examples))
+      )
+    );
+    return registry;
+  }
+
+  const methodRegistry = buildMethodRegistry();
+
   function escapeHtml(value) {
     return String(value)
       .replace(/&/g, "&amp;")
@@ -138,6 +181,18 @@
     }
   }
 
+  function isMethodRef(code, start, end, word) {
+    if (!methodRegistry.has(word)) {
+      return false;
+    }
+    let prev = start - 1;
+    while (prev >= 0 && (code[prev] === " " || code[prev] === "\t")) prev--;
+    const prevChar = prev >= 0 ? code[prev] : "";
+    const isMethodAccess = prevChar === ".";
+    const isDirectCall = code[end] === "(";
+    return isMethodAccess || isDirectCall;
+  }
+
   function highlightRust(code) {
     const n = code.length;
     const isIdentStart = (c) => c === "_" || (c >= "a" && c <= "z") || (c >= "A" && c <= "Z");
@@ -148,8 +203,39 @@
     let out = "";
     let i = 0;
 
+    let braceDepth = 0;
+    let scopeCounter = 0;
+    let currentScope = "g";
+    let inFn = false;
+    let fnBodyOpened = false;
+    let expectFnName = false;
+    const identSpan = (cls, word, scope) => {
+      const clsAttr = cls ? ` class="${cls}"` : "";
+      return `<span${clsAttr} data-ident="${escapeHtml(word)}" data-scope="${scope}">${escapeHtml(word)}</span>`;
+    };
+
     while (i < n) {
       const c = code[i];
+
+      if (c === "{") {
+        braceDepth++;
+        if (inFn) fnBodyOpened = true;
+        out += escapeHtml(c);
+        i++;
+        continue;
+      }
+
+      if (c === "}") {
+        if (braceDepth > 0) braceDepth--;
+        if (inFn && braceDepth === 0 && fnBodyOpened) {
+          inFn = false;
+          fnBodyOpened = false;
+          currentScope = "g";
+        }
+        out += escapeHtml(c);
+        i++;
+        continue;
+      }
 
       if (c === "/" && code[i + 1] === "/") {
         let j = i + 2;
@@ -281,14 +367,29 @@
         }
         if (RUST_KEYWORDS.has(word)) {
           out += span("tok-keyword", word);
+          if (word === "fn") {
+            expectFnName = true;
+            if (braceDepth === 0 && !inFn) {
+              inFn = true;
+              fnBodyOpened = false;
+              currentScope = ++scopeCounter;
+            }
+          }
         } else if (RUST_LITERALS.has(word)) {
           out += span("tok-literal", word);
+        } else if (isMethodRef(code, i, j, word)) {
+          out += `<span class="tok-fn method-ref" tabindex="0" data-method="${escapeHtml(word)}" data-ident="${escapeHtml(word)}" data-scope="g">${escapeHtml(word)}</span>`;
         } else if (RUST_TYPES.has(word) || (word[0] >= "A" && word[0] <= "Z")) {
           out += span("tok-type", word);
+        } else if (expectFnName) {
+          out += identSpan("tok-fn", word, "g");
+          expectFnName = false;
         } else if (code[j] === "(") {
-          out += span("tok-fn", word);
-        } else {
+          out += identSpan("tok-fn", word, "g");
+        } else if (word === "_") {
           out += escapeHtml(word);
+        } else {
+          out += identSpan("", word, currentScope);
         }
         i = j;
         continue;
@@ -661,10 +762,128 @@
 
   window.addEventListener("resize", updateHeaderVisibility);
 
+  function setupMethodTooltips() {
+    const tip = document.createElement("div");
+    tip.className = "method-tooltip";
+    tip.hidden = true;
+    document.body.appendChild(tip);
+
+    let activeEl = null;
+
+    const hide = () => {
+      tip.hidden = true;
+      activeEl = null;
+    };
+
+    const position = (el) => {
+      const rect = el.getBoundingClientRect();
+      const margin = 8;
+      const tipWidth = tip.offsetWidth;
+      const tipHeight = tip.offsetHeight;
+      let left = rect.left;
+      let top = rect.bottom + 6;
+      if (left + tipWidth > window.innerWidth - margin) {
+        left = window.innerWidth - margin - tipWidth;
+      }
+      if (left < margin) {
+        left = margin;
+      }
+      if (top + tipHeight > window.innerHeight - margin) {
+        top = rect.top - tipHeight - 6;
+      }
+      if (top < margin) {
+        top = margin;
+      }
+      tip.style.left = `${left}px`;
+      tip.style.top = `${top}px`;
+    };
+
+    const show = (el) => {
+      const entries = methodRegistry.get(el.dataset.method);
+      if (!entries || entries.length === 0) {
+        return;
+      }
+      tip.innerHTML = entries
+        .map((entry) => `
+          <div class="method-tooltip-item">
+            <span class="method-tooltip-group">${escapeHtml(pick(entry.group))}</span>
+            <code class="method-tooltip-sig language-rust">${highlightCode(entry.signature, "rust")}</code>
+            <span class="method-tooltip-note">${escapeHtml(pick(entry.note))}</span>
+          </div>
+        `)
+        .join("");
+      tip.hidden = false;
+      activeEl = el;
+      position(el);
+    };
+
+    root.addEventListener("mouseover", (event) => {
+      const el = event.target.closest(".method-ref");
+      if (el && root.contains(el)) {
+        show(el);
+      }
+    });
+    root.addEventListener("mouseout", (event) => {
+      const el = event.target.closest(".method-ref");
+      if (el && (!event.relatedTarget || !el.contains(event.relatedTarget))) {
+        hide();
+      }
+    });
+    root.addEventListener("focusin", (event) => {
+      const el = event.target.closest(".method-ref");
+      if (el) {
+        show(el);
+      }
+    });
+    root.addEventListener("focusout", (event) => {
+      const el = event.target.closest(".method-ref");
+      if (el) {
+        hide();
+      }
+    });
+    window.addEventListener("scroll", () => {
+      if (activeEl) {
+        position(activeEl);
+      }
+    }, { passive: true });
+  }
+
+  function setupIdentHighlight() {
+    let current = [];
+    const clear = () => {
+      current.forEach((el) => el.classList.remove("ident-highlight"));
+      current = [];
+    };
+    root.addEventListener("mouseover", (event) => {
+      const el = event.target.closest("[data-ident]");
+      if (!el || !root.contains(el)) {
+        return;
+      }
+      const pre = el.closest("pre");
+      if (!pre) {
+        return;
+      }
+      const name = el.dataset.ident;
+      const scope = el.dataset.scope;
+      clear();
+      const esc = (window.CSS && CSS.escape) ? CSS.escape(name) : name;
+      const escScope = (window.CSS && CSS.escape) ? CSS.escape(scope) : scope;
+      current = Array.from(pre.querySelectorAll(`[data-ident="${esc}"][data-scope="${escScope}"]`));
+      current.forEach((node) => node.classList.add("ident-highlight"));
+    });
+    root.addEventListener("mouseout", (event) => {
+      if (event.target.closest("[data-ident]")) {
+        clear();
+      }
+    });
+  }
+
   if (!window.location.hash) {
     history.replaceState(null, "", `#${encodeURIComponent(state.sectionId)}`);
   }
 
+  setupMethodTooltips();
+  setupIdentHighlight();
   render();
   updateHeaderVisibility();
 })();
