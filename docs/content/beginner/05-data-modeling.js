@@ -232,6 +232,32 @@ fn publish_without_check(draft: course::LessonDraft) {
                 ["C++17 `std::variant` is close to Rust enums, but Rust enums and `match` are a core language pair with lower friction."]
               ],
               examples: [
+                textExample(
+                  "match 里的 `@` 绑定与 `_` 通配",
+                  "`@` binding and `_` wildcard in match",
+                  [
+                    "`@` 是 pattern binding，写法是 `name @ pattern`：先判断右边的 pattern 是否匹配；如果匹配，就把“整个被匹配到的值”绑定到左边的变量名 `name`。所以下面示例里的 `terminal @ DownloadState::Stored { .. }` 意思是：如果当前状态是 `Stored`，不要拆字段，只把整个 `DownloadState::Stored { ... }` 取名为 `terminal`。",
+                    "下面示例最后一行用了 or-pattern：`terminal @ DownloadState::Stored { .. } | terminal @ DownloadState::Failed { .. } => terminal`。它表示 `Stored` 和 `Failed` 都是终态；无论匹配到哪一个，都把整个原状态绑定成 `terminal`，然后原样返回。这里的 `terminal` 不是关键字，只是变量名，换成 `done`、`state` 也可以。`|` 两边必须绑定同名、同类型的变量，所以两边都写 `terminal @ ...`。",
+                    "不用 `@` 也能写，但会啰嗦：`DownloadState::Stored { path, bytes } => DownloadState::Stored { path, bytes }`，`DownloadState::Failed { reason } => DownloadState::Failed { reason }`。`@` 的作用就是在检查具体变体的同时，保留整个值，方便直接返回或继续传给别的函数。",
+                    "`_` 是通配 pattern：它匹配任何值，但什么都不绑定、直接忽略。单独作为一条 match 分支时，`_ => ...` 就是“默认分支 / 兜底分支”，处理前面没有列出的所有情况，相当于 C/C++ `switch` 里的 `default`。它也能忽略局部：`Some(_)` 表示“是 `Some`，但不关心里面的值”，而结构体里的 `..`（如 `Stored { path, .. }`）忽略其余字段。",
+                    "但状态机里通常会故意不写 `_`：一旦加了兜底分支，以后新增枚举变体时 `match` 仍然能编译，编译器就不会再提醒你漏处理了新状态。所以默认分支只适合“确实有合理默认行为”的场景；想让编译器帮你查漏（像下面的 `next` 那样），就把每个变体显式写出来，不要用 `_` 兜底。"
+                  ],
+                  [
+                    "`@` is pattern binding. The form is `name @ pattern`: Rust first checks whether the pattern on the right matches; if it does, the whole matched value is bound to the name on the left. So `terminal @ DownloadState::Stored { .. }` in the example below means: if the current state is `Stored`, do not unpack its fields; keep the whole `DownloadState::Stored { ... }` value and call it `terminal`.",
+                    "The last arm in the example below uses an or-pattern: `terminal @ DownloadState::Stored { .. } | terminal @ DownloadState::Failed { .. } => terminal`. It says both `Stored` and `Failed` are terminal states; whichever one matches, bind the whole original state as `terminal` and return it unchanged. `terminal` is not a keyword, just a variable name; `done` or `state` would also work. Both sides of `|` must bind the same variable name with the same type, so both sides write `terminal @ ...`.",
+                    "You can write the same logic without `@`, but it is more verbose: `DownloadState::Stored { path, bytes } => DownloadState::Stored { path, bytes }`, `DownloadState::Failed { reason } => DownloadState::Failed { reason }`. `@` lets you check a specific variant while keeping the whole value for returning or passing onward.",
+                    "`_` is the wildcard pattern: it matches any value but binds nothing and simply ignores it. As a standalone match arm, `_ => ...` is the default / catch-all arm that handles every case not listed above, just like `default` in a C/C++ `switch`. It can also ignore parts: `Some(_)` means \"it is `Some`, but I don't care about the inner value,\" while `..` in a struct (such as `Stored { path, .. }`) ignores the remaining fields.",
+                    "In a state machine, though, you usually leave `_` out on purpose: once a catch-all arm exists, the `match` still compiles when you add a new enum variant, so the compiler stops reminding you that a new state is unhandled. A default arm only fits cases that truly have a sensible fallback; when you want the compiler to catch omissions (like `next` below), list every variant explicitly instead of falling back to `_`."
+                  ]
+                ),
+                sharedExample("Rust: 用 `_` 作为默认 state 分支", "Rust: use `_` as the default-state arm", "rust", `fn label(state: &DownloadState) -> &'static str {
+    match state {
+        DownloadState::Fetching { .. } => "downloading",
+        DownloadState::Failed { .. } => "needs attention",
+        // 默认 state：Queued、Stored 以及以后新增的变体都落到这里。
+        _ => "idle",
+    }
+}`),
                 withMistakes(
                   sharedExample("Rust: 下载任务状态机", "Rust: download job state machine", "rust", `enum DownloadState {
     Queued { url: String },
@@ -279,20 +305,6 @@ fn next(state: DownloadState) -> DownloadState {
                         ["Do not hide missing state-machine branches behind defaults; explicit states are easier to maintain."]
                       )
                     }
-                  ]
-                ),
-                textExample(
-                  "`terminal @ ...` 是什么",
-                  "What `terminal @ ...` means",
-                  [
-                    "`@` 是 pattern binding，写法是 `name @ pattern`：先判断右边的 pattern 是否匹配；如果匹配，就把“整个被匹配到的值”绑定到左边的变量名 `name`。所以 `terminal @ DownloadState::Stored { .. }` 的意思是：如果当前状态是 `Stored`，不要拆字段，只把整个 `DownloadState::Stored { ... }` 取名为 `terminal`。",
-                    "最后一行用了 or-pattern：`terminal @ DownloadState::Stored { .. } | terminal @ DownloadState::Failed { .. } => terminal`。它表示 `Stored` 和 `Failed` 都是终态；无论匹配到哪一个，都把整个原状态绑定成 `terminal`，然后原样返回。这里的 `terminal` 不是关键字，只是变量名，换成 `done`、`state` 也可以。`|` 两边必须绑定同名、同类型的变量，所以两边都写 `terminal @ ...`。",
-                    "不用 `@` 也能写，但会啰嗦：`DownloadState::Stored { path, bytes } => DownloadState::Stored { path, bytes }`，`DownloadState::Failed { reason } => DownloadState::Failed { reason }`。`@` 的作用就是在检查具体变体的同时，保留整个值，方便直接返回或继续传给别的函数。"
-                  ],
-                  [
-                    "`@` is pattern binding. The form is `name @ pattern`: Rust first checks whether the pattern on the right matches; if it does, the whole matched value is bound to the name on the left. So `terminal @ DownloadState::Stored { .. }` means: if the current state is `Stored`, do not unpack its fields; keep the whole `DownloadState::Stored { ... }` value and call it `terminal`.",
-                    "The last arm uses an or-pattern: `terminal @ DownloadState::Stored { .. } | terminal @ DownloadState::Failed { .. } => terminal`. It says both `Stored` and `Failed` are terminal states; whichever one matches, bind the whole original state as `terminal` and return it unchanged. `terminal` is not a keyword, just a variable name; `done` or `state` would also work. Both sides of `|` must bind the same variable name with the same type, so both sides write `terminal @ ...`.",
-                    "You can write the same logic without `@`, but it is more verbose: `DownloadState::Stored { path, bytes } => DownloadState::Stored { path, bytes }`, `DownloadState::Failed { reason } => DownloadState::Failed { reason }`. `@` lets you check a specific variant while keeping the whole value for returning or passing onward."
                   ]
                 )
               ],
