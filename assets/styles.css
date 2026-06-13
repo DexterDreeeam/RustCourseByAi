@@ -106,32 +106,14 @@ a {
   }
 }
 
-.brand-title,
+.brand strong,
 .brand small {
   display: block;
 }
 
-.brand-title {
-  background: linear-gradient(120deg, #f8fafc 0%, #7dd3fc 48%, #fde68a 100%);
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
-  -webkit-text-fill-color: transparent;
-  font-size: clamp(1.55rem, 2.2vw, 2.1rem);
-  font-weight: 950;
-  letter-spacing: -0.08em;
-  line-height: 0.95;
-  text-shadow: 0.08em 0.08em 0 rgba(56, 189, 248, 0.16);
-}
-
 .brand small {
-  color: rgba(230, 237, 247, 0.48);
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  line-height: 1.1;
-  margin-top: 0.22rem;
-  text-transform: uppercase;
+  color: var(--muted);
+  font-size: 0.78rem;
 }
 
 .header-actions {
