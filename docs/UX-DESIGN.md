@@ -88,7 +88,32 @@ can trace where a particular variable or function name is used.
 
 ---
 
-## 2. Content & formatting conventions (chapter authoring)
+## 2. Header GitHub Star CTA
+
+Goal: the top-right header should make it obvious that readers can support the
+project by starring the GitHub repository, while staying honest about what a pure
+static GitHub Pages site can know.
+
+- **CTA placement.** The Star CTA lives in `.header-actions` next to the language
+  toggle. It keeps the existing rounded pill style, but uses a star icon, stronger
+  label, and optional public count so it reads as an action rather than a generic
+  repository link.
+- **Public count only.** The page fetches
+  `https://api.github.com/repos/DexterDreeeam/RustCourseByAi` and displays
+  `stargazers_count` when available. If the public API fails or is rate-limited,
+  the CTA remains usable and the count is hidden.
+- **No verified per-user star state.** Without OAuth or a backend, the page cannot
+  safely know whether the current GitHub user has starred the repository. Do not
+  display a confirmed "already starred" state.
+- **Click feedback.** After the reader clicks the CTA, store a local
+  `localStorage` flag and change the label to a thank-you / support message. This
+  means the reader followed the CTA; it is not proof that GitHub recorded a star.
+- **Language aware.** CTA label, thank-you label, and accessible label follow the
+  active `zh`/`en` language.
+
+---
+
+## 3. Content & formatting conventions (chapter authoring)
 
 These shape the reading experience and must be followed in `docs/content/**`.
 
@@ -118,7 +143,7 @@ These shape the reading experience and must be followed in `docs/content/**`.
 
 ---
 
-## 3. Operational notes
+## 4. Operational notes
 
 - **Cache busting.** After editing any file under `docs/assets/`, bump the `?v=`
   query string on every asset reference in `docs/index.html` (single shared
@@ -128,7 +153,7 @@ These shape the reading experience and must be followed in `docs/content/**`.
 
 ---
 
-## 4. Change log discipline
+## 5. Change log discipline
 
 When you change anything in this document's scope (interaction behavior, affordance
 visuals, content/formatting conventions), update the relevant section here in the

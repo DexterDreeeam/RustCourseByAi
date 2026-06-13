@@ -136,6 +136,32 @@ a {
   transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
 }
 
+.star-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-weight: 800;
+}
+
+.star-cta-icon {
+  color: var(--yellow);
+  line-height: 1;
+  text-shadow: 1px 1px 0 rgba(253, 230, 138, 0.26);
+}
+
+.star-cta-count {
+  border-left: 1px solid rgba(148, 163, 184, 0.22);
+  color: var(--yellow);
+  font-variant-numeric: tabular-nums;
+  margin-left: 0.1rem;
+  padding-left: 0.45rem;
+}
+
+.star-cta-acknowledged {
+  border-color: rgba(134, 239, 172, 0.45);
+  background: rgba(134, 239, 172, 0.1);
+}
+
 .language-toggle:hover,
 .repo-link:hover,
 .nav-button:hover {
@@ -717,6 +743,7 @@ li code {
   .language-toggle,
   .repo-link,
   .nav-button {
+    justify-content: center;
     text-align: center;
     flex: 1;
   }
