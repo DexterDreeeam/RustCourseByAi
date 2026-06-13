@@ -5,6 +5,9 @@
   const languageToggle = document.getElementById("languageToggle");
   const brandSubtitle = document.getElementById("brandSubtitle");
   const header = document.querySelector(".site-header");
+  const starCta = document.getElementById("starCta");
+  const starLabel = starCta ? starCta.querySelector("[data-star-label]") : null;
+  const starCount = starCta ? starCta.querySelector("[data-star-count]") : null;
 
   if (!data || !root || !nav || !languageToggle) {
     return;
@@ -24,7 +27,11 @@
       compilerError: "会触发的错误",
       whyWrong: "为什么不对",
       languageButton: "English",
-      brandSubtitle: "面向 C++ 程序员的 Rust 教程"
+      brandSubtitle: "面向 C++ 程序员的 Rust 教程",
+      starCta: "Star 项目",
+      starCtaThanks: "感谢支持",
+      starCtaAria: "在 GitHub 上为 RustCourseByAi 点 Star",
+      starCtaThanksAria: "已打开 GitHub，引导为 RustCourseByAi 点 Star"
     },
     en: {
       syntax: "Syntax view",
@@ -39,12 +46,19 @@
       compilerError: "Compiler error",
       whyWrong: "Why this is wrong",
       languageButton: "中文",
-      brandSubtitle: "Rust for C++ Engineers"
+      brandSubtitle: "Rust for C++ Engineers",
+      starCta: "Star project",
+      starCtaThanks: "Thanks",
+      starCtaAria: "Star RustCourseByAi on GitHub",
+      starCtaThanksAria: "GitHub opened to star RustCourseByAi"
     }
   };
 
   const languageKey = "rust-course-language";
+  const starCtaKey = "rust-course-star-cta-clicked";
+  const repoApiUrl = "https://api.github.com/repos/DexterDreeeam/RustCourseByAi";
   const initialLanguage = localStorage.getItem(languageKey) === "en" ? "en" : "zh";
+  let starCountText = "";
   const flatSections = flattenSections(data.parts);
   const state = {
     language: initialLanguage,
@@ -464,6 +478,70 @@
     });
   }
 
+  function formatStarCount(value) {
+    if (value >= 1000) {
+      const compact = value / 1000;
+      return `${compact >= 10 ? Math.round(compact) : compact.toFixed(1)}k`;
+    }
+    return String(value);
+  }
+
+  function updateStarCta() {
+    if (!starCta || !starLabel) {
+      return;
+    }
+    const clicked = localStorage.getItem(starCtaKey) === "1";
+    starCta.classList.toggle("star-cta-acknowledged", clicked);
+    starLabel.textContent = clicked ? labels[state.language].starCtaThanks : labels[state.language].starCta;
+    starCta.setAttribute("aria-label", clicked ? labels[state.language].starCtaThanksAria : labels[state.language].starCtaAria);
+    if (starCount && starCountText) {
+      starCount.textContent = starCountText;
+      starCount.hidden = false;
+    } else if (starCount) {
+      starCount.hidden = true;
+    }
+  }
+
+  async function refreshStarCount() {
+    if (!starCount) {
+      return;
+    }
+    try {
+      const response = await fetch(repoApiUrl, {
+        headers: { Accept: "application/vnd.github+json" }
+      });
+      if (!response.ok) {
+        throw new Error(`GitHub API returned ${response.status}`);
+      }
+      const repo = await response.json();
+      if (typeof repo.stargazers_count === "number") {
+        starCountText = formatStarCount(repo.stargazers_count);
+      }
+    } catch (error) {
+      console.warn("Unable to load GitHub star count.", error);
+      starCountText = "";
+    }
+    updateStarCta();
+  }
+
+  function setupStarCta() {
+    if (!starCta) {
+      return;
+    }
+    updateStarCta();
+    refreshStarCount();
+    starCta.addEventListener("click", () => {
+      localStorage.setItem(starCtaKey, "1");
+      updateStarCta();
+      window.setTimeout(refreshStarCount, 1600);
+    });
+    window.addEventListener("focus", () => {
+      if (localStorage.getItem(starCtaKey) === "1") {
+        refreshStarCount();
+      }
+    });
+  }
+
   function renderExamples(examples) {
     const heading = (examples || []).every((example) => example.kind === "table" || example.kind === "searchableTable" || example.kind === "methodTable")
       ? labels[state.language].tables
@@ -721,6 +799,7 @@
   function render() {
     renderNav();
     renderLesson();
+    updateStarCta();
   }
 
   languageToggle.addEventListener("click", () => {
@@ -884,6 +963,7 @@
 
   setupMethodTooltips();
   setupIdentHighlight();
+  setupStarCta();
   render();
   updateHeaderVisibility();
 })();
