@@ -29,15 +29,14 @@
 
 fn error_counts(lines: &[String]) -> BTreeMap<&str, usize> {
     lines
-        // Iterate over each line by reference.
         .iter()
-        // Keep only lines containing "ERROR "; split into (before, after).
+        // 只保留含 "ERROR " 的行，按 "ERROR " 切成 (前, 后)。
         .filter_map(|line| line.split_once("ERROR "))
-        // Split the part after "ERROR " at the first ':' to get (code, message).
+        // 在后半段按第一个 ':' 再切一刀，得到 (错误码, 消息)。
         .filter_map(|(_, rest)| rest.split_once(':'))
-        // Extract the error code, trimming whitespace.
+        // 取错误码，去掉两端空白。
         .map(|(code, _message)| code.trim())
-        // Accumulate counts: for each code, insert 0 if absent then increment.
+        // 折叠：遇到一个 code 就在 map 里 +1。
         .fold(BTreeMap::new(), |mut counts, code| {
             *counts.entry(code).or_insert(0) += 1;
             counts
