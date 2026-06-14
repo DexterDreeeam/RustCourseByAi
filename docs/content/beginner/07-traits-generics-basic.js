@@ -84,8 +84,7 @@ fn main() {
                       )
                     }
                   ]
-                )
-              ],
+                ),
                 sharedExample("Rust: blanket impl \u2014 \u4e3a\u6240\u6709\u5b9e\u73b0 A \u7684\u7c7b\u578b\u81ea\u52a8\u5b9e\u73b0 B", "Rust: blanket impl \u2014 auto-implement B for all types that implement A", "rust", `trait Describable {
     fn describe(&self) -> String;
 }
@@ -114,6 +113,7 @@ fn main() {
     // Sensor \u53ea\u5199\u4e86 impl Describable\uff0c\u5c31\u81ea\u52a8\u62e5\u6709\u4e86 .log()\u3002
     s.log(); // [LOG] Sensor #7: 23.50
 }`),
+              ],
               references: ["serde-rs/serde"]
             })
           ]

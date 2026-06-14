@@ -1,5 +1,5 @@
 (function () {
-  const { t, sharedExample, localizedExample, withMistakes, lesson } = window.Course;
+  const { t, sharedExample, localizedExample, textExample, withMistakes, lesson } = window.Course;
   window.RUST_COURSE_CHAPTERS.beginner.push({
           id: "collections-iterators-closures",
           title: t("集合、迭代器与闭包", "Collections, iterators, and closures"),

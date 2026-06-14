@@ -1,5 +1,5 @@
 (function () {
-  const { t, sharedExample, localizedExample, withMistakes, lesson } = window.Course;
+  const { t, sharedExample, localizedExample, textExample, withMistakes, lesson } = window.Course;
   window.RUST_COURSE_CHAPTERS.beginner.push({
           id: "modules-tests-docs",
           title: t("模块、可见性、测试与文档", "Modules, visibility, tests, and docs"),
