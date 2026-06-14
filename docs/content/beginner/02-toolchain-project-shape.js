@@ -139,6 +139,22 @@ src/parser.rs
 └── loaded by mod parser as a module file inside course_core`
                 ),
                 textExample(
+                  "`mod`、`use`、`pub use` 不是一回事",
+                  "`mod`, `use`, and `pub use` are different",
+                  [
+                    "`mod parser;` 是把 `src/parser.rs` 接进当前 crate 的模块树，创建 `crate::parser` 这个 module。它决定 rustc 要读取哪个 module 文件。",
+                    "`use crate::model::Course;` 不会加载文件，也不会创建 module；它只是把已经存在的路径引入当前作用域，让后面可以少写 `crate::model::Course`。",
+                    "不写 `use` 也可以直接写完整路径，例如 `crate::model::Course`。`use` 只是本地简写，不改变可见性。",
+                    "`pub use model::Course;` 是重新导出：把内部 module 里的类型放到当前 crate 的对外入口上，让调用方可以写 `course_core::Course`，而不用依赖 `course_core::model::Course` 这种内部路径。"
+                  ],
+                  [
+                    "`mod parser;` pulls `src/parser.rs` into the current crate's module tree and creates the `crate::parser` module. It tells rustc which module file to read.",
+                    "`use crate::model::Course;` does not load a file and does not create a module; it only brings an existing path into the current scope so later code can write less than `crate::model::Course`.",
+                    "Without `use`, you can still write the full path directly, such as `crate::model::Course`. `use` is only a local shorthand; it does not change visibility.",
+                    "`pub use model::Course;` is a re-export: it puts a type from an internal module onto the crate's public entry point, so callers can write `course_core::Course` instead of depending on an internal path like `course_core::model::Course`."
+                  ]
+                ),
+                textExample(
                   "第四步：下面开始看每个文件的内容",
                   "Step 4: now read each file",
                   [
