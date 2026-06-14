@@ -65,6 +65,11 @@ impl PublishedLesson {
         // PublishedLesson 是 tuple struct；self.0 是第 1 个字段。
         &self.0
     }
+
+    // 委托：通过 self.0 调用内部类型的方法。
+    pub fn title(&self) -> &str {
+        self.0.title()
+    }
 }`, `#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct LessonDraft {
     // pub field: outside modules can read/write directly.
@@ -104,6 +109,11 @@ impl PublishedLesson {
     pub fn draft(&self) -> &LessonDraft {
         // PublishedLesson is a tuple struct; self.0 is its first field.
         &self.0
+    }
+
+    // Delegation: call the inner type's method via self.0.
+    pub fn title(&self) -> &str {
+        self.0.title()
     }
 }`),
                   [
