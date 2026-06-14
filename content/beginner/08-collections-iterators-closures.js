@@ -24,6 +24,12 @@
                 ["C++ ranges can express pipelines too, but Rust iterators encode consumption and borrowing in types."]
               ],
               examples: [
+                textExample(
+                  "为什么链式调用能工作",
+                  "Why chaining works",
+                  ["每个适配器（`filter_map`、`map` 等）返回的类型（如 `FilterMap<I, F>`）都实现了 `Iterator` trait。所以你可以继续在它上面调用 `.filter_map()`、`.map()` 等——这些方法定义在 `Iterator` trait 上，任何 `impl Iterator` 的类型都拥有它们。", "链条最后用 `.fold()`、`.collect()` 或 `.for_each()` 等终止操作消费迭代器，得到最终结果。在终止操作之前，整条链都是惰性的，不会真正遍历元素。"],
+                  ["Each adapter (`filter_map`, `map`, etc.) returns a type (like `FilterMap<I, F>`) that implements the `Iterator` trait. So you can keep calling `.filter_map()`, `.map()`, etc. — these methods are defined on `Iterator`, and any type that `impl Iterator` has them.", "The chain ends with a terminal operation like `.fold()`, `.collect()`, or `.for_each()` that consumes the iterator and produces the final result. Before that, the entire chain is lazy — no elements are actually traversed."]
+                ),
                 withMistakes(
                   sharedExample("Rust: 从日志行聚合错误次数", "Rust: aggregate error counts from log lines", "rust", `use std::collections::BTreeMap;
 
