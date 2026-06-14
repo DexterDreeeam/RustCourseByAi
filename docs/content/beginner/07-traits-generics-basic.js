@@ -86,6 +86,34 @@ fn main() {
                   ]
                 )
               ],
+                sharedExample("Rust: blanket impl \u2014 \u4e3a\u6240\u6709\u5b9e\u73b0 A \u7684\u7c7b\u578b\u81ea\u52a8\u5b9e\u73b0 B", "Rust: blanket impl \u2014 auto-implement B for all types that implement A", "rust", `trait Describable {
+    fn describe(&self) -> String;
+}
+
+// blanket impl: \u4efb\u4f55\u5b9e\u73b0\u4e86 Describable \u7684\u7c7b\u578b\uff0c\u81ea\u52a8\u83b7\u5f97 log \u65b9\u6cd5\u3002
+// \u8fd9\u548c\u6807\u51c6\u5e93\u7684 impl<T: Display> ToString for T \u662f\u540c\u4e00\u79cd\u6a21\u5f0f\u3002
+trait Loggable: Describable {
+    fn log(&self) {
+        println!("[LOG] {}", self.describe());
+    }
+}
+
+// \u4e3a\u6240\u6709\u5b9e\u73b0\u4e86 Describable \u7684\u7c7b\u578b\u81ea\u52a8\u5b9e\u73b0 Loggable\u3002
+impl<T: Describable> Loggable for T {}
+
+struct Sensor { id: u32, value: f64 }
+
+impl Describable for Sensor {
+    fn describe(&self) -> String {
+        format!("Sensor #{}: {:.2}", self.id, self.value)
+    }
+}
+
+fn main() {
+    let s = Sensor { id: 7, value: 23.5 };
+    // Sensor \u53ea\u5199\u4e86 impl Describable\uff0c\u5c31\u81ea\u52a8\u62e5\u6709\u4e86 .log()\u3002
+    s.log(); // [LOG] Sensor #7: 23.50
+}`),
               references: ["serde-rs/serde"]
             })
           ]
