@@ -47,12 +47,12 @@
                   "`#[...]` is an attribute: metadata for the compiler or tools",
                   [
                     "Rust 里的 `#[...]` 叫 attribute，放在下一项代码前面，意思是“给下面这个 item 加一个编译器/工具能理解的标记”。它不是普通函数调用，也不会在运行时按顺序执行。",
-                    "`#[derive(Debug)]` 放在 `struct` 或 `enum` 前面，要求编译器自动生成 `Debug` trait 的实现。这样这个类型就能用 `{:?}` 打印，也能让错误、测试输出更容易看。",
+                    "`#[derive(Debug)]` 放在 `struct` 或 `enum` 前面，要求编译器自动生成 `Debug` trait 的实现。这样这个类型就能用 `{:?}` 打印，也能让错误、测试输出更容易看。`Debug` trait 的名字容易误导；它不是“只能在 debug build 使用”，release build 里只要类型实现了 `Debug`，同样可以用 `{:?}`。",
                     "`#[test]` 放在函数前面，告诉 `cargo test`：这个函数是测试用例。普通 `cargo build` 不会把它当业务入口执行；运行 `cargo test` 时测试框架会发现并调用它。"
                   ],
                   [
                     "`#[...]` is an attribute. It sits before the next item and gives the compiler or tooling metadata about that item. It is not a normal function call and does not run in order at runtime.",
-                    "`#[derive(Debug)]` before a `struct` or `enum` asks the compiler to generate an implementation of the `Debug` trait. Then the type can be printed with `{:?}`, which makes errors and test output easier to read.",
+                    "`#[derive(Debug)]` before a `struct` or `enum` asks the compiler to generate an implementation of the `Debug` trait. Then the type can be printed with `{:?}`, which makes errors and test output easier to read. The name `Debug` can be misleading: it does not mean “only usable in debug builds.” In release builds, `{:?}` works too as long as the type implements `Debug`.",
                     "`#[test]` before a function tells `cargo test` that the function is a test case. `cargo build` does not treat it as business entry-point code; the test harness discovers and calls it when `cargo test` runs."
                   ]
                 ),
