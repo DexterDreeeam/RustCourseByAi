@@ -183,8 +183,8 @@ fn publish_without_check(draft: course::LessonDraft) {
                         ["error[E0603]: tuple struct constructor `PublishedLesson` is private", "The wrapped `LessonDraft` field inside `PublishedLesson` is not `pub`, so callers outside the module cannot directly write `PublishedLesson(draft)`."]
                       ),
                       explanation: t(
-                        ["正确写法：`let lesson = course::PublishedLesson::new(draft)?;`。如果把字段写成 `pub LessonDraft`，外部就能绕过发布校验，newtype 就失去保护边界。"],
-                        ["Correct fix: `let lesson = course::PublishedLesson::new(draft)?;`. If the field were `pub LessonDraft`, callers could bypass publication validation and the newtype would lose its protection boundary."]
+                        ["正确写法：`let lesson = course::PublishedLesson::new(draft)?;`。如果把字段写成 `pub LessonDraft`，外部就能绕过发布校验，newtype 就失去保护边界。", "如果你的 newtype 只是为了语义区分（比如给 `u32` 起个别名来区分不同 ID），不需要保护边界，就可以把字段写成 `pub`：`pub struct UserId(pub u32);`。这样外部能直接 `UserId(42)` 构造和 `.0` 访问，不需要 `new` 函数。"],
+                        ["Correct fix: `let lesson = course::PublishedLesson::new(draft)?;`. If the field were `pub LessonDraft`, callers could bypass publication validation and the newtype would lose its protection boundary.", "If your newtype is only for semantic distinction (e.g. giving `u32` a name to tell different IDs apart) and does not need a protection boundary, make the field `pub`: `pub struct UserId(pub u32);`. Then callers can directly write `UserId(42)` and access `.0` without a `new` function."]
                       )
                     },
                     {
