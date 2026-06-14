@@ -38,10 +38,29 @@ fn should_retry<C: Clock>(clock: &C, attempts: u8, policy: &RetryPolicy) -> bool
     attempts < policy.max_attempts && clock.now_ms() < policy.deadline_ms
 }
 
+// where 写法：效果和 <C: Clock> 相同，参数多时更清晰。
+fn retry_with_backoff<C>(clock: &C, attempts: u8, policy: &RetryPolicy) -> bool
+where
+    C: Clock,
+{
+    should_retry(clock, attempts, policy)
+}
+
 struct FakeClock(u64);
 
 impl Clock for FakeClock {
     fn now_ms(&self) -> u64 { self.0 }
+}
+
+fn main() {
+    let policy = RetryPolicy { deadline_ms: 5000, max_attempts: 3 };
+    let fake = FakeClock(1000);
+
+    assert!(should_retry(&fake, 0, &policy));   // 1000 < 5000, 0 < 3
+    assert!(!should_retry(&fake, 3, &policy));  // attempts 已到上限
+
+    // where 版本用法相同
+    assert!(retry_with_backoff(&fake, 1, &policy));
 }`),
                   [
                     {
