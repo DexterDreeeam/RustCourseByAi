@@ -20,15 +20,16 @@
                 ["Use an ordinary `struct` when a value has multiple components. Use a newtype when an existing value itself is the new domain concept; it usually has one private field, with state transitions or validation centralized in `new`.", "External modules receive a valid domain object and can only call the methods it explicitly exposes; preventing a draft from being passed to a public page is one consequence of that type boundary."]
               ],
               cppComparison: [
-                ["C++ 里可以用 wrapper class、strong typedef，甚至继承来表达“基于 A 做出一个 B”。Rust 的 newtype 更接近 wrapper class / strong typedef，不是继承：它不自动复用 `A` 的方法，需要你在 `impl B` 里明确暴露想提供的行为。"],
-                ["C++ may use wrapper classes, strong typedefs, or even inheritance to build a `B` from an `A`. Rust newtypes are closer to wrapper classes / strong typedefs, not inheritance: they do not automatically reuse `A`'s methods; you explicitly expose behavior in `impl B`."]
+                ["C++ 里可以用 wrapper class、strong typedef，甚至继承来表达“基于 A 做出一个 B”。Rust 的 newtype 更接近 wrapper class / strong typedef，不是继承：它不自动复用 `A` 的方法，需要你在 `impl B` 里明确暴露想提供的行为。", "Rust 的字段可见性只有 `pub`（公开）和默认（私有，仅当前模块可见）两种，没有 C++ 的 `protected`。因为 Rust 没有继承，子类访问父类成员的场景不存在。如果需要让特定模块访问而不对外暴露，可以用 `pub(crate)` 或 `pub(super)` 限制可见范围。"],
+                ["C++ may use wrapper classes, strong typedefs, or even inheritance to build a `B` from an `A`. Rust newtypes are closer to wrapper classes / strong typedefs, not inheritance: they do not automatically reuse `A`'s methods; you explicitly expose behavior in `impl B`.", "Rust field visibility has only two levels: `pub` (public) and the default (private to the current module). There is no `protected` like C++. Since Rust has no inheritance, there is no child-class-accesses-parent scenario. If you need restricted visibility beyond the module without full public exposure, use `pub(crate)` or `pub(super)`."]
               ],
               examples: [
                 withMistakes(
                   localizedExample("Rust: struct + impl + newtype 骨架", "Rust: struct + impl + newtype skeleton", "rust", `#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct LessonDraft {
-    // 字段没有 pub：模块外不能直接写 LessonDraft { ... }。
-    title: String,
+    // pub 字段：模块外可以直接读写。
+    pub title: String,
+    // 没有 pub 的字段：模块外不能直接访问。
     body: String,
 }
 
@@ -66,8 +67,9 @@ impl PublishedLesson {
     }
 }`, `#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct LessonDraft {
-    // Fields are not pub: outside modules cannot write LessonDraft { ... } directly.
-    title: String,
+    // pub field: outside modules can read/write directly.
+    pub title: String,
+    // No pub: outside modules cannot access this field.
     body: String,
 }
 
