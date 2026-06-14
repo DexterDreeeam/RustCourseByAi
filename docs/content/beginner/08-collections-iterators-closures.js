@@ -29,10 +29,15 @@
 
 fn error_counts(lines: &[String]) -> BTreeMap<&str, usize> {
     lines
+        // Iterate over each line by reference.
         .iter()
+        // Keep only lines containing "ERROR "; split into (before, after).
         .filter_map(|line| line.split_once("ERROR "))
+        // Split the part after "ERROR " at the first ':' to get (code, message).
         .filter_map(|(_, rest)| rest.split_once(':'))
+        // Extract the error code, trimming whitespace.
         .map(|(code, _message)| code.trim())
+        // Accumulate counts: for each code, insert 0 if absent then increment.
         .fold(BTreeMap::new(), |mut counts, code| {
             *counts.entry(code).or_insert(0) += 1;
             counts
