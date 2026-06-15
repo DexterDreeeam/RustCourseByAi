@@ -1,5 +1,5 @@
 (function () {
-  const { t, sharedExample, textExample, sourceTableExample, lesson } = window.Course;
+  const { t, sharedExample, textExample, sourceTableExample, fileTreeExample, lesson } = window.Course;
   window.RUST_COURSE_CHAPTERS.beginner.push({
           id: "beginner-capstone",
           title: t("入门综合项目", "Beginner capstone project"),
@@ -38,7 +38,7 @@
                     "Running `cargo test` covers the parser, validator, index builder, and public API."
                   ]
                 ),
-                textExample(
+                fileTreeExample(
                   "文件目录",
                   "File tree",
                   [
@@ -47,21 +47,23 @@
                   [
                     "`Cargo.toml` defines the package, library crate, and binary crate. `src/lib.rs` is the library entry point, and `src/main.rs` is the CLI entry point. `tests/public_api.rs` tests the public API like an external user."
                   ],
-                  `projects/beginner-course-index-cli/
-├── Cargo.toml
-├── README.md
-├── examples/
-│   └── course.txt
-├── src/
-│   ├── lib.rs
-│   ├── main.rs
-│   ├── model.rs
-│   ├── parser.rs
-│   ├── validate.rs
-│   ├── index.rs
-│   └── cli.rs
-└── tests/
-    └── public_api.rs`
+                  "projects/beginner-course-index-cli/",
+                  [
+                    { depth: 0, type: "file", badge: "toml", name: "Cargo.toml", note: t("定义 package、library crate 和 binary crate。", "Defines the package, library crate, and binary crate.") },
+                    { depth: 0, type: "file", badge: "md", name: "README.md", note: t("项目本身的运行说明。", "Run instructions for the project itself.") },
+                    { depth: 0, type: "dir", badge: "dir", name: "examples/", note: t("示例输入数据。", "Example input data.") },
+                    { depth: 1, type: "file", badge: "txt", name: "course.txt", note: t("CLI 默认演示用的课程文本。", "Course text used by the CLI demo.") },
+                    { depth: 0, type: "dir", badge: "src", name: "src/", note: t("library crate 和 binary crate 的源码。", "Source for the library and binary crates.") },
+                    { depth: 1, type: "file", badge: "api", name: "lib.rs", note: t("库入口和 public API。", "Library entry point and public API.") },
+                    { depth: 1, type: "file", badge: "bin", name: "main.rs", note: t("很薄的 binary crate 入口。", "Thin binary crate entry point.") },
+                    { depth: 1, type: "file", badge: "rs", name: "model.rs", note: t("领域模型、私有字段和 newtype。", "Domain models, private fields, and newtypes.") },
+                    { depth: 1, type: "file", badge: "rs", name: "parser.rs", note: t("文本解析和 `ParseError`。", "Text parsing and `ParseError`.") },
+                    { depth: 1, type: "file", badge: "rs", name: "validate.rs", note: t("业务校验和 `ValidationError`。", "Business validation and `ValidationError`.") },
+                    { depth: 1, type: "file", badge: "rs", name: "index.rs", note: t("tag 索引与 collection/iterator 用法。", "Tag indexing and collection/iterator usage.") },
+                    { depth: 1, type: "file", badge: "cli", name: "cli.rs", note: t("参数解析、文件 IO 和输出格式。", "Argument parsing, file IO, and output formatting.") },
+                    { depth: 0, type: "dir", badge: "test", name: "tests/", note: t("集成测试目录。", "Integration test directory.") },
+                    { depth: 1, type: "file", badge: "test", name: "public_api.rs", note: t("像外部用户一样测试公开 API。", "Tests public APIs like an external user.") }
+                  ]
                 ),
                 textExample(
                   "crate / module 设计方向",

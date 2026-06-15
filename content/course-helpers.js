@@ -43,6 +43,14 @@
     rows
   });
 
+  const fileTreeExample = (zhTitle, enTitle, zhParagraphs, enParagraphs, root, items) => ({
+    kind: "fileTree",
+    title: t(zhTitle, enTitle),
+    paragraphs: t(zhParagraphs, enParagraphs),
+    root,
+    items
+  });
+
   const searchableTableExample = (zhTitle, enTitle, headers, rows, zhPlaceholder, enPlaceholder) => ({
     kind: "searchableTable",
     title: t(zhTitle, enTitle),
@@ -78,6 +86,6 @@
     references
   });
 
-  window.Course = { t, block, sharedExample, localizedExample, textExample, tableExample, sourceTableExample, searchableTableExample, methodTableExample, withMistakes, lesson };
+  window.Course = { t, block, sharedExample, localizedExample, textExample, tableExample, sourceTableExample, fileTreeExample, searchableTableExample, methodTableExample, withMistakes, lesson };
   window.RUST_COURSE_CHAPTERS = window.RUST_COURSE_CHAPTERS || { beginner: [], advanced: [] };
 })();

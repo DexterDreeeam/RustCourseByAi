@@ -1,5 +1,5 @@
 (function () {
-  const { t, sharedExample, localizedExample, textExample, withMistakes, lesson } = window.Course;
+  const { t, sharedExample, localizedExample, textExample, fileTreeExample, withMistakes, lesson } = window.Course;
   window.RUST_COURSE_CHAPTERS.beginner.push({
           id: "toolchain-project-shape",
           title: t("工具链与项目基本形态", "Toolchain and project shape"),
@@ -80,7 +80,7 @@ jobs:
                     "A module is a namespace and visibility boundary inside a crate. Ordinary .rs files usually hold module code and become part of a crate only when pulled in by mod declarations."
                   ]
                 ),
-                textExample(
+                fileTreeExample(
                   "第二步：完整例子的文件树",
                   "Step 2: full example file tree",
                   [
@@ -93,21 +93,23 @@ jobs:
                     "The `course-core` package produces two crates: a library crate `course_core` and a binary crate `inspect`.",
                     "`parser.rs`, `model.rs`, and `validate.rs` are module files inside the `course_core` crate."
                   ],
-                  `rust-course/                         # workspace 目录
-├── Cargo.toml                       # [workspace]，列出成员 package
-└── crates/
-    ├── course-core/                 # package: course-core
-    │   ├── Cargo.toml               # [package] name = "course-core"
-    │   └── src/
-    │       ├── lib.rs               # crate root -> library crate: course_core
-    │       ├── parser.rs            # module file -> parser
-    │       ├── model.rs             # module file -> model
-    │       ├── validate.rs          # module file -> validate
-    │       └── bin/
-    │           └── inspect.rs       # crate root -> binary crate: inspect
-    └── course-cli/                  # package: course-cli
-        ├── Cargo.toml               # [package] name = "course-cli"
-        └── src/main.rs              # crate root -> binary crate: course-cli`
+                  "rust-course/",
+                  [
+                    { depth: 0, type: "file", badge: "toml", name: "Cargo.toml", note: t("workspace 清单，列出成员 package。", "Workspace manifest listing member packages.") },
+                    { depth: 0, type: "dir", badge: "dir", name: "crates/", note: t("存放 workspace 里的多个 package。", "Holds the packages in the workspace.") },
+                    { depth: 1, type: "dir", badge: "pkg", name: "course-core/", note: t("核心库 package，产生 library crate 和一个 inspect binary crate。", "Core package producing a library crate and one inspect binary crate.") },
+                    { depth: 2, type: "file", badge: "toml", name: "Cargo.toml", note: t("`[package] name = \"course-core\"`。", "`[package] name = \"course-core\"`.") },
+                    { depth: 2, type: "dir", badge: "src", name: "src/", note: t("Rust 源码目录。", "Rust source directory.") },
+                    { depth: 3, type: "file", badge: "root", name: "lib.rs", note: t("library crate root，编译成 `course_core`。", "Library crate root compiled as `course_core`.") },
+                    { depth: 3, type: "file", badge: "mod", name: "parser.rs", note: t("module 文件，通过 `mod parser;` 接入。", "Module file pulled in by `mod parser;`.") },
+                    { depth: 3, type: "file", badge: "mod", name: "model.rs", note: t("module 文件，通过 `mod model;` 接入。", "Module file pulled in by `mod model;`.") },
+                    { depth: 3, type: "file", badge: "mod", name: "validate.rs", note: t("module 文件，通过 `mod validate;` 接入。", "Module file pulled in by `mod validate;`.") },
+                    { depth: 3, type: "dir", badge: "bin", name: "bin/", note: t("额外 binary crate 目录。", "Additional binary crate directory.") },
+                    { depth: 4, type: "file", badge: "root", name: "inspect.rs", note: t("binary crate root，编译成 `inspect`。", "Binary crate root compiled as `inspect`.") },
+                    { depth: 1, type: "dir", badge: "pkg", name: "course-cli/", note: t("CLI package，产生 `course-cli` binary crate。", "CLI package producing the `course-cli` binary crate.") },
+                    { depth: 2, type: "file", badge: "toml", name: "Cargo.toml", note: t("`[package] name = \"course-cli\"`。", "`[package] name = \"course-cli\"`.") },
+                    { depth: 2, type: "file", badge: "root", name: "src/main.rs", note: t("binary crate root，编译成 `course-cli`。", "Binary crate root compiled as `course-cli`.") }
+                  ]
                 ),
                 textExample(
                   "第三步：Cargo 和 rustc 的读取链路",
