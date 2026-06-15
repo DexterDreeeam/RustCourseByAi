@@ -10,7 +10,7 @@
     { name: "hyperium/hyper", url: "https://github.com/hyperium/hyper", lesson: t("异步网络、service 抽象和协议分层。", "Async networking, service abstractions, and protocol layering.") },
     { name: "rustls/rustls", url: "https://github.com/rustls/rustls", lesson: t("安全敏感 API、封装、测试纪律和安全默认值。", "Security-sensitive APIs, encapsulation, test discipline, and safe defaults.") },
     { name: "clap-rs/clap", url: "https://github.com/clap-rs/clap", lesson: t("命令行 UX、builder/derive API 和宏的人体工学。", "Command-line UX, builder/derive APIs, and macro ergonomics.") },
-    { name: "tauri-apps/tauri", url: "https://github.com/tauri-apps/tauri", lesson: t("大型 workspace、跨平台边界和命令/插件架构。", "Large workspaces, cross-platform boundaries, and command/plugin architecture.") }
+    { name: "tauri-apps/tauri", url: "https://github.com/tauri-apps/tauri", lesson: t("大型 workspace、跨平台边界和命令/插件架构。", "Large workspaces, cross-platform boundaries, and command/plugin architecture.") },
+    { name: "RustCourseByAi/projects/beginner-course-index-cli", url: "https://github.com/DexterDreeeam/RustCourseByAi/tree/main/projects/beginner-course-index-cli", lesson: t("本课程入门阶段的完整综合项目源码。", "Complete source code for this course's beginner capstone project.") }
   ];
 })();
-
