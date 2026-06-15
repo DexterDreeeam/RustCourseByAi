@@ -587,12 +587,16 @@
             </div>
             <ol class="file-tree-list">
               ${(example.items || []).map((item) => `
-                <li class="file-tree-item file-tree-${escapeHtml(item.type || "file")}" style="--tree-indent: ${Math.max(0, Number(item.depth || 0)) * 1.35}rem">
+                <li
+                  class="file-tree-item file-tree-${escapeHtml(item.type || "file")}"
+                  style="--tree-indent: ${Math.max(0, Number(item.depth || 0)) * 1.35}rem"
+                  tabindex="0"
+                  data-file-note="${escapeHtml(pick(item.note))}"
+                >
                   <span class="file-tree-node">
                     <span class="file-tree-badge">${escapeHtml(item.badge || item.type || "file")}</span>
                     <code>${escapeHtml(item.name)}</code>
                   </span>
-                  <span class="file-tree-note">${formatInline(pick(item.note))}</span>
                 </li>
               `).join("")}
             </ol>
@@ -1033,6 +1037,81 @@
     });
   }
 
+  function setupFileTreeTooltips() {
+    const tip = document.createElement("div");
+    tip.className = "file-tree-tooltip";
+    tip.hidden = true;
+    document.body.appendChild(tip);
+
+    let activeEl = null;
+
+    const hide = () => {
+      tip.hidden = true;
+      activeEl = null;
+    };
+
+    const position = (el) => {
+      const rect = el.getBoundingClientRect();
+      const margin = 8;
+      const gap = 8;
+      const tipWidth = tip.offsetWidth;
+      const tipHeight = tip.offsetHeight;
+      let left = rect.left;
+      let top = rect.top - tipHeight - gap;
+      if (left + tipWidth > window.innerWidth - margin) {
+        left = window.innerWidth - margin - tipWidth;
+      }
+      if (left < margin) {
+        left = margin;
+      }
+      if (top < margin) {
+        top = rect.bottom + gap;
+      }
+      tip.style.left = `${left}px`;
+      tip.style.top = `${top}px`;
+    };
+
+    const show = (el) => {
+      const note = el.dataset.fileNote;
+      if (!note) {
+        return;
+      }
+      tip.innerHTML = formatInline(note);
+      tip.hidden = false;
+      activeEl = el;
+      position(el);
+    };
+
+    root.addEventListener("mouseover", (event) => {
+      const el = event.target.closest(".file-tree-item");
+      if (el && root.contains(el)) {
+        show(el);
+      }
+    });
+    root.addEventListener("mouseout", (event) => {
+      const el = event.target.closest(".file-tree-item");
+      if (el && (!event.relatedTarget || !el.contains(event.relatedTarget))) {
+        hide();
+      }
+    });
+    root.addEventListener("focusin", (event) => {
+      const el = event.target.closest(".file-tree-item");
+      if (el) {
+        show(el);
+      }
+    });
+    root.addEventListener("focusout", (event) => {
+      if (event.target.closest(".file-tree-item")) {
+        hide();
+      }
+    });
+    window.addEventListener("scroll", () => {
+      if (activeEl) {
+        position(activeEl);
+      }
+    }, { passive: true });
+  }
+
   async function loadSourceCode(codeEl) {
     if (!codeEl || codeEl.dataset.sourceLoaded === "true") {
       return;
@@ -1057,6 +1136,7 @@
 
   setupMethodTooltips();
   setupIdentHighlight();
+  setupFileTreeTooltips();
   setupSourceTables();
   setupStarCta();
   render();

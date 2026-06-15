@@ -398,9 +398,9 @@ a {
 .file-tree-panel {
   overflow: hidden;
   border: 1px solid rgba(148, 163, 184, 0.16);
-  border-radius: 0.8rem;
+  border-radius: 0.7rem;
   background: rgba(5, 7, 11, 0.46);
-  margin-top: 0.75rem;
+  margin-top: 0.65rem;
 }
 
 .file-tree-root {
@@ -409,7 +409,7 @@ a {
   gap: 0.55rem;
   border-bottom: 1px solid rgba(148, 163, 184, 0.14);
   background: rgba(2, 6, 23, 0.32);
-  padding: 0.48rem 0.65rem;
+  padding: 0.34rem 0.55rem;
 }
 
 .file-tree-root-icon,
@@ -430,19 +430,20 @@ a {
 .file-tree-list {
   display: grid;
   margin: 0;
-  padding: 0.35rem 0.55rem;
+  padding: 0.18rem 0.45rem;
 }
 
 .file-tree-item {
-  display: grid;
-  grid-template-columns: minmax(13rem, 0.7fr) minmax(14rem, 1.3fr);
-  gap: 0.55rem;
+  display: flex;
   align-items: center;
   border-bottom: 1px solid rgba(148, 163, 184, 0.08);
-  padding: 0.32rem 0.2rem 0.32rem calc(0.2rem + var(--tree-indent, 0rem));
+  border-radius: 0.35rem;
+  outline: none;
+  padding: 0.16rem 0.18rem 0.16rem calc(0.18rem + var(--tree-indent, 0rem));
 }
 
-.file-tree-item:hover {
+.file-tree-item:hover,
+.file-tree-item:focus-visible {
   background: rgba(125, 211, 252, 0.06);
 }
 
@@ -466,8 +467,12 @@ a {
 }
 
 .file-tree-dir .file-tree-badge {
-  border-color: rgba(125, 211, 252, 0.26);
-  color: var(--accent);
+  border-color: rgba(253, 230, 138, 0.34);
+  color: var(--yellow);
+}
+
+.file-tree-dir code {
+  color: var(--yellow);
 }
 
 .file-tree-file .file-tree-badge {
@@ -475,8 +480,35 @@ a {
   color: var(--green);
 }
 
-.file-tree-note {
-  color: var(--muted);
+.file-tree-file code {
+  color: var(--green);
+}
+
+.file-tree-tooltip {
+  position: fixed;
+  z-index: 1200;
+  max-width: min(30rem, calc(100vw - 1rem));
+  border: 1px solid rgba(125, 211, 252, 0.28);
+  border-radius: 0.7rem;
+  background: var(--panel-strong);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.5);
+  padding: 0.65rem 0.75rem;
+  color: var(--text);
+  font-size: 0.84rem;
+  line-height: 1.55;
+  pointer-events: none;
+}
+
+.file-tree-tooltip[hidden] {
+  display: none;
+}
+
+.file-tree-tooltip code {
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 0.35rem;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--green);
+  padding: 0.08rem 0.28rem;
 }
 
 .table-card {
@@ -877,7 +909,6 @@ li code {
   }
 
   .file-tree-item {
-    grid-template-columns: 1fr;
-    gap: 0.35rem;
+    display: flex;
   }
 }
