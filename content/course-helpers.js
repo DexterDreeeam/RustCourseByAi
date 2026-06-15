@@ -36,6 +36,13 @@
     rows
   });
 
+  const sourceTableExample = (zhTitle, enTitle, headers, rows) => ({
+    kind: "sourceTable",
+    title: t(zhTitle, enTitle),
+    headers,
+    rows
+  });
+
   const searchableTableExample = (zhTitle, enTitle, headers, rows, zhPlaceholder, enPlaceholder) => ({
     kind: "searchableTable",
     title: t(zhTitle, enTitle),
@@ -71,6 +78,6 @@
     references
   });
 
-  window.Course = { t, block, sharedExample, localizedExample, textExample, tableExample, searchableTableExample, methodTableExample, withMistakes, lesson };
+  window.Course = { t, block, sharedExample, localizedExample, textExample, tableExample, sourceTableExample, searchableTableExample, methodTableExample, withMistakes, lesson };
   window.RUST_COURSE_CHAPTERS = window.RUST_COURSE_CHAPTERS || { beginner: [], advanced: [] };
 })();

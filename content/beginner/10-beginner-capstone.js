@@ -1,5 +1,5 @@
 (function () {
-  const { t, sharedExample, textExample, tableExample, lesson } = window.Course;
+  const { t, sharedExample, textExample, sourceTableExample, lesson } = window.Course;
   window.RUST_COURSE_CHAPTERS.beginner.push({
           id: "beginner-capstone",
           title: t("入门综合项目", "Beginner capstone project"),
@@ -36,65 +36,6 @@
                     "The input file is a small course metadata file: a course title plus lesson rows. Each lesson has a `slug`, a title, and tags.",
                     "Running `cargo run -- examples/course.txt` prints a course index grouped by tag; running `cargo run -- examples/course.txt --tag ownership` shows lessons for one tag.",
                     "Running `cargo test` covers the parser, validator, index builder, and public API."
-                  ]
-                ),
-                textExample(
-                  "先按这张表读源码",
-                  "Read the source in this table order first",
-                  [
-                    "这个项目的完整代码在 GitHub 上。第一次阅读不要从 `main.rs` 开始一路猜，而是按下面表格顺序读：先看 crate 对外形状，再看数据模型，接着看解析、校验、索引，最后看 CLI 边界和测试。",
-                    "每一行都链接到项目里的一个 `.rs` 文件；右侧说明告诉你在那个文件里重点观察什么。"
-                  ],
-                  [
-                    "The full source lives on GitHub. On the first read, do not start at `main.rs` and guess the structure; follow the table below: public crate shape first, then data models, parsing, validation, indexing, CLI boundary, and tests.",
-                    "Each row links to one `.rs` file in the project; the guidance column tells you what to focus on in that file."
-                  ]
-                ),
-                tableExample(
-                  "源码阅读顺序",
-                  "Source reading order",
-                  [t("顺序", "Order"), t("文件", "File"), t("阅读重点", "What to read for")],
-                  [
-                    [
-                      "1",
-                      { text: "src/lib.rs", href: "https://github.com/DexterDreeeam/RustCourseByAi/blob/main/projects/beginner-course-index-cli/src/lib.rs" },
-                      t("从这里看 public API、`mod` 如何接入模块、`pub use` 如何暴露稳定入口。", "Start here for the public API, how `mod` pulls modules in, and how `pub use` exposes stable entry points.")
-                    ],
-                    [
-                      "2",
-                      { text: "src/model.rs", href: "https://github.com/DexterDreeeam/RustCourseByAi/blob/main/projects/beginner-course-index-cli/src/model.rs" },
-                      t("看 `Course`、`Lesson`、`LessonSlug`、`Tag` 如何表达领域概念、私有字段和 newtype 边界。", "Read how `Course`, `Lesson`, `LessonSlug`, and `Tag` model domain concepts, private fields, and newtype boundaries.")
-                    ],
-                    [
-                      "3",
-                      { text: "src/parser.rs", href: "https://github.com/DexterDreeeam/RustCourseByAi/blob/main/projects/beginner-course-index-cli/src/parser.rs" },
-                      t("看文本如何变成模型：`Result`、`ParseError`、`let else`、逐行解析。", "Read how text becomes models: `Result`, `ParseError`, `let else`, and line-by-line parsing.")
-                    ],
-                    [
-                      "4",
-                      { text: "src/validate.rs", href: "https://github.com/DexterDreeeam/RustCourseByAi/blob/main/projects/beginner-course-index-cli/src/validate.rs" },
-                      t("看业务规则放在哪里：空标题、重复 slug、重复 tag，以及 `BTreeSet` 的去重用法。", "Read where business rules live: empty titles, duplicate slugs, duplicate tags, and deduplication with `BTreeSet`.")
-                    ],
-                    [
-                      "5",
-                      { text: "src/index.rs", href: "https://github.com/DexterDreeeam/RustCourseByAi/blob/main/projects/beginner-course-index-cli/src/index.rs" },
-                      t("看 collection/iterator 的工程用途：用 `BTreeMap` 建 tag 索引，用 helper 查询某个 tag。", "Read the engineering use of collections/iterators: building a tag index with `BTreeMap` and querying one tag with a helper.")
-                    ],
-                    [
-                      "6",
-                      { text: "src/cli.rs", href: "https://github.com/DexterDreeeam/RustCourseByAi/blob/main/projects/beginner-course-index-cli/src/cli.rs" },
-                      t("看边界层：命令行参数、文件 IO、错误转换、输出格式，不把业务逻辑塞进 `main`。", "Read the boundary layer: command-line args, file IO, error conversion, output formatting, and why business logic is not put in `main`.")
-                    ],
-                    [
-                      "7",
-                      { text: "src/main.rs", href: "https://github.com/DexterDreeeam/RustCourseByAi/blob/main/projects/beginner-course-index-cli/src/main.rs" },
-                      t("最后看 binary crate 入口：它只调用 `cli::run`，把成功/失败转换成输出和 exit code。", "Read the binary entry point last: it only calls `cli::run` and turns success/failure into output and exit codes.")
-                    ],
-                    [
-                      "8",
-                      { text: "tests/public_api.rs", href: "https://github.com/DexterDreeeam/RustCourseByAi/blob/main/projects/beginner-course-index-cli/tests/public_api.rs" },
-                      t("用外部用户视角读测试：只通过公开 API 使用库，避免依赖内部 module 路径。", "Read the test from an external user's point of view: use only public APIs and avoid internal module paths.")
-                    ]
                   ]
                 ),
                 textExample(
@@ -154,7 +95,74 @@ pub fn load_and_index(input: &str) -> Result<TagIndex, CourseError> {
     let course = parse_course(input)?;
     validate_course(&course)?;
     Ok(build_tag_index(&course))
-}`)
+}`),
+                textExample(
+                  "最后按这张表读源码",
+                  "Finally, read the source in this table order",
+                  [
+                    "前面的卡片先说明项目目标、目录和 crate/module 设计；现在再按下面表格读源码。不要从 `main.rs` 开始一路猜，按表格顺序从 library API 读到 CLI 边界和测试。",
+                    "每一行都是一个可展开的 `.rs` 文件；点击文件名会在表格内展开完整源码。"
+                  ],
+                  [
+                    "The previous cards explain the project goal, file tree, and crate/module design first; now read the source files in the table below. Do not start at `main.rs` and guess the structure; follow the order from library API to CLI boundary and tests.",
+                    "Each row is a collapsible `.rs` file; click the file name to expand the full source inline inside the table."
+                  ]
+                ),
+                sourceTableExample(
+                  "源码阅读顺序",
+                  "Source reading order",
+                  [t("顺序", "Order"), t("文件", "File"), t("阅读重点", "What to read for")],
+                  [
+                    {
+                      order: 1,
+                      file: "src/lib.rs",
+                      sourceUrl: "https://raw.githubusercontent.com/DexterDreeeam/RustCourseByAi/main/projects/beginner-course-index-cli/src/lib.rs",
+                      focus: t("从这里看 public API、`mod` 如何接入模块、`pub use` 如何暴露稳定入口。", "Start here for the public API, how `mod` pulls modules in, and how `pub use` exposes stable entry points.")
+                    },
+                    {
+                      order: 2,
+                      file: "src/model.rs",
+                      sourceUrl: "https://raw.githubusercontent.com/DexterDreeeam/RustCourseByAi/main/projects/beginner-course-index-cli/src/model.rs",
+                      focus: t("看 `Course`、`Lesson`、`LessonSlug`、`Tag` 如何表达领域概念、私有字段和 newtype 边界。", "Read how `Course`, `Lesson`, `LessonSlug`, and `Tag` model domain concepts, private fields, and newtype boundaries.")
+                    },
+                    {
+                      order: 3,
+                      file: "src/parser.rs",
+                      sourceUrl: "https://raw.githubusercontent.com/DexterDreeeam/RustCourseByAi/main/projects/beginner-course-index-cli/src/parser.rs",
+                      focus: t("看文本如何变成模型：`Result`、`ParseError`、`let else`、逐行解析。", "Read how text becomes models: `Result`, `ParseError`, `let else`, and line-by-line parsing.")
+                    },
+                    {
+                      order: 4,
+                      file: "src/validate.rs",
+                      sourceUrl: "https://raw.githubusercontent.com/DexterDreeeam/RustCourseByAi/main/projects/beginner-course-index-cli/src/validate.rs",
+                      focus: t("看业务规则放在哪里：空标题、重复 slug、重复 tag，以及 `BTreeSet` 的去重用法。", "Read where business rules live: empty titles, duplicate slugs, duplicate tags, and deduplication with `BTreeSet`.")
+                    },
+                    {
+                      order: 5,
+                      file: "src/index.rs",
+                      sourceUrl: "https://raw.githubusercontent.com/DexterDreeeam/RustCourseByAi/main/projects/beginner-course-index-cli/src/index.rs",
+                      focus: t("看 collection/iterator 的工程用途：用 `BTreeMap` 建 tag 索引，用 helper 查询某个 tag。", "Read the engineering use of collections/iterators: building a tag index with `BTreeMap` and querying one tag with a helper.")
+                    },
+                    {
+                      order: 6,
+                      file: "src/cli.rs",
+                      sourceUrl: "https://raw.githubusercontent.com/DexterDreeeam/RustCourseByAi/main/projects/beginner-course-index-cli/src/cli.rs",
+                      focus: t("看边界层：命令行参数、文件 IO、错误转换、输出格式，不把业务逻辑塞进 `main`。", "Read the boundary layer: command-line args, file IO, error conversion, output formatting, and why business logic is not put in `main`.")
+                    },
+                    {
+                      order: 7,
+                      file: "src/main.rs",
+                      sourceUrl: "https://raw.githubusercontent.com/DexterDreeeam/RustCourseByAi/main/projects/beginner-course-index-cli/src/main.rs",
+                      focus: t("最后看 binary crate 入口：它只调用 `cli::run`，把成功/失败转换成输出和 exit code。", "Read the binary entry point last: it only calls `cli::run` and turns success/failure into output and exit codes.")
+                    },
+                    {
+                      order: 8,
+                      file: "tests/public_api.rs",
+                      sourceUrl: "https://raw.githubusercontent.com/DexterDreeeam/RustCourseByAi/main/projects/beginner-course-index-cli/tests/public_api.rs",
+                      focus: t("用外部用户视角读测试：只通过公开 API 使用库，避免依赖内部 module 路径。", "Read the test from an external user's point of view: use only public APIs and avoid internal module paths.")
+                    }
+                  ]
+                )
               ],
               references: ["RustCourseByAi/projects/beginner-course-index-cli", "rust-lang/cargo", "BurntSushi/ripgrep"]
             })

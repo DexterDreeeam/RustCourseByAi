@@ -468,6 +468,41 @@ a {
   vertical-align: top;
 }
 
+.source-summary-row {
+  cursor: pointer;
+}
+
+.source-summary-row:hover {
+  background: rgba(125, 211, 252, 0.08);
+}
+
+.source-toggle {
+  border: 0;
+  background: transparent;
+  color: var(--accent);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 800;
+  padding: 0;
+  text-align: left;
+}
+
+.source-toggle::before {
+  content: "▸";
+  display: inline-block;
+  margin-right: 0.4rem;
+  transition: transform 140ms ease;
+}
+
+.source-summary-row[aria-expanded="true"] .source-toggle::before {
+  transform: rotate(90deg);
+}
+
+.source-code-row pre {
+  margin: 0;
+  max-height: min(62vh, 42rem);
+}
+
 .compare-table thead th {
   background: rgba(56, 189, 248, 0.1);
   color: var(--text);

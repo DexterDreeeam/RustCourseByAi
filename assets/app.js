@@ -31,7 +31,9 @@
       starCta: "Star 项目",
       starCtaThanks: "感谢支持",
       starCtaAria: "在 GitHub 上为 RustCourseByAi 点 Star",
-      starCtaThanksAria: "已打开 GitHub，引导为 RustCourseByAi 点 Star"
+      starCtaThanksAria: "已打开 GitHub，引导为 RustCourseByAi 点 Star",
+      loadingSource: "正在加载源码...",
+      sourceLoadError: "源码加载失败，请稍后重试。"
     },
     en: {
       syntax: "Syntax view",
@@ -50,7 +52,9 @@
       starCta: "Star project",
       starCtaThanks: "Thanks",
       starCtaAria: "Star RustCourseByAi on GitHub",
-      starCtaThanksAria: "GitHub opened to star RustCourseByAi"
+      starCtaThanksAria: "GitHub opened to star RustCourseByAi",
+      loadingSource: "Loading source...",
+      sourceLoadError: "Could not load source. Please try again later."
     }
   };
 
@@ -557,17 +561,7 @@
   }
 
   function cellText(cell) {
-    if (cell && typeof cell === "object" && "href" in cell) {
-      return pick(cell.text);
-    }
     return pick(cell);
-  }
-
-  function renderTableCellContent(cell) {
-    if (cell && typeof cell === "object" && "href" in cell) {
-      return `<a href="${escapeHtml(cell.href)}" target="_blank" rel="noreferrer">${formatInline(pick(cell.text))}</a>`;
-    }
-    return formatInline(pick(cell));
   }
 
   function renderExample(example) {
@@ -582,7 +576,7 @@
     }
 
     if (example.kind === "table") {
-      const renderCell = (cell, tag) => `<${tag}>${renderTableCellContent(cell)}</${tag}>`;
+      const renderCell = (cell, tag) => `<${tag}>${formatInline(pick(cell))}</${tag}>`;
       return `
         <div class="explanation-card table-card">
           <h3>${escapeHtml(pick(example.title))}</h3>
@@ -596,8 +590,34 @@
       `;
     }
 
+    if (example.kind === "sourceTable") {
+      const renderHeader = (header) => `<th>${formatInline(pick(header))}</th>`;
+      return `
+        <div class="explanation-card table-card source-table-card">
+          <h3>${escapeHtml(pick(example.title))}</h3>
+          <div class="table-scroll">
+            <table class="compare-table source-table">
+              <thead><tr>${example.headers.map(renderHeader).join("")}</tr></thead>
+              <tbody>${example.rows.map((row, index) => `
+                <tr class="source-summary-row" data-source-toggle aria-expanded="false">
+                  <td>${escapeHtml(String(row.order || index + 1))}</td>
+                  <td><button class="source-toggle" type="button">${formatInline(pick(row.file))}</button></td>
+                  <td>${formatInline(pick(row.focus))}</td>
+                </tr>
+                <tr class="source-code-row" hidden>
+                  <td colspan="${example.headers.length}">
+                    <pre><code class="language-rust" data-source-url="${escapeHtml(row.sourceUrl || "")}" data-source-loaded="false">${escapeHtml(labels[state.language].loadingSource)}</code></pre>
+                  </td>
+                </tr>
+              `).join("")}</tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
     if (example.kind === "searchableTable") {
-      const renderCell = (cell, tag) => `<${tag}>${renderTableCellContent(cell)}</${tag}>`;
+      const renderCell = (cell, tag) => `<${tag}>${formatInline(pick(cell))}</${tag}>`;
       return `
         <div class="explanation-card table-card searchable-table-card">
           <h3>${escapeHtml(pick(example.title))}</h3>
@@ -619,7 +639,7 @@
     }
 
     if (example.kind === "methodTable") {
-      const renderCell = (cell, tag) => `<${tag}>${renderTableCellContent(cell)}</${tag}>`;
+      const renderCell = (cell, tag) => `<${tag}>${formatInline(pick(cell))}</${tag}>`;
       const renderSignatureCell = (cell) => `<td>${formatRustSignature(pick(cell))}</td>`;
       const allRows = example.groups.flatMap((group) =>
         group.rows.map((row) => ({
@@ -948,6 +968,7 @@
       if (!el || !root.contains(el)) {
         return;
       }
+
       const pre = el.closest("pre");
       if (!pre) {
         return;
@@ -967,12 +988,50 @@
     });
   }
 
+  function setupSourceTables() {
+    root.addEventListener("click", async (event) => {
+      const row = event.target.closest("[data-source-toggle]");
+      if (!row || !root.contains(row)) {
+        return;
+      }
+      const codeRow = row.nextElementSibling;
+      if (!codeRow || !codeRow.classList.contains("source-code-row")) {
+        return;
+      }
+      const expanded = row.getAttribute("aria-expanded") === "true";
+      row.setAttribute("aria-expanded", String(!expanded));
+      codeRow.hidden = expanded;
+      if (!expanded) {
+        await loadSourceCode(codeRow.querySelector("[data-source-url]"));
+      }
+    });
+  }
+
+  async function loadSourceCode(codeEl) {
+    if (!codeEl || codeEl.dataset.sourceLoaded === "true") {
+      return;
+    }
+    try {
+      const response = await fetch(codeEl.dataset.sourceUrl, { headers: { Accept: "text/plain" } });
+      if (!response.ok) {
+        throw new Error(`Source returned ${response.status}`);
+      }
+      const source = await response.text();
+      codeEl.innerHTML = highlightCode(source, "rust");
+      codeEl.dataset.sourceLoaded = "true";
+    } catch (error) {
+      console.warn("Unable to load source file.", error);
+      codeEl.textContent = labels[state.language].sourceLoadError;
+    }
+  }
+
   if (!window.location.hash) {
     history.replaceState(null, "", `#${encodeURIComponent(state.sectionId)}`);
   }
 
   setupMethodTooltips();
   setupIdentHighlight();
+  setupSourceTables();
   setupStarCta();
   render();
   updateHeaderVisibility();
