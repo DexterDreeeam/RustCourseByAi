@@ -134,6 +134,10 @@ These shape the reading experience and must be followed in `docs/content/**`.
 - **Inline formatting in text cards: backticks only.** Paragraph text is rendered
   by `formatInline`, which converts only `` `code` `` to `<code>`. Markdown bold
   `**...**` is **not** supported and will render literal asterisks — do not use it.
+- **Table links use explicit cells, not markdown links.** `tableExample` cells may
+  use `{ text, href }` when a row must link to source code or documentation. The
+  renderer emits a safe external `<a>` for that cell. Do not add markdown link
+  syntax to paragraph or table text.
 - **Show positive usage, not only mistakes.** Each concept should include correct
   usage examples (e.g. a `panic!` "when to use" example), in addition to any
   `withMistakes` wrong-code blocks.

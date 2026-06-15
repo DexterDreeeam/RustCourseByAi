@@ -557,7 +557,17 @@
   }
 
   function cellText(cell) {
+    if (cell && typeof cell === "object" && "href" in cell) {
+      return pick(cell.text);
+    }
     return pick(cell);
+  }
+
+  function renderTableCellContent(cell) {
+    if (cell && typeof cell === "object" && "href" in cell) {
+      return `<a href="${escapeHtml(cell.href)}" target="_blank" rel="noreferrer">${formatInline(pick(cell.text))}</a>`;
+    }
+    return formatInline(pick(cell));
   }
 
   function renderExample(example) {
@@ -572,7 +582,7 @@
     }
 
     if (example.kind === "table") {
-      const renderCell = (cell, tag) => `<${tag}>${formatInline(pick(cell))}</${tag}>`;
+      const renderCell = (cell, tag) => `<${tag}>${renderTableCellContent(cell)}</${tag}>`;
       return `
         <div class="explanation-card table-card">
           <h3>${escapeHtml(pick(example.title))}</h3>
@@ -587,7 +597,7 @@
     }
 
     if (example.kind === "searchableTable") {
-      const renderCell = (cell, tag) => `<${tag}>${formatInline(pick(cell))}</${tag}>`;
+      const renderCell = (cell, tag) => `<${tag}>${renderTableCellContent(cell)}</${tag}>`;
       return `
         <div class="explanation-card table-card searchable-table-card">
           <h3>${escapeHtml(pick(example.title))}</h3>
@@ -609,7 +619,7 @@
     }
 
     if (example.kind === "methodTable") {
-      const renderCell = (cell, tag) => `<${tag}>${formatInline(pick(cell))}</${tag}>`;
+      const renderCell = (cell, tag) => `<${tag}>${renderTableCellContent(cell)}</${tag}>`;
       const renderSignatureCell = (cell) => `<td>${formatRustSignature(pick(cell))}</td>`;
       const allRows = example.groups.flatMap((group) =>
         group.rows.map((row) => ({
