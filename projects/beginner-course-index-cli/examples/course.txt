@@ -1,0 +1,12 @@
+# Format:
+# title: Course title
+# lesson: slug | title | tag1, tag2
+
+title: Rust Course for C++ Engineers
+
+lesson: rust-vs-cpp-model | Rust solves ownership and safety problems | intro, ownership
+lesson: cargo-workflow | Cargo workflow and quality gates | cargo, tooling
+lesson: struct-impl-newtype | Struct, impl, and newtype boundaries | modeling, visibility
+lesson: option-result-panic | Option, Result, and panic boundaries | errors, result
+lesson: iterator-pipeline | Iterator pipelines and aggregation | iterators, collections
+lesson: visibility-tests-docs | Visibility, tests, and documentation examples | modules, testing
