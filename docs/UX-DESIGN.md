@@ -141,7 +141,8 @@ These shape the reading experience and must be followed in `docs/content/**`.
 - **File trees use the dedicated renderer.** Use `fileTreeExample` for project
   layouts instead of ASCII `├──` diagrams. Each node should have a path segment,
   type/badge, depth, and a short reading note so directory structure is scannable
-  and visually consistent with the rest of the UI.
+  and visually consistent with the rest of the UI. Keep this component compact:
+  lightweight separators, small badges, and tight vertical spacing.
 - **Show positive usage, not only mistakes.** Each concept should include correct
   usage examples (e.g. a `panic!` "when to use" example), in addition to any
   `withMistakes` wrong-code blocks.
