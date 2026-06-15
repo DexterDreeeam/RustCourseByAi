@@ -1,0 +1,9 @@
+[package]
+name = "course-cli"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+course-core = { path = "../course-core" }
+course-service = { path = "../course-service" }
+course-store-memory = { path = "../course-store-memory" }

@@ -1,0 +1,8 @@
+[package]
+name = "course-service"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+course-core = { path = "../course-core" }
+course-index = { path = "../course-index" }

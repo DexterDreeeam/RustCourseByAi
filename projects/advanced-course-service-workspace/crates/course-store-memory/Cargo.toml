@@ -1,0 +1,7 @@
+[package]
+name = "course-store-memory"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+course-core = { path = "../course-core" }

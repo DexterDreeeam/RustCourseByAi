@@ -1,0 +1,9 @@
+[workspace]
+members = [
+    "crates/course-core",
+    "crates/course-index",
+    "crates/course-store-memory",
+    "crates/course-service",
+    "crates/course-cli",
+]
+resolver = "2"
