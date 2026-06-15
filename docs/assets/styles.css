@@ -391,6 +391,101 @@ a {
   margin-top: 0.9rem;
 }
 
+.file-tree-card {
+  grid-column: 1 / -1;
+}
+
+.file-tree-panel {
+  overflow: hidden;
+  border: 1px solid rgba(125, 211, 252, 0.18);
+  border-radius: 1rem;
+  background:
+    linear-gradient(135deg, rgba(125, 211, 252, 0.08), transparent 42%),
+    rgba(5, 7, 11, 0.62);
+  margin-top: 0.9rem;
+}
+
+.file-tree-root {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+  background: rgba(2, 6, 23, 0.42);
+  padding: 0.75rem 0.9rem;
+}
+
+.file-tree-root-icon,
+.file-tree-dir .file-tree-badge,
+.file-tree-file .file-tree-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.file-tree-root-icon {
+  width: 0.8rem;
+  height: 0.8rem;
+  border: 2px solid var(--accent);
+  border-radius: 0.25rem;
+  box-shadow: 0.18rem 0.18rem 0 rgba(56, 189, 248, 0.18);
+}
+
+.file-tree-list {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0.75rem;
+}
+
+.file-tree-item {
+  display: grid;
+  grid-template-columns: minmax(13rem, 0.7fr) minmax(14rem, 1.3fr);
+  gap: 0.8rem;
+  align-items: center;
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  border-radius: 0.75rem;
+  background: rgba(15, 23, 42, 0.5);
+  padding: 0.55rem 0.65rem 0.55rem calc(0.65rem + var(--tree-indent, 0rem));
+}
+
+.file-tree-item:hover {
+  border-color: rgba(125, 211, 252, 0.34);
+  background: rgba(15, 23, 42, 0.78);
+}
+
+.file-tree-node {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-width: 0;
+}
+
+.file-tree-badge {
+  min-width: 3.1rem;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  padding: 0.16rem 0.42rem;
+  text-transform: uppercase;
+}
+
+.file-tree-dir .file-tree-badge {
+  border-color: rgba(125, 211, 252, 0.26);
+  color: var(--accent);
+}
+
+.file-tree-file .file-tree-badge {
+  border-color: rgba(134, 239, 172, 0.22);
+  color: var(--green);
+}
+
+.file-tree-note {
+  color: var(--muted);
+}
+
 .table-card {
   grid-column: 1 / -1;
 }
@@ -786,5 +881,10 @@ li code {
     justify-content: center;
     text-align: center;
     flex: 1;
+  }
+
+  .file-tree-item {
+    grid-template-columns: 1fr;
+    gap: 0.35rem;
   }
 }

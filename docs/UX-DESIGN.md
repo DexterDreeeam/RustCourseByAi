@@ -138,6 +138,10 @@ These shape the reading experience and must be followed in `docs/content/**`.
   guides readers through repository files in order. Each row should name one file,
   explain what to inspect, and expand the full source code inline on click instead
   of linking away. Do not add markdown link syntax to paragraph or table text.
+- **File trees use the dedicated renderer.** Use `fileTreeExample` for project
+  layouts instead of ASCII `├──` diagrams. Each node should have a path segment,
+  type/badge, depth, and a short reading note so directory structure is scannable
+  and visually consistent with the rest of the UI.
 - **Show positive usage, not only mistakes.** Each concept should include correct
   usage examples (e.g. a `panic!` "when to use" example), in addition to any
   `withMistakes` wrong-code blocks.

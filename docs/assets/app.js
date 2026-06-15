@@ -575,6 +575,32 @@
       `;
     }
 
+    if (example.kind === "fileTree") {
+      return `
+        <div class="explanation-card file-tree-card">
+          <h3>${escapeHtml(pick(example.title))}</h3>
+          ${renderParagraphs(asArray(pick(example.paragraphs)))}
+          <div class="file-tree-panel">
+            <div class="file-tree-root">
+              <span class="file-tree-root-icon" aria-hidden="true"></span>
+              <code>${escapeHtml(example.root)}</code>
+            </div>
+            <ol class="file-tree-list">
+              ${(example.items || []).map((item) => `
+                <li class="file-tree-item file-tree-${escapeHtml(item.type || "file")}" style="--tree-indent: ${Math.max(0, Number(item.depth || 0)) * 1.35}rem">
+                  <span class="file-tree-node">
+                    <span class="file-tree-badge">${escapeHtml(item.badge || item.type || "file")}</span>
+                    <code>${escapeHtml(item.name)}</code>
+                  </span>
+                  <span class="file-tree-note">${formatInline(pick(item.note))}</span>
+                </li>
+              `).join("")}
+            </ol>
+          </div>
+        </div>
+      `;
+    }
+
     if (example.kind === "table") {
       const renderCell = (cell, tag) => `<${tag}>${formatInline(pick(cell))}</${tag}>`;
       return `
