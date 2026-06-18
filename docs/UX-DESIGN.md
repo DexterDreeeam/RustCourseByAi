@@ -160,6 +160,11 @@ These shape the reading experience and must be followed in `docs/content/**`.
   version stamp) so GitHub Pages serves fresh CSS/JS.
 - **No-build static site.** All behavior is plain classic-script JS; chapter files
   run inside an IIFE consuming helpers from `window.Course`. No bundler step.
+- **Standalone research pages.** Deep-dive pages that are not normal course
+  lessons may live as plain HTML files directly under `docs/` when they need a
+  different information architecture than the course renderer. They should keep
+  the dark visual language, be reachable from `docs/index.html` or `README.md`,
+  and avoid adding a build step.
 
 ---
 

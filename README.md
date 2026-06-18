@@ -4,6 +4,8 @@
 
 <p align="center">
   <a href="https://dexterdreeeam.github.io/RustCourseByAi/"><strong>Open the course →</strong></a>
+  ·
+  <a href="https://dexterdreeeam.github.io/RustCourseByAi/agent-architecture.html"><strong>Agent architecture research →</strong></a>
 </p>
 
 <p align="center">
