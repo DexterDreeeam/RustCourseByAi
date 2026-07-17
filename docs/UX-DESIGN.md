@@ -127,8 +127,10 @@ start close to the top-left of the viewport, without making controls cramped.
   read as balanced; avoid adding a hidden rail or one-sided scrollbar reservation
   that makes the right side look wider than the left.
 - **Navigation density.** The beginner/advanced tabs need enough horizontal gap
-  to read as two distinct controls. Individual section links should use a smaller
-  font than lesson body text so the left panel remains a compact index.
+  to read as two distinct controls. Keep their top inset tight, but leave a clear
+  interval below the tabs before the first chapter title. Individual section links
+  should use a smaller font than lesson body text so the left panel remains a
+  compact index.
 - **Content padding.** The main lesson card and nested cards should use compact
   but readable padding. Prefer reducing outer gutters before shrinking text size.
 - **Responsive safety.** Compact desktop spacing must still leave touch targets
