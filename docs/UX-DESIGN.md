@@ -113,7 +113,26 @@ static GitHub Pages site can know.
 
 ---
 
-## 3. Content & formatting conventions (chapter authoring)
+## 3. Layout density
+
+Goal: keep the reading surface compact enough that navigation and lesson content
+start close to the top-left of the viewport, without making controls cramped.
+
+- **Header height.** The fixed header should stay shallow: compact vertical
+  padding, a modest logo mark, and tight title/subtitle line-height. The top-right
+  language and Star controls use small pill padding rather than large button
+  padding.
+- **Sidebar padding.** The left navigation panel uses a small top/left inset so
+  the beginner/advanced tabs sit near the top edge and the nav does not waste a
+  wide blank rail on the left.
+- **Content padding.** The main lesson card and nested cards should use compact
+  but readable padding. Prefer reducing outer gutters before shrinking text size.
+- **Responsive safety.** Compact desktop spacing must still leave touch targets
+  usable on narrow screens; the mobile layout may keep controls full-width.
+
+---
+
+## 4. Content & formatting conventions (chapter authoring)
 
 These shape the reading experience and must be followed in `docs/content/**`.
 
@@ -153,7 +172,7 @@ These shape the reading experience and must be followed in `docs/content/**`.
 
 ---
 
-## 4. Operational notes
+## 5. Operational notes
 
 - **Cache busting.** After editing any file under `docs/assets/`, bump the `?v=`
   query string on every asset reference in `docs/index.html` (single shared
@@ -163,7 +182,7 @@ These shape the reading experience and must be followed in `docs/content/**`.
 
 ---
 
-## 5. Change log discipline
+## 6. Change log discipline
 
 When you change anything in this document's scope (interaction behavior, affordance
 visuals, content/formatting conventions), update the relevant section here in the
