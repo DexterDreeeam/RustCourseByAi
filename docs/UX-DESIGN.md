@@ -86,6 +86,12 @@ can trace where a particular variable or function name is used.
   and toggles `.ident-highlight` on every
   `[data-ident="<name>"][data-scope="<scope>"]` within it.
 
+### 1.4 Code font rendering
+Code examples should render language syntax literally. Disable programming-font
+ligatures and contextual alternates for `code` so multi-character operators such
+as `->`, `=>`, `::`, and `>=` remain visibly separate characters rather than a
+single combined glyph.
+
 ---
 
 ## 2. Header GitHub Star CTA
