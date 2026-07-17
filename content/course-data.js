@@ -12,7 +12,16 @@
     {
       id: "syntax-values-types",
       title: t("基础语法、控制流与类型", "Syntax, control flow, and types"),
-      members: ["syntax-values-types", "control-flow-patterns"]
+      members: ["syntax-values-types", "control-flow-patterns"],
+      sectionOrder: [
+        "scalar-compound-types",
+        "bindings-mutability-shadowing",
+        "strings-slices-collections",
+        "macros-vs-functions",
+        "control-flow-expressions",
+        "match-patterns",
+        "common-method-vocabulary"
+      ]
     },
     {
       id: "data-modeling-and-errors",
@@ -75,10 +84,19 @@
           return chapter;
         })
         .filter(Boolean);
+      const sections = members.flatMap((chapter) => chapter.sections);
+      const orderedSections = group.sectionOrder
+        ? [
+            ...group.sectionOrder
+              .map((sectionId) => sections.find((section) => section.id === sectionId))
+              .filter(Boolean),
+            ...sections.filter((section) => !group.sectionOrder.includes(section.id))
+          ]
+        : sections;
       return {
         id: group.id,
         title: group.title || (members[0] && members[0].title),
-        sections: members.flatMap((chapter) => chapter.sections)
+        sections: orderedSections
       };
     });
     for (const chapter of originalChapters) {
