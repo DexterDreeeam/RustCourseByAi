@@ -9,7 +9,11 @@
       title: t("从 C++ 到 Rust：迁移地图与工具链", "From C++ to Rust: migration map and toolchain"),
       members: ["cpp-to-rust-map", "toolchain-project-shape"]
     },
-    { id: "syntax-values-types", members: ["syntax-values-types"] },
+    {
+      id: "syntax-values-types",
+      title: t("基础语法、控制流与类型", "Syntax, control flow, and types"),
+      members: ["syntax-values-types", "control-flow-patterns"]
+    },
     {
       id: "data-modeling-and-errors",
       title: t("数据建模与错误处理", "Data modeling and error handling"),
