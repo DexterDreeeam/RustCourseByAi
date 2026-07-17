@@ -118,13 +118,17 @@ static GitHub Pages site can know.
 Goal: keep the reading surface compact enough that navigation and lesson content
 start close to the top-left of the viewport, without making controls cramped.
 
-- **Header height.** The fixed header should stay shallow: compact vertical
-  padding, a modest logo mark, and tight title/subtitle line-height. The top-right
-  language and Star controls use small pill padding rather than large button
-  padding.
+- **Header height.** The fixed header should be compact but not cramped: use
+  moderate vertical padding, a modest logo mark, and tight title/subtitle
+  line-height. The top-right language and Star controls use small pill padding
+  rather than large button padding.
 - **Sidebar padding.** The left navigation panel uses a small top/left inset so
-  the beginner/advanced tabs sit near the top edge and the nav does not waste a
-  wide blank rail on the left.
+  the beginner/advanced tabs sit near the top edge. Left and right inset should
+  read as balanced; avoid adding a hidden rail or one-sided scrollbar reservation
+  that makes the right side look wider than the left.
+- **Navigation density.** The beginner/advanced tabs need enough horizontal gap
+  to read as two distinct controls. Individual section links should use a smaller
+  font than lesson body text so the left panel remains a compact index.
 - **Content padding.** The main lesson card and nested cards should use compact
   but readable padding. Prefer reducing outer gutters before shrinking text size.
 - **Responsive safety.** Compact desktop spacing must still leave touch targets
