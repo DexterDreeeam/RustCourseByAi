@@ -731,7 +731,9 @@ pre {
 
 code {
   font-family: "Cascadia Code", "SFMono-Regular", Consolas, "Liberation Mono", "Microsoft YaHei", "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC", "Noto Sans SC", monospace;
+  font-feature-settings: "liga" 0, "calt" 0;
   font-size: 0.9rem;
+  font-variant-ligatures: none;
 }
 
 .tok-comment {
