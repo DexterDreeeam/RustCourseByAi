@@ -12,8 +12,8 @@
                 ["Read resource ownership from function signatures.", "Understand borrow as temporary access to caller-owned data.", "Distinguish pass-by-value for `Copy` types, which are implicitly copied, from non-`Copy` types, which are moved.", "Choose between `T`, `&T`, `&mut T`, `&str`, and `&[T]`."]
               ],
               syntax: [
-                ["所有权回答“这份值归谁管，谁负责释放”。借用回答“能不能临时看一下或改一下”。函数拿到借用时，所有者不变，函数不能负责释放这份数据，也不能随便把引用保存到更久的地方。", "`&T` 是共享借用：只读访问，可以同时有多个读者。适合查询、校验、格式化、计算长度；调用结束后，调用方继续拥有原值。", "`&mut T` 是可变借用：可以修改原值，但同一时间只能有一个，且不能和正在使用的 `&T` 混在一起。适合追加元素、填充缓冲区、原地更新状态。", "传 `T` 是 by value API：函数收到自己的一个 `T`。如果 `T: Copy`，调用点会隐式 copy 一份传进去，调用方原变量继续可用；如果 `T` 不是 `Copy`，按值传递就是 move，函数可以保存、丢弃或继续转移它，调用方除非从返回值拿回所有权，否则不能再用原变量。", "`#[derive(Copy, Clone)]` 只适合“按位复制就是完整语义”的小类型；所有字段都必须是 `Copy`，并且类型不能实现 `Drop`。", "`&str`、`&[T]` 是字符串和数组切片的借用视图，不拥有底层数据。API 只是读取时优先借用；需要长期保存时再转成 `String`、`Vec<T>` 等 owned 类型。", "返回 owned value 通常表示创建新资源或转移资源；返回引用表示结果依赖输入数据，需要讲清楚生命周期关系。"],
-                ["Ownership answers “who controls this value and frees it”. Borrowing answers “may this function temporarily read or modify it”. When a function receives a borrow, the owner stays the same; the function does not free the data and cannot freely store the reference somewhere longer-lived.", "`&T` is a shared borrow: read-only access, with multiple readers allowed. It fits queries, validation, formatting, and length checks; after the call, the caller still owns the value.", "`&mut T` is a mutable borrow: it may modify the original value, but only one mutable borrow may exist at a time, and it cannot overlap with an actively used `&T`. It fits appending, filling buffers, and in-place state updates.", "Passing `T` is a by-value API: the function receives its own `T`. If `T: Copy`, the call site implicitly copies one value into the function and the caller's original variable stays usable; if `T` is not `Copy`, passing by value moves it, so the function may store, drop, or move it onward, and the caller cannot use the original variable unless ownership is returned.", "`#[derive(Copy, Clone)]` fits only small types where bitwise copying is the whole semantic story; every field must be `Copy`, and the type cannot implement `Drop`.", "`&str` and `&[T]` are borrowed views into strings and slices; they do not own the underlying data. Prefer borrowing when an API only reads data; convert to owned `String` or `Vec<T>` only when data must be stored.", "Returning an owned value usually creates or transfers a resource; returning a reference means the result depends on input data and needs a clear lifetime relationship."]
+                ["所有权回答“这份值归谁管，谁负责释放”。借用回答“能不能临时看一下或改一下”。函数拿到借用时，所有者不变，函数不能负责释放这份数据，也不能随便把引用保存到更久的地方。", "`&T` 是共享借用：只读访问，可以同时有多个读者。适合查询、校验、格式化、计算长度；调用结束后，调用方继续拥有原值。", "`&mut T` 是可变借用：可以修改原值，但同一时间只能有一个，且不能和正在使用的 `&T` 混在一起。适合追加元素、填充缓冲区、原地更新状态。", "传 `T` 是 by value API：函数收到自己的一个 `T`。如果 `T: Copy`，调用点会隐式 copy 一份传进去，调用方原变量继续可用；如果 `T` 不是 `Copy`，按值传递就是 move，函数可以保存、丢弃或继续转移它，调用方除非从返回值拿回所有权，否则不能再用原变量。", "`#[derive(Copy, Clone)]` 只适合“按位复制就是完整语义”的小类型；所有字段都必须是 `Copy`，并且类型不能实现 `Drop`。", "`&str`、`&[T]` 是字符串和数组切片的借用视图，不拥有底层数据。API 只是读取时优先借用；需要长期保存时再转成 `String`、`Vec<T>` 等 owned 类型。", "返回 owned value 通常表示创建新资源或转移资源；返回 borrowed view 的生命周期关系放到下一节单独讲。"],
+                ["Ownership answers “who controls this value and frees it”. Borrowing answers “may this function temporarily read or modify it”. When a function receives a borrow, the owner stays the same; the function does not free the data and cannot freely store the reference somewhere longer-lived.", "`&T` is a shared borrow: read-only access, with multiple readers allowed. It fits queries, validation, formatting, and length checks; after the call, the caller still owns the value.", "`&mut T` is a mutable borrow: it may modify the original value, but only one mutable borrow may exist at a time, and it cannot overlap with an actively used `&T`. It fits appending, filling buffers, and in-place state updates.", "Passing `T` is a by-value API: the function receives its own `T`. If `T: Copy`, the call site implicitly copies one value into the function and the caller's original variable stays usable; if `T` is not `Copy`, passing by value moves it, so the function may store, drop, or move it onward, and the caller cannot use the original variable unless ownership is returned.", "`#[derive(Copy, Clone)]` fits only small types where bitwise copying is the whole semantic story; every field must be `Copy`, and the type cannot implement `Drop`.", "`&str` and `&[T]` are borrowed views into strings and slices; they do not own the underlying data. Prefer borrowing when an API only reads data; convert to owned `String` or `Vec<T>` only when data must be stored.", "Returning an owned value usually creates or transfers a resource; lifetime relationships for returned borrowed views are covered in the next section."]
               ],
               engineering: [
                 ["API 边界越清晰，调用方越少猜测谁负责释放、缓存或修改。", "小 ID、坐标、状态码这类 `Copy` newtype 按值传很自然：调用方保留原值，函数拿到独立副本。`String`、`Vec<T>`、文件句柄、锁守卫这类拥有资源的类型按值传通常表示交出所有权。", "如果为了通过编译到处加 `clone`，通常说明 API 边界还没想清楚。"],
@@ -182,8 +182,7 @@ fn validate_name(name: &str) -> Result<(), &'static str> {
 fn create_user(input: &str) -> Result<User, &'static str> {
     // input 只是借用；只有 User 需要保存时才分配 String。
     let normalized = normalize_name(input);
-    // normalized.as_str() 显式把 owned String 借成 &str；
-    // 写 &normalized 也能工作，因为 Rust 有 Deref coercion。
+    // normalized.as_str() 显式把 owned String 借成 &str。
     validate_name(normalized.as_str())?;
     Ok(User { normalized_name: normalized })
 }`, `#[derive(Debug)]
@@ -204,8 +203,7 @@ fn validate_name(name: &str) -> Result<(), &'static str> {
 fn create_user(input: &str) -> Result<User, &'static str> {
     // input is borrowed; allocate String only when User must store it.
     let normalized = normalize_name(input);
-    // normalized.as_str() explicitly borrows the owned String as &str;
-    // &normalized also works because Rust has deref coercion.
+    // normalized.as_str() explicitly borrows the owned String as &str.
     validate_name(normalized.as_str())?;
     Ok(User { normalized_name: normalized })
 }`),
@@ -296,51 +294,6 @@ fn main() {
                       explanation: t(
                         ["C++ 默认对类类型按值拷贝；Rust 默认 move（只有实现了 `Copy` 的简单类型才拷贝）。想让调用方保留就传 `&ids`。"],
                         ["C++ copies class types by value by default; Rust moves by default (only `Copy` types are copied). Pass `&ids` if the caller should keep it."]
-                      )
-                    }
-                  ]
-                ),
-                withMistakes(
-                  localizedExample("Rust: 返回 owned 还是借用？", "Rust: return owned or borrowed?", "rust", `// 借用输入、返回指向输入的 slice：返回值生命周期来自参数。
-// 这里靠 lifetime elision：等价于 fn first_word<'a>(text: &'a str) -> &'a str。
-fn first_word(text: &str) -> &str {
-    text.split_whitespace().next().unwrap_or("")
-}
-
-// 需要新建数据时返回 owned String
-fn shout(text: &str) -> String {
-    text.to_uppercase()
-}`, `// Borrow the input and return a slice into it: the result lifetime comes from the parameter.
-// This uses lifetime elision: equivalent to fn first_word<'a>(text: &'a str) -> &'a str.
-fn first_word(text: &str) -> &str {
-    text.split_whitespace().next().unwrap_or("")
-}
-
-// Return an owned String when you build new data
-fn shout(text: &str) -> String {
-    text.to_uppercase()
-}`),
-                  [
-                    {
-                      title: t("错误：返回指向局部变量的引用（C++ 经典悬垂指针）", "Wrong: return a reference to a local (classic C++ dangling pointer)"),
-                      language: "rust",
-                      code: t(
-                        `fn greeting() -> &str {
-    let owned = String::from("hello");
-    &owned // 返回指向局部 owned 的引用
-}`,
-                        `fn greeting() -> &str {
-    let owned = String::from("hello");
-    &owned // returning a reference into the local owned
-}`
-                      ),
-                      error: t(
-                        ["error[E0515]: cannot return reference to local variable `owned`", "`owned` 在函数结束时被释放，返回它的引用就是悬垂引用。"],
-                        ["error[E0515]: cannot return reference to local variable `owned`", "`owned` is dropped at function exit, so a reference to it would dangle."]
-                      ),
-                      explanation: t(
-                        ["C++ 里 `return &owned;`（或返回 `string_view`）能编译，运行期是未定义行为；Rust 在编译期就拦下。要么返回 owned `String`，要么让调用方传入数据再返回它的 slice。"],
-                        ["C++ would compile `return &owned;` (or return a `string_view`) and invoke UB at runtime; Rust rejects it at compile time. Return an owned `String`, or take the data from the caller and return a slice into it."]
                       )
                     }
                   ]
@@ -461,89 +414,6 @@ fn total_len(parts: &[String]) -> usize {
                     }
                   ]
                 ),
-                withMistakes(
-                  localizedExample("Rust: 结构体借用数据要标注生命周期", "Rust: a struct borrowing data needs a lifetime", "rust", `// 解析器只借用输入，不复制；生命周期 'a 把这层依赖写进类型
-struct Parser<'a> {
-    input: &'a str,
-    pos: usize,
-}
-
-impl<'a> Parser<'a> {
-    fn new(input: &'a str) -> Self {
-        Parser { input, pos: 0 }
-    }
-
-    fn rest(&self) -> &'a str {
-        &self.input[self.pos..]
-    }
-}`, `// The parser only borrows the input; lifetime 'a records that dependency in the type
-struct Parser<'a> {
-    input: &'a str,
-    pos: usize,
-}
-
-impl<'a> Parser<'a> {
-    fn new(input: &'a str) -> Self {
-        Parser { input, pos: 0 }
-    }
-
-    fn rest(&self) -> &'a str {
-        &self.input[self.pos..]
-    }
-}`),
-                  [
-                    {
-                      title: t("错误：结构体存引用却不写生命周期", "Wrong: store a reference in a struct without a lifetime"),
-                      language: "rust",
-                      code: t(
-                        `struct Parser {
-    input: &str, // 缺少生命周期标注
-}`,
-                        `struct Parser {
-    input: &str, // missing lifetime annotation
-}`
-                      ),
-                      error: t(
-                        ["error[E0106]: missing lifetime specifier", "结构体保存引用时，必须写明这个引用依赖哪份数据，例如 `input: &'a str`。"],
-                        ["error[E0106]: missing lifetime specifier", "A struct holding a reference must state which data it depends on, e.g. `input: &'a str`."]
-                      ),
-                      explanation: t(
-                        ["C++ 里把指针/`string_view` 塞进类成员没人拦你，悬垂要自己保证；Rust 要求把生命周期写进类型，让编译器替你检查。"],
-                        ["C++ lets you stash a pointer/`string_view` in a member with no checks and leaves dangling to you; Rust requires the lifetime in the type so the compiler verifies it."]
-                      )
-                    },
-                    {
-                      title: t("错误：让借用视图比数据活得更久", "Wrong: let a borrowing view outlive its data"),
-                      language: "rust",
-                      code: t(
-                        `fn main() {
-    let parser;
-    {
-        let input = String::from("1 2 3");
-        parser = Parser::new(&input); // 借用 input
-    } // input 在这里被释放
-    println!("{}", parser.rest());    // parser 还在用已释放的数据
-}`,
-                        `fn main() {
-    let parser;
-    {
-        let input = String::from("1 2 3");
-        parser = Parser::new(&input); // borrows input
-    } // input is dropped here
-    println!("{}", parser.rest());    // parser still uses freed data
-}`
-                      ),
-                      error: t(
-                        ["error[E0597]: `input` does not live long enough", "`parser` 借用了 `input`，但 `input` 在内层作用域结束就释放了，`parser` 却用到更晚。"],
-                        ["error[E0597]: `input` does not live long enough", "`parser` borrows `input`, but `input` is dropped at the end of the inner scope while `parser` is used later."]
-                      ),
-                      explanation: t(
-                        ["这正是 C++ `string_view`/迭代器悬垂的场景，运行期才暴露；Rust 用生命周期在编译期发现。要么让 `input` 活得够久，要么让 `Parser` 拥有 owned `String`。"],
-                        ["This is exactly the dangling `string_view`/iterator scenario in C++, surfacing only at runtime; Rust catches it at compile time via lifetimes. Keep `input` alive long enough, or make `Parser` own a `String`."]
-                      )
-                    }
-                  ]
-                ),
                 localizedExample("Rust: 用类型表达所有权转移（builder 消费 self）", "Rust: encode ownership transfer in types (builder consumes self)", "rust", `// 每一步消费 self 再返回，所有权按链式流动，build 后原对象不可再用
 #[derive(Default)]
 struct RequestBuilder {
@@ -614,8 +484,8 @@ fn main() {
                 ["Understand what `&'a str`, `fn f<'a>`, and `'static` mean.", "Read the dependency between return values and inputs from a function signature."]
               ],
               syntax: [
-                ["生命周期说的是“一个引用在多长范围内还能安全使用”。它不会让数据活得更久，只是让编译器检查：引用不能比它指向的数据活得更久。", "`'a` 不是字符串、字符或运行时变量，只是一个生命周期参数名。可以把它读成“生命周期 a”或“某个生命周期”；名字也可以写成 `'input`。", "`&'a str` 表示“这个 `str` 引用在生命周期 `'a` 内有效”。`fn first<'a>(x: &'a str, y: &'a str) -> &'a str` 里的 `<'a>` 是声明这个名字，后面的 `&'a` 是把参数和返回值绑到同一个有效期关系上。", "这类签名的意思不是返回值一定来自第一个参数，而是：返回的引用必须来自 `x` 或 `y` 这种至少能活到 `'a` 的输入，调用方不能把返回值用到输入失效之后。", "`struct Header<'a>` 的意思是：`Header` 这个结构体里保存了引用字段，`'a` 是这些引用共同的有效期名字。`Header<'a>` 不拥有字符串本体，它只能在被借用的字符串还活着时存在。", "`'static` 是特殊生命周期，表示引用的数据能活到整个程序结束，例如字符串字面量。普通函数里编译器经常能自动推断生命周期，所以不一定都要手写 `<'a>`；当函数返回引用且有多个输入引用，或结构体字段保存引用时，通常就需要写清楚。"],
-                ["Lifetimes describe the scope where a reference remains safe to use. They do not make data live longer; they let the compiler check that a reference never outlives the data it points at.", "`'a` is not a string, character, or runtime variable. It is a lifetime parameter name, read as \"lifetime a\" or \"some lifetime\"; longer names such as `'input` are also valid.", "`&'a str` means \"this `str` reference is valid for lifetime `'a`\". In `fn first<'a>(x: &'a str, y: &'a str) -> &'a str`, `<'a>` declares the name, and `&'a` ties the parameters and return value into the same validity relationship.", "That signature does not mean the result must be the first parameter. It means the returned reference must come from input data that is valid for `'a`, so the caller cannot use the result after the input has expired.", "`struct Header<'a>` means the `Header` struct stores reference fields, and `'a` names the validity period shared by those references. `Header<'a>` does not own the strings themselves; it can only exist while the borrowed strings are still alive.", "`'static` is the special lifetime for data valid until the program ends, such as string literals. The compiler can infer lifetimes in many ordinary functions, so `<'a>` is not always written; it is usually needed when a function returns a reference with multiple input references, or when a struct stores references."]
+                ["生命周期说的是“一个引用在多长范围内还能安全使用”。它不会让数据活得更久，只是让编译器检查：引用不能比它指向的数据活得更久。", "`'a` 不是字符串、字符或运行时变量，只是一个生命周期参数名。可以把它读成“生命周期 a”或“某个生命周期”；名字也可以写成 `'input`。", "`&'a str` 表示“这个 `str` 引用在生命周期 `'a` 内有效”。`fn first<'a>(x: &'a str, y: &'a str) -> &'a str` 里的 `<'a>` 是声明这个名字，后面的 `&'a` 是把参数和返回值绑到同一个有效期关系上。", "当函数只有一个输入引用时，lifetime elision 会把省略的输出生命周期绑定到这个输入上；有多个输入引用时，编译器通常不能猜返回值来自哪一个。", "这类签名的意思不是返回值一定来自第一个参数，而是：返回的引用必须来自 `x` 或 `y` 这种至少能活到 `'a` 的输入，调用方不能把返回值用到输入失效之后。", "`struct Header<'a>` 的意思是：`Header` 这个结构体里保存了引用字段，`'a` 是这些引用共同的有效期名字。`Header<'a>` 不拥有字符串本体，它只能在被借用的字符串还活着时存在。", "`'static` 是特殊生命周期，表示引用的数据能活到整个程序结束，例如字符串字面量。普通函数里编译器经常能自动推断生命周期，所以不一定都要手写 `<'a>`；当函数返回引用且有多个输入引用，或结构体字段保存引用时，通常就需要写清楚。"],
+                ["Lifetimes describe the scope where a reference remains safe to use. They do not make data live longer; they let the compiler check that a reference never outlives the data it points at.", "`'a` is not a string, character, or runtime variable. It is a lifetime parameter name, read as \"lifetime a\" or \"some lifetime\"; longer names such as `'input` are also valid.", "`&'a str` means \"this `str` reference is valid for lifetime `'a`\". In `fn first<'a>(x: &'a str, y: &'a str) -> &'a str`, `<'a>` declares the name, and `&'a` ties the parameters and return value into the same validity relationship.", "When a function has one input reference, lifetime elision ties an elided output lifetime to that input; with multiple input references, the compiler usually cannot guess which one the result comes from.", "That signature does not mean the result must be the first parameter. It means the returned reference must come from input data that is valid for `'a`, so the caller cannot use the result after the input has expired.", "`struct Header<'a>` means the `Header` struct stores reference fields, and `'a` names the validity period shared by those references. `Header<'a>` does not own the strings themselves; it can only exist while the borrowed strings are still alive.", "`'static` is the special lifetime for data valid until the program ends, such as string literals. The compiler can infer lifetimes in many ordinary functions, so `<'a>` is not always written; it is usually needed when a function returns a reference with multiple input references, or when a struct stores references."]
               ],
               engineering: [
                 ["缓存、解析器、HTTP header、少拷贝的数据视图里经常会看到生命周期。", "如果生命周期一路传到很多层，让代码很难读，可以考虑在某个模块入口把数据拷贝成 owned 类型。"],
@@ -626,6 +496,51 @@ fn main() {
                 ["C++ `string_view` lifetime safety is a caller convention; Rust forces that relationship into types."]
               ],
               examples: [
+                withMistakes(
+                  localizedExample("Rust: 单个输入引用可省略生命周期", "Rust: one input reference can elide the lifetime", "rust", `// 借用输入、返回指向输入的 slice：返回值生命周期来自参数。
+// 这里靠 lifetime elision：等价于 fn first_word<'a>(text: &'a str) -> &'a str。
+fn first_word(text: &str) -> &str {
+    text.split_whitespace().next().unwrap_or("")
+}
+
+// 需要新建数据时返回 owned String，不需要生命周期标注。
+fn shout(text: &str) -> String {
+    text.to_uppercase()
+}`, `// Borrow the input and return a slice into it: the result lifetime comes from the parameter.
+// This uses lifetime elision: equivalent to fn first_word<'a>(text: &'a str) -> &'a str.
+fn first_word(text: &str) -> &str {
+    text.split_whitespace().next().unwrap_or("")
+}
+
+// Return an owned String when you build new data; no lifetime annotation is needed.
+fn shout(text: &str) -> String {
+    text.to_uppercase()
+}`),
+                  [
+                    {
+                      title: t("错误：返回指向局部变量的引用（C++ 经典悬垂指针）", "Wrong: return a reference to a local (classic C++ dangling pointer)"),
+                      language: "rust",
+                      code: t(
+                        `fn greeting() -> &str {
+    let owned = String::from("hello");
+    &owned // 返回指向局部 owned 的引用
+}`,
+                        `fn greeting() -> &str {
+    let owned = String::from("hello");
+    &owned // returning a reference into the local owned
+}`
+                      ),
+                      error: t(
+                        ["error[E0515]: cannot return reference to local variable `owned`", "`owned` 在函数结束时被释放，返回它的引用就是悬垂引用。"],
+                        ["error[E0515]: cannot return reference to local variable `owned`", "`owned` is dropped at function exit, so a reference to it would dangle."]
+                      ),
+                      explanation: t(
+                        ["C++ 里 `return &owned;`（或返回 `string_view`）能编译，运行期是未定义行为；Rust 在编译期就拦下。要么返回 owned `String`，要么让调用方传入数据再返回它的 slice。"],
+                        ["C++ would compile `return &owned;` (or return a `string_view`) and invoke UB at runtime; Rust rejects it at compile time. Return an owned `String`, or take the data from the caller and return a slice into it."]
+                      )
+                    }
+                  ]
+                ),
                 withMistakes(
                   localizedExample("Rust: 返回值依赖多个输入", "Rust: result depends on multiple inputs", "rust", `// 读法：'a 是“某个生命周期”的名字。
 // x、y 和返回值都写成 &'a str，表示返回值依赖输入数据，
@@ -801,6 +716,89 @@ fn main() {
                   `Header<'a>
   name  -> &'a str  -> external string data
   value -> &'a str  -> external string data`
+                ),
+                withMistakes(
+                  localizedExample("Rust: 结构体借用数据要标注生命周期", "Rust: a struct borrowing data needs a lifetime", "rust", `// 解析器只借用输入，不复制；生命周期 'a 把这层依赖写进类型。
+struct Parser<'a> {
+    input: &'a str,
+    pos: usize,
+}
+
+impl<'a> Parser<'a> {
+    fn new(input: &'a str) -> Self {
+        Parser { input, pos: 0 }
+    }
+
+    fn rest(&self) -> &'a str {
+        &self.input[self.pos..]
+    }
+}`, `// The parser only borrows the input; lifetime 'a records that dependency in the type.
+struct Parser<'a> {
+    input: &'a str,
+    pos: usize,
+}
+
+impl<'a> Parser<'a> {
+    fn new(input: &'a str) -> Self {
+        Parser { input, pos: 0 }
+    }
+
+    fn rest(&self) -> &'a str {
+        &self.input[self.pos..]
+    }
+}`),
+                  [
+                    {
+                      title: t("错误：结构体存引用却不写生命周期", "Wrong: store a reference in a struct without a lifetime"),
+                      language: "rust",
+                      code: t(
+                        `struct Parser {
+    input: &str, // 缺少生命周期标注
+}`,
+                        `struct Parser {
+    input: &str, // missing lifetime annotation
+}`
+                      ),
+                      error: t(
+                        ["error[E0106]: missing lifetime specifier", "结构体保存引用时，必须写明这个引用依赖哪份数据，例如 `input: &'a str`。"],
+                        ["error[E0106]: missing lifetime specifier", "A struct holding a reference must state which data it depends on, e.g. `input: &'a str`."]
+                      ),
+                      explanation: t(
+                        ["C++ 里把指针/`string_view` 塞进类成员没人拦你，悬垂要自己保证；Rust 要求把生命周期写进类型，让编译器替你检查。"],
+                        ["C++ lets you stash a pointer/`string_view` in a member with no checks and leaves dangling to you; Rust requires the lifetime in the type so the compiler verifies it."]
+                      )
+                    },
+                    {
+                      title: t("错误：让借用视图比数据活得更久", "Wrong: let a borrowing view outlive its data"),
+                      language: "rust",
+                      code: t(
+                        `fn main() {
+    let parser;
+    {
+        let input = String::from("1 2 3");
+        parser = Parser::new(&input); // 借用 input
+    } // input 在这里被释放
+    println!("{}", parser.rest());    // parser 还在用已释放的数据
+}`,
+                        `fn main() {
+    let parser;
+    {
+        let input = String::from("1 2 3");
+        parser = Parser::new(&input); // borrows input
+    } // input is dropped here
+    println!("{}", parser.rest());    // parser still uses freed data
+}`
+                      ),
+                      error: t(
+                        ["error[E0597]: `input` does not live long enough", "`parser` 借用了 `input`，但 `input` 在内层作用域结束就释放了，`parser` 却用到更晚。"],
+                        ["error[E0597]: `input` does not live long enough", "`parser` borrows `input`, but `input` is dropped at the end of the inner scope while `parser` is used later."]
+                      ),
+                      explanation: t(
+                        ["这正是 C++ `string_view`/迭代器悬垂的场景，运行期才暴露；Rust 用生命周期在编译期发现。要么让 `input` 活得够久，要么让 `Parser` 拥有 owned `String`。"],
+                        ["This is exactly the dangling `string_view`/iterator scenario in C++, surfacing only at runtime; Rust catches it at compile time via lifetimes. Keep `input` alive long enough, or make `Parser` own a `String`."]
+                      )
+                    }
+                  ]
                 ),
                 withMistakes(
                   localizedExample("Rust: Header 借用外部字符串", "Rust: Header borrows external strings", "rust", `// 'text 是名字，表示 Header 里的引用都依赖外部文本。
