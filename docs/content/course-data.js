@@ -55,7 +55,7 @@
     {
       id: "observability-performance",
       title: t("可观测性与性能", "Observability and performance"),
-      members: ["observability-errors", "performance-engineering"]
+      members: ["observability-errors", "performance-engineering", "advanced-lifetimes-coercions"]
     },
     {
       id: "unsafe-macros",
