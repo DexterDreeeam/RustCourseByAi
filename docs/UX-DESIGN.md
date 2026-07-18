@@ -137,8 +137,10 @@ start close to the top-left of the viewport, without making controls cramped.
   interval below the tabs before the first chapter title. Individual section links
   should use a smaller font than lesson body text so the left panel remains a
   compact index.
-- **Content padding.** The main lesson card and nested cards should use compact
-  but readable padding. Prefer reducing outer gutters before shrinking text size.
+- **Content surface.** The right-side lesson body should not have a rounded outer
+  frame; that frame reduces usable width without adding structure. Let the page
+  background show through and use framed surfaces only for nested content cards
+  that need grouping.
 - **Responsive safety.** Compact desktop spacing must still leave touch targets
   usable on narrow screens; the mobile layout may keep controls full-width.
 

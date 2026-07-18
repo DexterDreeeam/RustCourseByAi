@@ -288,10 +288,7 @@ a {
 }
 
 .lesson {
-  border: 1px solid rgba(148, 163, 184, 0.16);
-  border-radius: 1.5rem;
-  background: rgba(13, 17, 25, 0.78);
-  box-shadow: var(--shadow);
+  background: transparent;
 }
 
 .lesson h1 {
@@ -314,7 +311,7 @@ a {
 }
 
 .lesson {
-  padding: clamp(0.85rem, 1.45vw, 1.35rem);
+  padding: 0;
 }
 
 .lesson-grid {
