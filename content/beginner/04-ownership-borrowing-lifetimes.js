@@ -182,7 +182,9 @@ fn validate_name(name: &str) -> Result<(), &'static str> {
 fn create_user(input: &str) -> Result<User, &'static str> {
     // input 只是借用；只有 User 需要保存时才分配 String。
     let normalized = normalize_name(input);
-    validate_name(&normalized)?;
+    // normalized.as_str() 显式把 owned String 借成 &str；
+    // 写 &normalized 也能工作，因为 Rust 有 Deref coercion。
+    validate_name(normalized.as_str())?;
     Ok(User { normalized_name: normalized })
 }`, `#[derive(Debug)]
 struct User {
@@ -202,7 +204,9 @@ fn validate_name(name: &str) -> Result<(), &'static str> {
 fn create_user(input: &str) -> Result<User, &'static str> {
     // input is borrowed; allocate String only when User must store it.
     let normalized = normalize_name(input);
-    validate_name(&normalized)?;
+    // normalized.as_str() explicitly borrows the owned String as &str;
+    // &normalized also works because Rust has deref coercion.
+    validate_name(normalized.as_str())?;
     Ok(User { normalized_name: normalized })
 }`),
                 withMistakes(
@@ -297,7 +301,8 @@ fn main() {
                   ]
                 ),
                 withMistakes(
-                  localizedExample("Rust: 返回 owned 还是借用？", "Rust: return owned or borrowed?", "rust", `// 借用输入、返回指向输入的 slice：返回值生命周期来自参数
+                  localizedExample("Rust: 返回 owned 还是借用？", "Rust: return owned or borrowed?", "rust", `// 借用输入、返回指向输入的 slice：返回值生命周期来自参数。
+// 这里靠 lifetime elision：等价于 fn first_word<'a>(text: &'a str) -> &'a str。
 fn first_word(text: &str) -> &str {
     text.split_whitespace().next().unwrap_or("")
 }
@@ -305,7 +310,8 @@ fn first_word(text: &str) -> &str {
 // 需要新建数据时返回 owned String
 fn shout(text: &str) -> String {
     text.to_uppercase()
-}`, `// Borrow the input and return a slice into it: the result lifetime comes from the parameter
+}`, `// Borrow the input and return a slice into it: the result lifetime comes from the parameter.
+// This uses lifetime elision: equivalent to fn first_word<'a>(text: &'a str) -> &'a str.
 fn first_word(text: &str) -> &str {
     text.split_whitespace().next().unwrap_or("")
 }
