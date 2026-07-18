@@ -8,20 +8,20 @@
               id: "ownership-api-design",
               title: ["用所有权设计 API", "Design APIs with ownership"],
               goals: [
-                ["能根据函数签名判断资源归属。", "理解 borrow/借用：函数临时访问调用方的数据，但不拥有它。", "会选择 `T`、`&T`、`&mut T`、`&str`、`&[T]`。"],
-                ["Read resource ownership from function signatures.", "Understand borrow as temporary access to caller-owned data.", "Choose between `T`, `&T`, `&mut T`, `&str`, and `&[T]`."]
+                ["能根据函数签名判断资源归属。", "理解 borrow/借用：函数临时访问调用方的数据，但不拥有它。", "区分按值传 `T` 时，`Copy` 类型会隐式 copy，非 `Copy` 类型会 move。", "会选择 `T`、`&T`、`&mut T`、`&str`、`&[T]`。"],
+                ["Read resource ownership from function signatures.", "Understand borrow as temporary access to caller-owned data.", "Distinguish pass-by-value for `Copy` types, which are implicitly copied, from non-`Copy` types, which are moved.", "Choose between `T`, `&T`, `&mut T`, `&str`, and `&[T]`."]
               ],
               syntax: [
-                ["所有权回答“这份值归谁管，谁负责释放”。借用回答“能不能临时看一下或改一下”。函数拿到借用时，所有者不变，函数不能负责释放这份数据，也不能随便把引用保存到更久的地方。", "`&T` 是共享借用：只读访问，可以同时有多个读者。适合查询、校验、格式化、计算长度；调用结束后，调用方继续拥有原值。", "`&mut T` 是可变借用：可以修改原值，但同一时间只能有一个，且不能和正在使用的 `&T` 混在一起。适合追加元素、填充缓冲区、原地更新状态。", "传 `T` 才是拿走所有权：函数可以保存、丢弃或继续转移它；调用方除非从返回值拿回所有权，否则不能再用原变量。", "`&str`、`&[T]` 是字符串和数组切片的借用视图，不拥有底层数据。API 只是读取时优先借用；需要长期保存时再转成 `String`、`Vec<T>` 等 owned 类型。", "返回 owned value 通常表示创建新资源或转移资源；返回引用表示结果依赖输入数据，需要讲清楚生命周期关系。"],
-                ["Ownership answers “who controls this value and frees it”. Borrowing answers “may this function temporarily read or modify it”. When a function receives a borrow, the owner stays the same; the function does not free the data and cannot freely store the reference somewhere longer-lived.", "`&T` is a shared borrow: read-only access, with multiple readers allowed. It fits queries, validation, formatting, and length checks; after the call, the caller still owns the value.", "`&mut T` is a mutable borrow: it may modify the original value, but only one mutable borrow may exist at a time, and it cannot overlap with an actively used `&T`. It fits appending, filling buffers, and in-place state updates.", "Passing `T` is what takes ownership: the function may store, drop, or move it onward; unless ownership is returned, the caller cannot use the original variable afterward.", "`&str` and `&[T]` are borrowed views into strings and slices; they do not own the underlying data. Prefer borrowing when an API only reads data; convert to owned `String` or `Vec<T>` only when data must be stored.", "Returning an owned value usually creates or transfers a resource; returning a reference means the result depends on input data and needs a clear lifetime relationship."]
+                ["所有权回答“这份值归谁管，谁负责释放”。借用回答“能不能临时看一下或改一下”。函数拿到借用时，所有者不变，函数不能负责释放这份数据，也不能随便把引用保存到更久的地方。", "`&T` 是共享借用：只读访问，可以同时有多个读者。适合查询、校验、格式化、计算长度；调用结束后，调用方继续拥有原值。", "`&mut T` 是可变借用：可以修改原值，但同一时间只能有一个，且不能和正在使用的 `&T` 混在一起。适合追加元素、填充缓冲区、原地更新状态。", "传 `T` 是 by value API：函数收到自己的一个 `T`。如果 `T: Copy`，调用点会隐式 copy 一份传进去，调用方原变量继续可用；如果 `T` 不是 `Copy`，按值传递就是 move，函数可以保存、丢弃或继续转移它，调用方除非从返回值拿回所有权，否则不能再用原变量。", "`#[derive(Copy, Clone)]` 只适合“按位复制就是完整语义”的小类型；所有字段都必须是 `Copy`，并且类型不能实现 `Drop`。", "`&str`、`&[T]` 是字符串和数组切片的借用视图，不拥有底层数据。API 只是读取时优先借用；需要长期保存时再转成 `String`、`Vec<T>` 等 owned 类型。", "返回 owned value 通常表示创建新资源或转移资源；返回引用表示结果依赖输入数据，需要讲清楚生命周期关系。"],
+                ["Ownership answers “who controls this value and frees it”. Borrowing answers “may this function temporarily read or modify it”. When a function receives a borrow, the owner stays the same; the function does not free the data and cannot freely store the reference somewhere longer-lived.", "`&T` is a shared borrow: read-only access, with multiple readers allowed. It fits queries, validation, formatting, and length checks; after the call, the caller still owns the value.", "`&mut T` is a mutable borrow: it may modify the original value, but only one mutable borrow may exist at a time, and it cannot overlap with an actively used `&T`. It fits appending, filling buffers, and in-place state updates.", "Passing `T` is a by-value API: the function receives its own `T`. If `T: Copy`, the call site implicitly copies one value into the function and the caller's original variable stays usable; if `T` is not `Copy`, passing by value moves it, so the function may store, drop, or move it onward, and the caller cannot use the original variable unless ownership is returned.", "`#[derive(Copy, Clone)]` fits only small types where bitwise copying is the whole semantic story; every field must be `Copy`, and the type cannot implement `Drop`.", "`&str` and `&[T]` are borrowed views into strings and slices; they do not own the underlying data. Prefer borrowing when an API only reads data; convert to owned `String` or `Vec<T>` only when data must be stored.", "Returning an owned value usually creates or transfers a resource; returning a reference means the result depends on input data and needs a clear lifetime relationship."]
               ],
               engineering: [
-                ["API 边界越清晰，调用方越少猜测谁负责释放、缓存或修改。", "如果为了通过编译到处加 `clone`，通常说明 API 边界还没想清楚。"],
-                ["Clear API boundaries reduce guessing about who frees, caches, or mutates data.", "If you add `clone` everywhere to appease the compiler, the API boundary is probably unclear."]
+                ["API 边界越清晰，调用方越少猜测谁负责释放、缓存或修改。", "小 ID、坐标、状态码这类 `Copy` newtype 按值传很自然：调用方保留原值，函数拿到独立副本。`String`、`Vec<T>`、文件句柄、锁守卫这类拥有资源的类型按值传通常表示交出所有权。", "如果为了通过编译到处加 `clone`，通常说明 API 边界还没想清楚。"],
+                ["Clear API boundaries reduce guessing about who frees, caches, or mutates data.", "Small ID, coordinate, and status-code newtypes that are `Copy` are natural by-value parameters: the caller keeps its original value and the function receives an independent copy. Resource-owning types such as `String`, `Vec<T>`, file handles, and lock guards usually mean ownership transfer when passed by value.", "If you add `clone` everywhere to appease the compiler, the API boundary is probably unclear."]
               ],
               cppComparison: [
-                ["C++ 可以通过 `const&`、`unique_ptr`、`shared_ptr` 表达意图；Rust 把普通引用也纳入检查。"],
-                ["C++ expresses intent with `const&`, `unique_ptr`, and `shared_ptr`; Rust also checks ordinary references."]
+                ["C++ 可以通过 `const&`、`unique_ptr`、`shared_ptr` 表达意图；Rust 把普通引用也纳入检查。C++ 的按值参数经常触发拷贝构造或移动构造；Rust 的按值参数默认是 move，只有实现 `Copy` 的简单类型才会隐式复制，而且这种复制不能自定义复杂逻辑。"],
+                ["C++ expresses intent with `const&`, `unique_ptr`, and `shared_ptr`; Rust also checks ordinary references. C++ by-value parameters often trigger copy or move constructors; Rust by-value parameters move by default, and only simple `Copy` types are implicitly copied, with no custom complex logic."]
               ],
               examples: [
                 withMistakes(
@@ -106,6 +106,63 @@ fn main() {
                       )
                     }
                   ]
+                ),
+                textExample(
+                  "按值传 `T` 不等于一定 move",
+                  "Passing `T` does not always mean a move happened",
+                  [
+                    "函数签名里的 `T` 表示 callee 要拿到一个 owned `T`。关键差异发生在调用点：如果这个类型实现了 `Copy`，编译器会复制一份小值给函数，原绑定仍然可用；如果没有实现 `Copy`，同一个调用就是 move。",
+                    "所以 `fn handle(id: RequestId)` 和 `fn store(body: String)` 都是 by value API，但前者通常是复制一个小 ID，后者通常是把 owned buffer 的所有权交出去。"
+                  ],
+                  [
+                    "`T` in a function signature means the callee receives an owned `T`. The important difference happens at the call site: if the type implements `Copy`, the compiler copies a small value into the function and the original binding remains usable; if it does not implement `Copy`, the same call is a move.",
+                    "So `fn handle(id: RequestId)` and `fn store(body: String)` are both by-value APIs, but the former usually copies a small ID while the latter usually gives away ownership of an owned buffer."
+                  ]
+                ),
+                localizedExample(
+                  "Rust: Copy 类型按值传递时会隐式复制",
+                  "Rust: Copy types are implicitly copied when passed by value",
+                  "rust",
+                  `#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+struct RequestId(u64);
+
+fn choose_worker(id: RequestId) -> &'static str {
+    if id.0 % 2 == 0 { "fast-worker" } else { "normal-worker" }
+}
+
+fn store_body(body: String) {
+    println!("store {} bytes", body.len());
+}
+
+fn main() {
+    let id = RequestId(42);
+    let worker = choose_worker(id); // RequestId: Copy，所以这里复制一份给函数
+    println!("{id:?} -> {worker}"); // id 仍然可用
+
+    let body = String::from("payload");
+    store_body(body); // String: 非 Copy，所以这里 move 所有权
+    // println!("{body}"); // 如果取消注释，会报 use after move
+}`,
+                  `#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+struct RequestId(u64);
+
+fn choose_worker(id: RequestId) -> &'static str {
+    if id.0 % 2 == 0 { "fast-worker" } else { "normal-worker" }
+}
+
+fn store_body(body: String) {
+    println!("store {} bytes", body.len());
+}
+
+fn main() {
+    let id = RequestId(42);
+    let worker = choose_worker(id); // RequestId is Copy, so this copies one value into the function
+    println!("{id:?} -> {worker}"); // id is still usable
+
+    let body = String::from("payload");
+    store_body(body); // String is not Copy, so ownership moves here
+    // println!("{body}"); // uncommenting this would be use after move
+}`
                 ),
                 localizedExample("Rust: 解析后保存 owned 数据", "Rust: parse borrowed input and store owned data", "rust", `#[derive(Debug)]
 struct User {
