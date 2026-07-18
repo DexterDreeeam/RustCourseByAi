@@ -706,11 +706,13 @@ fn main() {
                   [
                     "`struct Header<'a>` 不是说 `Header` 自己活多久，而是说：这个结构体里面有引用字段，这些引用必须指向某些仍然活着的数据。",
                     "`name: &'a str` 和 `value: &'a str` 表示：`name`、`value` 都只是借用外部字符串，不能比外部字符串活得更久。",
+                    "如果两个字段总是来自同一段输入文本，用一个生命周期最简洁；如果它们可能来自两份不同来源，就可以写成两个生命周期参数，例如 `Header<'name, 'value>`。",
                     "如果不想在结构体上写生命周期，就不要在结构体里存引用；改成 `name: String`、`value: String`，让结构体拥有数据。"
                   ],
                   [
                     "`struct Header<'a>` does not say how long `Header` itself lives. It says the struct contains reference fields, and those references must point to data that is still alive.",
                     "`name: &'a str` and `value: &'a str` mean both fields borrow external strings and cannot outlive those strings.",
+                    "If both fields always come from the same input text, one lifetime is the clearest form; if they may come from different sources, use two lifetime parameters such as `Header<'name, 'value>`.",
                     "If you do not want a lifetime on the struct, do not store references in it; use `name: String` and `value: String` so the struct owns the data."
                   ],
                   `Header<'a>
@@ -892,7 +894,62 @@ fn make_header<'text>() -> Header<'text> {
                       )
                     }
                   ]
-                )
+                ),
+                localizedExample("Rust: 字段来自不同来源时使用两个生命周期", "Rust: use two lifetimes when fields come from different sources", "rust", `struct Header<'name, 'value> {
+    name: &'name str,
+    value: &'value str,
+}
+
+impl<'name, 'value> Header<'name, 'value> {
+    fn name(&self) -> &'name str {
+        self.name
+    }
+
+    fn value(&self) -> &'value str {
+        self.value
+    }
+}
+
+fn main() {
+    let name = String::from("content-type");
+
+    {
+        let value = String::from("text/plain");
+        let header = Header {
+            name: name.as_str(),
+            value: value.as_str(),
+        };
+
+        println!("{} = {}", header.name(), header.value());
+    } // value 在这里释放，所以 header 也不能被带到这个作用域外。
+}`, `struct Header<'name, 'value> {
+    name: &'name str,
+    value: &'value str,
+}
+
+impl<'name, 'value> Header<'name, 'value> {
+    fn name(&self) -> &'name str {
+        self.name
+    }
+
+    fn value(&self) -> &'value str {
+        self.value
+    }
+}
+
+fn main() {
+    let name = String::from("content-type");
+
+    {
+        let value = String::from("text/plain");
+        let header = Header {
+            name: name.as_str(),
+            value: value.as_str(),
+        };
+
+        println!("{} = {}", header.name(), header.value());
+    } // value is dropped here, so header cannot be moved outside this scope.
+}`)
               ],
               references: ["rust-lang/rust"]
             })
