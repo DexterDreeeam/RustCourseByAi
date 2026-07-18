@@ -141,6 +141,10 @@ start close to the top-left of the viewport, without making controls cramped.
   frame; that frame reduces usable width without adding structure. Let the page
   background show through and use framed surfaces only for nested content cards
   that need grouping.
+- **Main column gutter.** On desktop, the gap between the fixed sidebar and the
+  lesson content should equal the right page gutter. Do not stack a left layout
+  padding on top of the grid gap, because that makes the content look shifted
+  right.
 - **Responsive safety.** Compact desktop spacing must still leave touch targets
   usable on narrow screens; the mobile layout may keep controls full-width.
 

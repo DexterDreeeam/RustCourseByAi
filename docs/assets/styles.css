@@ -176,8 +176,8 @@ a {
 .layout {
   display: grid;
   grid-template-columns: var(--sidebar-rail-width) minmax(0, 1fr);
-  gap: clamp(0.75rem, 2vw, 1.25rem);
-  padding: var(--page-gutter);
+  gap: var(--page-gutter);
+  padding: var(--page-gutter) var(--page-gutter) var(--page-gutter) 0;
 }
 
 .sidebar {
@@ -874,7 +874,9 @@ li code {
 
 @media (max-width: 980px) {
   .layout {
+    gap: var(--page-gutter);
     grid-template-columns: 1fr;
+    padding: var(--page-gutter);
   }
 
   .sidebar {
